@@ -1,0 +1,55 @@
+QUESTIONS
+------------
+- how are we going to handle meta-program debugging
+    note: lua_Debug like callback API is probably our best bet
+
+- how to distinguish fixed-length arrays from dynamic arrays
+    without hard coding how dynamic arrays work into the compiler itself.
+
+BIG PICTURE
+------------
+
++---------------------------+  notes:
+| command-line program (bc) |    a) command-line arguments should support specifying back-end compiler toolchain
+|                           |
+|   args ...                |
++---------------------------+
+             |
+             |
+             |
+    +-------------------+  notes:
+    |   job scheduler   |    a) number of workers is based on number of physical cores - some overhead count
+    |                   |
+    |       (queue)     |<---+
+    |                   |    |
+    +-------------------+    |
+        |           |        | (tasks processing in workers can put new work onto the scheduler queue)
+        |           |        |
+        |           |        |
+    +-------+    +-------+   |
+    |  w1   |    |  w2   |---+--<
+    +-------+    +-------+      |
+        |           |           |
+        |           |           |
+        |           |           |
+        +-----+-----+           |
+              |                 |
+              | (join)          |
+              |                 |
+        +-----+----------+      |
+        |  meta-program  |      |
+        | (compiler apis)+------>  (continues to run, until a fix point)
+        |                |         using tinyc
+        +----+-----------+
+             |
+             | (finalized c source)
+             |
+        +----+--------------+
+        | compiler back-end | (clang, etc.)  (pstream)
+        +-------------------+
+
+- single typed-ast, versioned
+- ast is converted to C99 for both meta and runtime
+
+TASKS
+------------
