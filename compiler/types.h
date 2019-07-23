@@ -22,8 +22,13 @@
 #include <vector>
 #include <cstdint>
 #include <utility>
+#include <boost/filesystem/path.hpp>
 
 namespace basecode::compiler {
+
+    using path_t = boost::filesystem::path;
+
+    ///////////////////////////////////////////////////////////////////////////
 
     struct location_t {
         uint16_t line = 0;

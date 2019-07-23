@@ -52,20 +52,21 @@ namespace basecode::compiler::terminal {
     }
 
     std::string stream_builder_t::colorize_range(
-        std::string_view text,
-        size_t begin,
-        size_t end,
-        colors_t fg_color,
-        colors_t bg_color) const {
+            std::string_view text,
+            size_t begin,
+            size_t end,
+            colors_t fg_color,
+            colors_t bg_color) const {
         if (!_enabled)
             return std::string(text);
 
         auto j = 0;
+        result_t r{};
         utf8::reader_t reader(text);
         auto in_colored_range = false;
         std::stringstream colored_source;
         while (true) {
-            auto rune = reader.next();
+            auto rune = reader.next(r);
             if (rune == utf8::rune_eof)
                 break;
 

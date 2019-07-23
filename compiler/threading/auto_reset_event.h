@@ -18,43 +18,33 @@
 
 #pragma once
 
-#include <stack>
-#include <string_view>
-#include <compiler/types.h>
-#include "rune.h"
+#include <mutex>
+#include <thread>
+#include <chrono>
+#include <condition_variable>
 
-namespace basecode::compiler::utf8 {
+namespace basecode::compiler::threading {
 
-    class reader_t final {
+    class auto_reset_event_t final {
     public:
-        explicit reader_t(std::string_view slice);
+        explicit auto_reset_event_t(bool initial = false);
 
-        void push_mark();
+        auto_reset_event_t(const auto_reset_event_t&) = delete;
 
-        size_t pop_mark();
+        auto_reset_event_t& operator=(const auto_reset_event_t&) = delete;
 
-        size_t current_mark();
+        void set();
 
-        bool seek(size_t index);
+        void reset();
 
-        void restore_top_mark();
+        bool wait_one();
 
-        rune_t next(result_t& r);
-
-        rune_t prev(result_t& r);
-
-        [[nodiscard]] bool eof() const;
-
-        [[nodiscard]] size_t pos() const;
+        bool wait_one(std::chrono::milliseconds timeout);
 
     private:
-        rune_t read(result_t& r, uint8_t& width);
-
-    private:
-        size_t _index{};
-        std::string_view _slice;
-        std::stack<size_t> _mark_stack{};
-        std::stack<uint8_t> _width_stack{};
+        bool _flag;
+        std::mutex _protect;
+        std::condition_variable _signal;
     };
 
 }

@@ -15,16 +15,26 @@ configure_file (
 add_library(
         ${PROJECT_NAME}
 
+        defer.h
+
+        graph/directed.h
+
         types.cpp types.h
+
+        id/pool.cpp id/pool.h
 
         formatters/formatters.h
 
         utf8/rune.cpp utf8/rune.h
         utf8/reader.cpp utf8/reader.h
+        utf8/source_buffer.cpp utf8/source_buffer.h
 
         signals/hook.cpp signals/hook.h
 
         terminal/stream_builder.cpp terminal/stream_builder.h
+
+        threading/auto_reset_event.cpp threading/auto_reset_event.h
+        threading/manual_reset_event.cpp threading/manual_reset_event.h
 )
 target_link_libraries(
         ${PROJECT_NAME}
