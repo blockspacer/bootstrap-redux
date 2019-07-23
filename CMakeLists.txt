@@ -141,6 +141,9 @@ endif()
 add_executable(tinycc ext/tinycc-mob/tcc.c)
 target_link_libraries(tinycc tcc)
 
+# entt
+include_directories(ext/entt-master/single_include)
+
 # sub-projects
 add_subdirectory(bc)
 add_subdirectory(compiler)
