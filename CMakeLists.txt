@@ -148,6 +148,9 @@ include_directories(ext/entt-master/single_include)
 add_subdirectory(ext/mstch-1.0.2)
 include_directories(ext/mstch-1.0.2/include)
 
+# our project-level includes
+include_directories(${PROJECT_SOURCE_DIR})
+
 # sub-projects
 add_subdirectory(bc)
 add_subdirectory(compiler)

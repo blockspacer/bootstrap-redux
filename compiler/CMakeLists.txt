@@ -16,6 +16,15 @@ add_library(
         ${PROJECT_NAME}
 
         types.cpp types.h
+
+        formatters/formatters.h
+
+        utf8/rune.cpp utf8/rune.h
+        utf8/reader.cpp utf8/reader.h
+
+        signals/hook.cpp signals/hook.h
+
+        terminal/stream_builder.cpp terminal/stream_builder.h
 )
 target_link_libraries(
         ${PROJECT_NAME}

@@ -575,3 +575,17 @@ pointers & storage & ownership:
         // error
         buffer_ptr := 255;
     }
+
+
+if expressions:
+---------------
+
+NOTE: Phil says this is Evil(R) and should not be allowed:
+    if true print("true");
+
+Is there any way we can check surrounding context to verify
+scope is what the programmer thinks it should be?
+
+if true {
+    print("true");
+};
