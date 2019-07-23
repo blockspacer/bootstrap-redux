@@ -51,6 +51,71 @@ add_custom_command(OUTPUT always-rebuild COMMAND ${CMAKE_COMMAND} -E echo)
 set (TESTS_DIR ${PROJECT_BINARY_DIR}/tests)
 set (LOGS_DIR  ${PROJECT_BINARY_DIR}/logs)
 
+# pstreams
+include_directories(ext/pstreams-1.0.1)
+
+# utf8proc
+add_subdirectory(ext/utf8proc-2.4.0 EXCLUDE_FROM_ALL)
+include_directories(ext/utf8proc-2.4.0)
+
+# libfmt
+add_subdirectory(ext/fmt-5.3.0 EXCLUDE_FROM_ALL)
+
+# hat-trie
+add_subdirectory(ext/hat-trie-0.6.0 EXCLUDE_FROM_ALL)
+include_directories(ext/hat-trie-0.6.0/include)
+
+# boost
+include_directories(ext/boost-1.70.0)
+
+# boost system library
+add_library(boost-system ext/boost-1.70.0/libs/system/src/error_code.cpp)
+
+# boost filesystem library
+set(
+        BOOST_FILESYSTEM_SOURCES
+        ext/boost-1.70.0/libs/filesystem/src/codecvt_error_category.cpp
+        ext/boost-1.70.0/libs/filesystem/src/operations.cpp
+        ext/boost-1.70.0/libs/filesystem/src/path.cpp
+        ext/boost-1.70.0/libs/filesystem/src/path_traits.cpp
+        ext/boost-1.70.0/libs/filesystem/src/portability.cpp
+        ext/boost-1.70.0/libs/filesystem/src/unique_path.cpp
+        ext/boost-1.70.0/libs/filesystem/src/utf8_codecvt_facet.cpp)
+if (WIN32)
+    set(
+            BOOST_FILESYSTEM_SOURCES
+            ${BOOST_FILESYSTEM_SOURCES}
+            ext/boost-1.70.0/libs/filesystem/src/windows_file_codecvt.cpp)
+endif()
+add_library(boost-filesystem ${BOOST_FILESYSTEM_SOURCES})
+
+# boost program_options library
+set(
+        BOOST_PROGRAM_OPTIONS_SOURCES
+        ext/boost-1.70.0/libs/program_options/src/cmdline.cpp
+        ext/boost-1.70.0/libs/program_options/src/config_file.cpp
+        ext/boost-1.70.0/libs/program_options/src/convert.cpp
+        ext/boost-1.70.0/libs/program_options/src/options_description.cpp
+        ext/boost-1.70.0/libs/program_options/src/parsers.cpp
+        ext/boost-1.70.0/libs/program_options/src/positional_options.cpp
+        ext/boost-1.70.0/libs/program_options/src/split.cpp
+        ext/boost-1.70.0/libs/program_options/src/utf8_codecvt_facet.cpp
+        ext/boost-1.70.0/libs/program_options/src/value_semantic.cpp
+        ext/boost-1.70.0/libs/program_options/src/variables_map.cpp)
+if (WIN32)
+    set(
+            BOOST_PROGRAM_OPTIONS_SOURCES
+            ${BOOST_PROGRAM_OPTIONS_SOURCES}
+            ext/boost-1.70.0/libs/program_options/src/winmain.cpp)
+endif()
+add_library(boost-program_options ${BOOST_PROGRAM_OPTIONS_SOURCES})
+
+# catch2
+include_directories(ext/catch2-2.9.1/single_include)
+
+# spdlog
+include_directories(ext/spdlog-1.3.1/include)
+
 # sub-projects
 add_subdirectory(bc)
 add_subdirectory(compiler)

@@ -17,3 +17,10 @@ add_library(
 
         types.cpp types.h
 )
+target_link_libraries(
+        ${PROJECT_NAME}
+        utf8proc
+        fmt-header-only
+        boost-system
+        boost-filesystem
+)

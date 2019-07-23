@@ -12,4 +12,5 @@ target_link_libraries(
         ${PROJECT_NAME}
 
         compiler
+        boost-program_options
 )
