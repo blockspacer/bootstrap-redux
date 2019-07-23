@@ -23,4 +23,5 @@ target_link_libraries(
         fmt-header-only
         boost-system
         boost-filesystem
+        tcc
 )

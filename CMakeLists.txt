@@ -116,12 +116,37 @@ include_directories(ext/catch2-2.9.1/single_include)
 # spdlog
 include_directories(ext/spdlog-1.3.1/include)
 
+# tinycc
+set(
+        TINYCC_SOURCES
+        ext/tinycc-mob/libtcc.c
+        ext/tinycc-mob/tccpp.c
+        ext/tinycc-mob/tccgen.c
+        ext/tinycc-mob/tccelf.c
+        ext/tinycc-mob/tccasm.c
+        ext/tinycc-mob/tccrun.c
+        ext/tinycc-mob/x86_64-gen.c
+        ext/tinycc-mob/x86_64-link.c
+        ext/tinycc-mob/i386-asm.c
+)
+add_library(tcc ${TINYCC_SOURCES})
+
+# XXX: eventually add conditionals around all of these defines
+target_compile_definitions(tcc PUBLIC TCC_TARGET_X86_64 ONE_SOURCE=0 _FORTIFY_SOURCE=0)
+
+if (APPLE)
+    target_compile_definitions(tcc PUBLIC TCC_TARGET_MACHO)
+endif()
+
+add_executable(tinycc ext/tinycc-mob/tcc.c)
+target_link_libraries(tinycc tcc)
+
 # sub-projects
 add_subdirectory(bc)
 add_subdirectory(compiler)
 
 # post build
-add_custom_target(basecode-configured DEPENDS dummy-target compiler bc)
+add_custom_target(basecode-configured DEPENDS dummy-target compiler bc tinycc)
 add_custom_command(
         TARGET basecode-configured
 
