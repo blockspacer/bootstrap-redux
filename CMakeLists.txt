@@ -144,6 +144,10 @@ target_link_libraries(tinycc tcc)
 # entt
 include_directories(ext/entt-master/single_include)
 
+# mstch
+add_subdirectory(ext/mstch-1.0.2)
+include_directories(ext/mstch-1.0.2/include)
+
 # sub-projects
 add_subdirectory(bc)
 add_subdirectory(compiler)

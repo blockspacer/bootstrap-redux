@@ -24,4 +24,5 @@ target_link_libraries(
         boost-system
         boost-filesystem
         tcc
+        mstch
 )
