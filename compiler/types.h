@@ -28,6 +28,8 @@ namespace basecode::compiler {
 
     using path_t = boost::filesystem::path;
 
+    using string_list_t = std::vector<std::string>;
+
     ///////////////////////////////////////////////////////////////////////////
 
     struct location_t {

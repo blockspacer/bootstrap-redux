@@ -23,7 +23,14 @@ add_library(
 
         id/pool.cpp id/pool.h
 
+        io/text.cpp io/text.h
+        io/binary.cpp io/binary.h
+
         formatters/formatters.h
+
+        numbers/parse.cpp numbers/parse.h
+
+        strings/transforms.cpp strings/transforms.h
 
         utf8/rune.cpp utf8/rune.h
         utf8/reader.cpp utf8/reader.h
