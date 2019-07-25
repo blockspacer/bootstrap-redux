@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <stack>
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -45,19 +46,21 @@ namespace basecode::compiler {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    struct location_t {
+    struct location_t final {
         uint16_t line = 0;
         uint16_t column = 0;
     };
 
-    struct source_location_t {
-        location_t start{};
+    struct source_location_t final {
         location_t end{};
+        location_t start{};
     };
+
+    using source_location_stack_t = std::stack<source_location_t>;
 
     ///////////////////////////////////////////////////////////////////////////
 
-    class result_message_t {
+    class result_message_t final {
     public:
         using list_t = std::vector<result_message_t>;
 
@@ -114,7 +117,7 @@ namespace basecode::compiler {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    class result_t {
+    class result_t final {
     public:
         result_t() = default;
 

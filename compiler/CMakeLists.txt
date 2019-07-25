@@ -31,6 +31,9 @@ add_library(
         numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
+        lexer/token.cpp lexer/token.h
+        lexer/lexer.cpp lexer/lexer.h
+
         strings/transforms.cpp strings/transforms.h
         strings/escape_parser.cpp strings/escape_parser.h
 
