@@ -28,9 +28,11 @@ add_library(
 
         formatters/formatters.h
 
+        numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
         strings/transforms.cpp strings/transforms.h
+        strings/escape_parser.cpp strings/escape_parser.h
 
         utf8/rune.cpp utf8/rune.h
         utf8/reader.cpp utf8/reader.h

@@ -107,4 +107,10 @@ namespace basecode::compiler::utf8 {
         return rune;
     }
 
+    std::string_view reader_t::make_slice(size_t offset, size_t length) const {
+        return std::string_view(
+            reinterpret_cast<const char*>(_slice.data() + offset),
+            length);
+    }
+
 }

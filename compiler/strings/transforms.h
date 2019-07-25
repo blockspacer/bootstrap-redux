@@ -27,6 +27,12 @@
 
 namespace basecode::compiler::strings {
 
+    std::string word_wrap(
+        std::string text,
+        size_t width,
+        size_t right_pad = 0,
+        const char& fill = ' ');
+
     inline std::string pad_to(
             const std::string& str,
             const size_t num,
@@ -40,8 +46,7 @@ namespace basecode::compiler::strings {
         }
     }
 
-    // trim from start (in place)
-    inline void ltrim(std::string &s) {
+    inline void ltrim(std::string& s) {
         s.erase(
             s.begin(),
             std::find_if(
@@ -50,7 +55,7 @@ namespace basecode::compiler::strings {
                 [](unsigned char c) { return !std::isspace(c); }));
     }
 
-    inline void rtrim(std::string &s) {
+    inline void rtrim(std::string& s) {
         s.erase(
             std::find_if(
                 s.rbegin(),
@@ -59,7 +64,7 @@ namespace basecode::compiler::strings {
             s.end());
     }
 
-    inline void trim(std::string &s) {
+    inline void trim(std::string& s) {
         ltrim(s);
         rtrim(s);
     }
@@ -72,6 +77,11 @@ namespace basecode::compiler::strings {
         std::transform(s.begin(), s.end(), s.begin(), ::toupper);
     }
 
+    inline std::string trimmed(std::string s) {
+        trim(s);
+        return s;
+    }
+
     inline std::string ltrimmed(std::string s) {
         ltrim(s);
         return s;
@@ -81,19 +91,6 @@ namespace basecode::compiler::strings {
         rtrim(s);
         return s;
     }
-
-    inline std::string trimmed(std::string s) {
-        trim(s);
-        return s;
-    }
-
-    std::string word_wrap(
-        std::string text,
-        size_t width,
-        size_t right_pad = 0,
-        const char& fill = ' ');
-
-    std::string escaped_string(const std::string& value);
 
     std::string remove_underscores(const std::string_view& value);
 

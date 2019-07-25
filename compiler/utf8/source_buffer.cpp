@@ -279,9 +279,7 @@ namespace basecode::compiler::utf8 {
 
     std::string_view source_buffer_t::substring(size_t start, size_t end) const {
         const auto length = end - start;
-        return std::string_view(
-            reinterpret_cast<const char*>(_buffer.data() + start),
-            length);
+        return _reader->make_slice(start, length);
     }
 
     const source_buffer_line_t* source_buffer_t::line_by_number(size_t line) const {
@@ -299,9 +297,7 @@ namespace basecode::compiler::utf8 {
     }
 
     std::string_view source_buffer_t::make_slice(size_t offset, size_t length) const {
-        return std::string_view(
-            reinterpret_cast<const char*>(_buffer.data() + offset),
-            length);
+        return _reader->make_slice(offset, length);
     }
 
 }
