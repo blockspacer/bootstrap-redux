@@ -22,13 +22,26 @@
 #include <vector>
 #include <cstdint>
 #include <utility>
+#include <boost/uuid/uuid.hpp>
 #include <boost/filesystem/path.hpp>
 
 namespace basecode::compiler {
 
+    // filesystem type aliases
     using path_t = boost::filesystem::path;
 
+    // string type aliases
     using string_list_t = std::vector<std::string>;
+
+    // time type aliases
+    using time_point_t = std::chrono::system_clock::time_point;
+    using monotonic_time_point_t = std::chrono::steady_clock::time_point;
+
+    // bytes type aliases
+    using byte_buffer_t = std::vector<uint8_t>;
+
+    // uuid type aliases
+    using uuid_t = boost::uuids::uuid;
 
     ///////////////////////////////////////////////////////////////////////////
 

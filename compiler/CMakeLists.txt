@@ -54,3 +54,5 @@ target_link_libraries(
         tcc
         mstch
 )
+
+add_subdirectory(lexer/tests)
