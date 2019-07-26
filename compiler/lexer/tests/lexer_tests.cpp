@@ -51,7 +51,7 @@ namespace basecode {
                 const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
                 fmt::print(", number_token = {}", number_token);
             }
-            fmt::print(", location = {}\n", token, source_location);
+            fmt::print(", location = {}\n", source_location);
         }
     }
 

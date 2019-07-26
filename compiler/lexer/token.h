@@ -71,6 +71,10 @@ namespace basecode::compiler::lexer {
         bool is_signed{};
         uint8_t radix = 10;
         number_type_t type{};
+        union {
+            double d;
+            int64_t i;
+        } value{.i = 0};
     };
 
 }

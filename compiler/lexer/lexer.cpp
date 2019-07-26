@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <compiler/numbers/bytes.h>
+#include <compiler/numbers/parse.h>
 #include "lexer.h"
 
 namespace basecode::compiler::lexer {
@@ -312,11 +313,41 @@ namespace basecode::compiler::lexer {
 
         auto token = _workspace->registry.create();
         _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace->registry.assign<number_token_t>(
+        auto& number_token = _workspace->registry.assign<number_token_t>(
             token,
             is_signed,
             static_cast<uint8_t>(10),
             type);
+
+        if (type == number_type_t::integer) {
+            auto result = numbers::parse_integer(
+                capture,
+                10,
+                number_token.value.i);
+            if (result != numbers::conversion_result_t::success) {
+                r.error(
+                    "X000",
+                    fmt::format(
+                        "unable to convert integer value {} because {}",
+                        capture,
+                        numbers::conversion_result_to_name(result)));
+                return false;
+            }
+        } else if (type == number_type_t::floating_point) {
+            auto result = numbers::parse_double(
+                capture,
+                number_token.value.d);
+            if (result != numbers::conversion_result_t::success) {
+                r.error(
+                    "X000",
+                    fmt::format(
+                        "unable to convert floating point value {} because {}",
+                        capture,
+                        numbers::conversion_result_to_name(result)));
+                return false;
+            }
+        }
+
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
@@ -348,11 +379,27 @@ namespace basecode::compiler::lexer {
 
         auto token = _workspace->registry.create();
         _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace->registry.assign<number_token_t>(
+
+        auto& number_token = _workspace->registry.assign<number_token_t>(
             token,
             false,
             static_cast<uint8_t>(16),
             number_type_t::integer);
+        auto result = numbers::parse_integer(
+            capture,
+            16,
+            number_token.value.i);
+        if (result != numbers::conversion_result_t::success) {
+            r.error(
+                "X000",
+                fmt::format(
+                    "unable to convert integer value {} because {}",
+                    capture,
+                    numbers::conversion_result_to_name(result)));
+            return false;
+        }
+        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
@@ -385,11 +432,26 @@ namespace basecode::compiler::lexer {
 
         auto token = _workspace->registry.create();
         _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace->registry.assign<number_token_t>(
+        auto& number_token = _workspace->registry.assign<number_token_t>(
             token,
             false,
             static_cast<uint8_t>(8),
             number_type_t::integer);
+        auto result = numbers::parse_integer(
+            capture,
+            8,
+            number_token.value.i);
+        if (result != numbers::conversion_result_t::success) {
+            r.error(
+                "X000",
+                fmt::format(
+                    "unable to convert integer value {} because {}",
+                    capture,
+                    numbers::conversion_result_to_name(result)));
+            return false;
+        }
+        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
@@ -422,11 +484,26 @@ namespace basecode::compiler::lexer {
 
         auto token = _workspace->registry.create();
         _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace->registry.assign<number_token_t>(
+        auto& number_token = _workspace->registry.assign<number_token_t>(
             token,
             false,
             static_cast<uint8_t>(2),
             number_type_t::integer);
+        auto result = numbers::parse_integer(
+            capture,
+            2,
+            number_token.value.i);
+        if (result != numbers::conversion_result_t::success) {
+            r.error(
+                "X000",
+                fmt::format(
+                    "unable to convert integer value {} because {}",
+                    capture,
+                    numbers::conversion_result_to_name(result)));
+            return false;
+        }
+        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));

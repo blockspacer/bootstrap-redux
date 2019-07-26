@@ -98,12 +98,20 @@ namespace fmt {
         auto format(
                 const basecode::compiler::lexer::number_token_t& token,
                 FormatContext& ctx) {
-            return format_to(
+            format_to(
                 ctx.out(),
-                "<is_signed = {}, radix = {}, type = {}>",
+                "<is_signed = {}, radix = {}, type = {}",
                 token.is_signed,
                 token.radix,
                 basecode::compiler::lexer::number_type_to_name(token.type));
+            if (token.type == basecode::compiler::lexer::number_type_t::integer) {
+                return format_to(ctx.out(), ", value = {}>", token.value.i);
+            } else if (token.type == basecode::compiler::lexer::number_type_t::floating_point) {
+                return format_to(ctx.out(), ", value = {}>", token.value.d);
+            } else {
+                // XXX: revisit
+                return format_to(ctx.out(), ">");
+            }
         }
     };
 
