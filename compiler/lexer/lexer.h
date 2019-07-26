@@ -19,6 +19,7 @@
 #pragma once
 
 #include <tsl/htrie_map.h>
+#include <compiler/types.h>
 #include <compiler/utf8/source_buffer.h>
 #include "token.h"
 
@@ -35,7 +36,9 @@ namespace basecode::compiler::lexer {
 
     class lexer_t final {
     public:
-        explicit lexer_t(utf8::source_buffer_t* buffer);
+        lexer_t(
+            workspace_t* workspace,
+            utf8::source_buffer_t* buffer);
 
         bool tokenize(result_t& r);
 
@@ -63,8 +66,12 @@ namespace basecode::compiler::lexer {
         bool binary_number_literal(result_t& r);
 
     private:
+        source_location_t make_location(size_t start_pos, size_t end_pos);
+
+    private:
         static tsl::htrie_map<char, lexeme_t> s_lexemes;
 
+        workspace_t* _workspace{};
         utf8::source_buffer_t* _buffer{};
     };
 

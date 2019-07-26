@@ -23,6 +23,7 @@
 #include <vector>
 #include <cstdint>
 #include <utility>
+#include <entt/entt.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -47,8 +48,8 @@ namespace basecode::compiler {
     ///////////////////////////////////////////////////////////////////////////
 
     struct location_t final {
-        uint16_t line = 0;
-        uint16_t column = 0;
+        uint32_t line = 0;
+        uint32_t column = 0;
     };
 
     struct source_location_t final {
@@ -202,6 +203,12 @@ namespace basecode::compiler {
     private:
         bool _success = true;
         result_message_t::list_t _messages {};
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    struct workspace_t final {
+        entt::registry registry{};
     };
 
 }

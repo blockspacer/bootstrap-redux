@@ -18,6 +18,7 @@
 
 #include <catch2/catch.hpp>
 #include <compiler/lexer/lexer.h>
+#include <compiler/formatters/formatters.h>
 
 namespace basecode {
 
@@ -25,6 +26,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize detects radix prefixed numbers") {
         compiler::result_t r{};
+        compiler::workspace_t workspace{};
         compiler::utf8::source_buffer_t buffer(0);
 
         const std::string source =
@@ -35,8 +37,22 @@ namespace basecode {
 
         REQUIRE(buffer.load(r, source));
 
-        compiler::lexer::lexer_t lexer(&buffer);
+        compiler::lexer::lexer_t lexer(&workspace, &buffer);
         REQUIRE(lexer.tokenize(r));
+
+        auto view = workspace.registry.view<
+            compiler::lexer::token_t,
+            compiler::source_location_t>();
+        for (auto entity : view) {
+            const auto& token = view.get<compiler::lexer::token_t>(entity);
+            const auto& source_location = view.get<compiler::source_location_t>(entity);
+            fmt::print("token = {}", token);
+            if (workspace.registry.has<compiler::lexer::number_token_t>(entity)) {
+                const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
+                fmt::print(", number_token = {}", number_token);
+            }
+            fmt::print(", location = {}\n", token, source_location);
+        }
     }
 
 }

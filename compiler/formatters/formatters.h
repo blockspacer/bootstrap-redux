@@ -19,7 +19,9 @@
 #pragma once
 
 #include <fmt/format.h>
+#include <compiler/types.h>
 #include <compiler/utf8/rune.h>
+#include <compiler/lexer/token.h>
 
 namespace fmt {
 
@@ -39,6 +41,69 @@ namespace fmt {
             for (size_t j = 0; j < encode_result.width; j++)
                 temp += static_cast<char>(encode_result.data[j]);
             return format_to(ctx.out(), "{}", temp);
+        }
+    };
+
+    template<>
+    struct formatter<basecode::compiler::source_location_t> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const basecode::compiler::source_location_t& loc,
+                FormatContext& ctx) {
+            return format_to(
+                ctx.out(),
+                "{}@{}-{}@{}",
+                loc.start.line + 1,
+                loc.start.column + 1,
+                loc.end.line + 1,
+                loc.end.column);
+        }
+    };
+
+    template<>
+    struct formatter<basecode::compiler::lexer::token_t> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const basecode::compiler::lexer::token_t& token,
+                FormatContext& ctx) {
+            format_to(
+                ctx.out(),
+                "<type = {}",
+                basecode::compiler::lexer::token_type_to_name(token.type));
+            if (!token.value.empty()) {
+                format_to(ctx.out(), ", value = {}", token.value);
+            }
+            return format_to(ctx.out(), ">");
+        }
+    };
+
+    template<>
+    struct formatter<basecode::compiler::lexer::number_token_t> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const basecode::compiler::lexer::number_token_t& token,
+                FormatContext& ctx) {
+            return format_to(
+                ctx.out(),
+                "<is_signed = {}, radix = {}, type = {}>",
+                token.is_signed,
+                token.radix,
+                basecode::compiler::lexer::number_type_to_name(token.type));
         }
     };
 

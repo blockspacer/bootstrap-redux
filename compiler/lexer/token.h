@@ -22,6 +22,8 @@
 
 namespace basecode::compiler::lexer {
 
+    using namespace std::literals;
+
     enum class token_type_t {
         literal,
         comment,
@@ -31,6 +33,18 @@ namespace basecode::compiler::lexer {
         punctuation,
         end_of_input,
     };
+
+    static inline std::string_view token_type_to_name(token_type_t type) {
+        switch (type) {
+            case token_type_t::literal: return "literal"sv;
+            case token_type_t::comment: return "comment"sv;
+            case token_type_t::keyword: return "keyword"sv;
+            case token_type_t::operator_: return "operator"sv;
+            case token_type_t::identifier: return "identifier"sv;
+            case token_type_t::punctuation: return "punctuation"sv;
+            case token_type_t::end_of_input: return "end_of_input"sv;
+        }
+    }
 
     struct token_t final {
         token_type_t type{};
@@ -43,6 +57,15 @@ namespace basecode::compiler::lexer {
         arbitrary,
         floating_point
     };
+
+    static inline std::string_view number_type_to_name(number_type_t type) {
+        switch (type) {
+            case number_type_t::none:           return "none"sv;
+            case number_type_t::integer:        return "integer"sv;
+            case number_type_t::arbitrary:      return "arbitrary"sv;
+            case number_type_t::floating_point: return "floating_point";
+        }
+    }
 
     struct number_token_t final {
         bool is_signed{};

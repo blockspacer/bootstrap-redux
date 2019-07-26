@@ -53,7 +53,12 @@ BIG PICTURE
 
 TASKS
 ------------
+- REFACTOR: introduce our own trie/trie-map structure that allows us to
+    explicitly navigate the internal trie nodes instead of having to
+    perform string-like "prefix" searches from the root each time.
 
+- FIX(lexer.cpp): hex, octal, binary parsers should convert to number and check
+    sign bit.
 
 DONE
 ------------
@@ -92,3 +97,39 @@ foo :: struct {
 };
 ======
 
+26 July 2019
+=============
+
+    +---------------+
+    | compiler api  |
+    +---------------+--------------------------------------------------------+
+    | build-related |                                                        |
+    | workspaces    | (1)  enqueue                                           |
+ +--+>meta          +-------------------+                                    |
+ |  | jobs<*        |                   |                                    |c
+ |  +-+----+--------+                   |                                    |a
+ |c   |    |                            |                                    |l
+ |a   |i   |                            |                                    |l
+ |l   |n   |                            |                                    |b
+ |l   |v   |s                           |                                    |a
+ |b   |o   |t                           | (many)                             |c
+ |a   |k   |a                    +------*-------+                            |k
+ |c   |e   |r                    | workspace    |-+                          |
+ |k   |    |t                    +--------------+ |                          |
+ |s   |    +---------------------+ work queue   |-+                          |
+ |    |                +---------->versions     | |                          |
+ |    |                |         |   state      | |                          |
+ |    |                |         |      ecs     | |                          |
+ |    |           +----+----+    +--+-----------+ |                          |
+ |    |           | debug   |       +-------------+                          |
+ |    |           +---------+                                                |
+ |    |                                                                      |
+ |    |                                                                      |
+ |    |                                                                      |
+++----*----+                                                        +--------+---+
+| parser   |                   +---------------+                    | code gen   |
++----------+                   | type manager  |                    +------------+
+|lexing    +<----------------->+---------------+                    | translator |
+|parsing   |                   |deps           <-------------------->  tinyc     |
++----------+                   | inference     |                    +------------+
+                               +---------------+

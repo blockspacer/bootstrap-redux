@@ -191,6 +191,10 @@ namespace basecode::compiler::utf8 {
         return _reader->current_mark();
     }
 
+    uint8_t source_buffer_t::width() const {
+        return _reader->width();
+    }
+
     size_t source_buffer_t::length() const {
         return _buffer.size();
     }

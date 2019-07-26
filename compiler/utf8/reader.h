@@ -53,10 +53,12 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] size_t pos() const;
 
+        [[nodiscard]] uint8_t width() const;
+
         [[nodiscard]] std::string_view make_slice(size_t offset, size_t length) const;
 
     private:
-        rune_t read(result_t& r, uint8_t& width);
+        rune_t read(result_t& r, uint8_t& width) const;
 
     private:
         size_t _index{};

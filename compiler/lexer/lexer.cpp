@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/numbers/bytes.h>
 #include "lexer.h"
 
 namespace basecode::compiler::lexer {
@@ -170,7 +171,10 @@ namespace basecode::compiler::lexer {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    lexer_t::lexer_t(utf8::source_buffer_t* buffer) : _buffer(buffer) {
+    lexer_t::lexer_t(
+            workspace_t* workspace,
+            utf8::source_buffer_t* buffer) : _workspace(workspace),
+                                             _buffer(buffer) {
         s_lexemes.burst_threshold(1024);
     }
 
@@ -192,10 +196,9 @@ namespace basecode::compiler::lexer {
                 lexeme_t& value;
             };
 
-            auto start_pos = _buffer->pos();
             auto len = 1;
             while (true) {
-                auto slice = _buffer->make_slice(start_pos, len);
+                auto slice = _buffer->make_slice(_buffer->pos(), len);
                 auto range = s_lexemes.equal_prefix_range(slice);
 
                 std::vector<match_t> matches{};
@@ -216,28 +219,33 @@ namespace basecode::compiler::lexer {
                     if (match.value.tokenizer) {
                         if (!match.value.tokenizer(this, r))
                             return false;
-
-                        // XXX: do something clever
                     } else {
-                        // XXX: create entity + components
-                        fmt::print("match.key = {}\n", match.key);
+                        auto start_pos = _buffer->pos();
+                        _buffer->seek(_buffer->pos() + len);
+                        auto token = _workspace->registry.create();
+                        _workspace->registry.assign<token_t>(token, match.value.type, slice);
+                        _workspace->registry.assign<source_location_t>(
+                            token,
+                            make_location(start_pos, _buffer->pos()));
                     }
                     break;
                 }
 
-                ++len;
+                len += _buffer->width();
 
-                if (start_pos + len >= _buffer->length() - 1) {
+                if (_buffer->pos() + len >= _buffer->length() - 1) {
                     r.error("X000", "unexpected end of input");
                     return false;
                 }
             }
-
-            if (!_buffer->move_next(r))
-                return false;
         }
 
-        // XXX: create entity & components for end_of_file
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::end_of_input);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(_buffer->pos(), _buffer->pos()));
+
         return !r.is_failed();
     }
 
@@ -302,6 +310,16 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<number_token_t>(
+            token,
+            is_signed,
+            static_cast<uint8_t>(10),
+            type);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
         return true;
     }
 
@@ -327,6 +345,17 @@ namespace basecode::compiler::lexer {
         auto capture = _buffer->make_slice(
             start_pos,
             _buffer->pos() - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<number_token_t>(
+            token,
+            false,
+            static_cast<uint8_t>(16),
+            number_type_t::integer);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
 
         return true;
     }
@@ -354,6 +383,17 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<number_token_t>(
+            token,
+            false,
+            static_cast<uint8_t>(8),
+            number_type_t::integer);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
+
         return true;
     }
 
@@ -380,7 +420,28 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<number_token_t>(
+            token,
+            false,
+            static_cast<uint8_t>(2),
+            number_type_t::integer);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
+
         return true;
+    }
+
+    source_location_t lexer_t::make_location(size_t start_pos, size_t end_pos) {
+        auto start_line = _buffer->line_by_index(start_pos);
+        auto start_column = _buffer->column_by_index(start_pos);
+
+        auto end_line = _buffer->line_by_index(end_pos);
+        auto end_column = _buffer->column_by_index(end_pos);
+
+        return {{end_line->line, end_column}, {start_line->line, start_column}};
     }
 
 }

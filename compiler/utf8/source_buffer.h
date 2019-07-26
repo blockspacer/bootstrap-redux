@@ -95,6 +95,8 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] bool empty() const;
 
+        [[nodiscard]] uint8_t width() const;
+
         [[nodiscard]] id::type_t id() const;
 
         [[nodiscard]] size_t length() const;

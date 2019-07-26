@@ -49,6 +49,13 @@ namespace basecode::compiler::utf8 {
         return _mark_stack.top();
     }
 
+    uint8_t reader_t::width() const {
+        result_t r{};
+        uint8_t width;
+        read(r, width);
+        return width;
+    }
+
     bool reader_t::seek(size_t index) {
         if (index > _slice.size() - 1)
             return false;
@@ -119,7 +126,7 @@ namespace basecode::compiler::utf8 {
         return true;
     }
 
-    rune_t reader_t::read(result_t& r, uint8_t& width) {
+    rune_t reader_t::read(result_t& r, uint8_t& width) const {
         width = 1;
         uint8_t ch = _slice[_index];
         auto rune = rune_t(ch);
