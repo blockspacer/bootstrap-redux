@@ -39,9 +39,15 @@ namespace basecode::compiler::utf8 {
 
         void restore_top_mark();
 
+        rune_t curr(result_t& r);
+
         rune_t next(result_t& r);
 
         rune_t prev(result_t& r);
+
+        bool move_prev(result_t& r);
+
+        bool move_next(result_t& r);
 
         [[nodiscard]] bool eof() const;
 

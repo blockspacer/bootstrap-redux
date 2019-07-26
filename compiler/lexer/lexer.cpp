@@ -16,58 +16,134 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <tsl/htrie_map.h>
-#include "token.h"
 #include "lexer.h"
 
 namespace basecode::compiler::lexer {
 
-    // XXX: add new flag for non-conditional prefixes to lexeme_t
     tsl::htrie_map<char, lexeme_t> lexer_t::s_lexemes {
-        {"@",           {.prefix = prefix_type_t::conditional, .type = token_type_t::at}},
-        {"!",           {.type = token_type_t::bang}},
-        {"+",           {.type = token_type_t::plus}},
-        {"|",           {.type = token_type_t::pipe}},
-        {"-",           {.type = token_type_t::minus}},
-        {"^",           {.type = token_type_t::caret}},
-        {",",           {.type = token_type_t::comma}},
-        {":",           {.type = token_type_t::colon}},
-        {"=",           {.type = token_type_t::equal}},
-        {"~",           {.type = token_type_t::tilde}},
-        {"\"",          {.prefix = prefix_type_t::non_conditional, .type = token_type_t::quote}},
-        {".",           {.type = token_type_t::period}},
-        {"$",           {.prefix = prefix_type_t::conditional, .type = token_type_t::dollar}},
-        {"%",           {.prefix = prefix_type_t::conditional, .type = token_type_t::percent}},
-        {"*",           {.type = token_type_t::asterisk}},
-        {"?",           {.type = token_type_t::question}},
-        {"&",           {.type = token_type_t::ampersand}},
-        {"<",           {.type = token_type_t::less_than}},
-        {"`",           {.type = token_type_t::back_tick}},
-        {"_",           {.type = token_type_t::underscore}},
-        {"#",           {.type = token_type_t::octothorpe}},
-        {"\\",          {.type = token_type_t::back_slash}},
-        {";",           {.type = token_type_t::semi_colon}},
-        {"(",           {.type = token_type_t::left_paren}},
-        {"'",           {.prefix = prefix_type_t::non_conditional, .type = token_type_t::apostrophe}},
-        {"{",           {.type = token_type_t::left_brace}},
-        {"}",           {.type = token_type_t::right_brace}},
-        {")",           {.type = token_type_t::right_paren}},
-        {"[",           {.type = token_type_t::left_bracket}},
-        {"]",           {.type = token_type_t::right_bracket}},
-        {">",           {.type = token_type_t::greater_than}},
-        {"/",           {.type = token_type_t::forward_slash}},
+        {"1",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"2",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"3",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"4",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"5",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"6",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"7",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"8",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"9",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+
+        {"-1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-8",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-9",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+
+        {"$0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+
+        {"%0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
+        {"%1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
+
+        {"@0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+
+        {"@a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@g",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@h",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@i",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@j",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@k",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@l",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@m",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@n",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@o",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@p",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@q",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@r",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@s",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@t",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@u",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@v",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@w",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@x",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@y",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@z",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+
+        {"#a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#g",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#h",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#i",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#j",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#k",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#l",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#m",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#n",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#o",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#p",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#q",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#r",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#s",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#t",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#u",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#v",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#w",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#x",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#y",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#z",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+
+        {"'",           {.type = token_type_t::literal, .tokenizer = &lexer_t::rune_literal}},
+        {"\"",          {.type = token_type_t::literal, .tokenizer = &lexer_t::string_literal}},
+
+        {"//",          {.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
+        {"/*",          {.type = token_type_t::comment, .tokenizer = &lexer_t::block_comment}},
+
+        {";",           {.type = token_type_t::punctuation}},
+
+        {"in",          {.type = token_type_t::operator_}},
+        {"xor",         {.type = token_type_t::operator_}},
+        {"shl",         {.type = token_type_t::operator_}},
+        {"shr",         {.type = token_type_t::operator_}},
+        {"rol",         {.type = token_type_t::operator_}},
+        {"ror",         {.type = token_type_t::operator_}},
 
         {"if",          {.type = token_type_t::keyword}},
         {"ns",          {.type = token_type_t::keyword}},
-        {"xor",         {.type = token_type_t::keyword}},
-        {"shl",         {.type = token_type_t::keyword}},
-        {"shr",         {.type = token_type_t::keyword}},
-        {"rol",         {.type = token_type_t::keyword}},
-        {"ror",         {.type = token_type_t::keyword}},
         {"for",         {.type = token_type_t::keyword}},
         {"nil",         {.type = token_type_t::keyword}},
         {"use",         {.type = token_type_t::keyword}},
         {"true",        {.type = token_type_t::keyword}},
+        {"cast",        {.type = token_type_t::keyword}},
         {"case",        {.type = token_type_t::keyword}},
         {"proc",        {.type = token_type_t::keyword}},
         {"enum",        {.type = token_type_t::keyword}},
@@ -88,63 +164,223 @@ namespace basecode::compiler::lexer {
         {"import",      {.type = token_type_t::keyword}},
         {"else if",     {.type = token_type_t::keyword}},
         {"continue",    {.type = token_type_t::keyword}},
+        {"transmute",   {.type = token_type_t::keyword}},
         {"fallthrough", {.type = token_type_t::keyword}},
-    };
-
-    std::array<lexeme_tokenizer_t, 3> lexer_t::s_custom_tokenizers {
-        std::bind(&lexer_t::tokenize_binary_number, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&lexer_t::tokenize_octal_number, std::placeholders::_1, std::placeholders::_2),
-        std::bind(&lexer_t::tokenize_hex_number, std::placeholders::_1, std::placeholders::_2)
-    };
-
-    tsl::htrie_map<char, uint8_t> lexer_t::s_custom_lexemes {
-        {"%0",  0},
-        {"%1",  0},
-
-        {"@0",  1},
-        {"@1",  1},
-        {"@2",  1},
-        {"@3",  1},
-        {"@4",  1},
-        {"@5",  1},
-        {"@6",  1},
-        {"@7",  1},
-
-        {"$0",  2},
-        {"$1",  2},
-        {"$2",  2},
-        {"$3",  2},
-        {"$4",  2},
-        {"$5",  2},
-        {"$6",  2},
-        {"$7",  2},
-        {"$a",  2},
-        {"$b",  2},
-        {"$c",  2},
-        {"$d",  2},
-        {"$e",  2},
-        {"$f",  2},
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
     lexer_t::lexer_t(utf8::source_buffer_t* buffer) : _buffer(buffer) {
+        s_lexemes.burst_threshold(1024);
     }
 
-    bool lexer_t::tokenize(result_t&) {
+    bool lexer_t::tokenize(result_t& r) {
+        while (!_buffer->eof()) {
+            auto rune = _buffer->curr(r);
+            if (rune == utf8::rune_invalid)
+                break;
+
+            if (rune.is_space()) {
+                _buffer->move_next(r);
+                continue;
+            }
+
+            // XXX: navigating into the trie-map with a full codepoint?
+
+            struct match_t final {
+                std::string_view key;
+                lexeme_t& value;
+            };
+
+            auto start_pos = _buffer->pos();
+            auto len = 1;
+            while (true) {
+                auto slice = _buffer->make_slice(start_pos, len);
+                auto range = s_lexemes.equal_prefix_range(slice);
+
+                std::vector<match_t> matches{};
+                for (auto it = range.first; it != range.second; it++)
+                    matches.push_back(match_t{it.key(), it.value()});
+
+                if (matches.empty()) {
+                    if (!identifier(r)) {
+                        r.error("X000", "expected identifier");
+                        return false;
+                    }
+                    break;
+                }
+
+                if (matches.size() == 1
+                &&  matches[0].key.length() == len) {
+                    auto& match = matches[0];
+                    if (match.value.tokenizer) {
+                        if (!match.value.tokenizer(this, r))
+                            return false;
+
+                        // XXX: do something clever
+                    } else {
+                        // XXX: create entity + components
+                        fmt::print("match.key = {}\n", match.key);
+                    }
+                    break;
+                }
+
+                ++len;
+
+                if (start_pos + len >= _buffer->length() - 1) {
+                    r.error("X000", "unexpected end of input");
+                    return false;
+                }
+            }
+
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        // XXX: create entity & components for end_of_file
+        return !r.is_failed();
+    }
+
+    bool lexer_t::identifier(result_t& r) {
         return false;
     }
 
-    bool lexer_t::tokenize_hex_number(result_t& r) {
+    bool lexer_t::rune_literal(result_t& r) {
         return false;
     }
 
-    bool lexer_t::tokenize_octal_number(result_t& r) {
+    bool lexer_t::line_comment(result_t& r) {
         return false;
     }
 
-    bool lexer_t::tokenize_binary_number(result_t& r) {
+    bool lexer_t::block_comment(result_t& r) {
         return false;
+    }
+
+    bool lexer_t::string_literal(result_t& r) {
+        return false;
+    }
+
+    bool lexer_t::directive_literal(result_t& r) {
+        return false;
+    }
+
+    bool lexer_t::annotation_literal(result_t& r) {
+        return false;
+    }
+
+    bool lexer_t::dec_number_literal(result_t& r) {
+        auto type = number_type_t::integer;
+        auto rune = _buffer->curr(r);
+        bool is_signed = rune == '-';
+        if (is_signed) {
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            if (ch == '.') {
+                if (type == number_type_t::floating_point) {
+                    r.error("X000", "unexpected decimal point");
+                    return false;
+                } else {
+                    type = number_type_t::floating_point;
+                }
+            }
+            if (ch == '_' || ch == 'E' || ch == 'e') {
+                if (!_buffer->move_next(r))
+                    return false;
+                continue;
+            }
+            if (ch < 0x30 || ch > 0x39)     break;
+            if (!_buffer->move_next(r))  return false;
+        }
+
+        auto capture = _buffer->make_slice(
+            start_pos,
+            _buffer->pos() - start_pos);
+
+        return true;
+    }
+
+    bool lexer_t::hex_number_literal(result_t& r) {
+        auto rune = _buffer->next(r);
+        if (rune != '$') {
+            r.error("X000", "expected hex prefix: $");
+            return false;
+        }
+
+        auto start_pos = _buffer->pos();
+        while (true) {
+            rune = _buffer->curr(r);
+            if (rune == '_') {
+                if (!_buffer->move_next(r))
+                    return false;
+                continue;
+            }
+            if (!rune.is_xdigit())          break;
+            if (!_buffer->move_next(r))  return false;
+        }
+
+        auto capture = _buffer->make_slice(
+            start_pos,
+            _buffer->pos() - start_pos);
+
+        return true;
+    }
+
+    bool lexer_t::octal_number_literal(result_t& r) {
+        auto rune = _buffer->next(r);
+        if (rune != '@') {
+            r.error("X000", "expected octal prefix: @");
+            return false;
+        }
+
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            if (ch == '_') {
+                if (!_buffer->move_next(r))
+                    return false;
+                continue;
+            }
+            if (ch < 0x30 || ch > 0x37)     break;
+            if (!_buffer->move_next(r))  return false;
+        }
+
+        auto capture = _buffer->make_slice(
+            start_pos,
+            _buffer->pos() - start_pos);
+
+        return true;
+    }
+
+    bool lexer_t::binary_number_literal(result_t& r) {
+        auto rune = _buffer->next(r);
+        if (rune != '%') {
+            r.error("X000", "expected binary prefix: %");
+            return false;
+        }
+
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            if (ch == '_') {
+                if (!_buffer->move_next(r))
+                    return false;
+                continue;
+            }
+            if (ch < 0x30 || ch > 0x31)     break;
+            if (!_buffer->move_next(r))  return false;
+        }
+
+        auto capture = _buffer->make_slice(
+            start_pos,
+            _buffer->pos() - start_pos);
+
+        return true;
     }
 
 }

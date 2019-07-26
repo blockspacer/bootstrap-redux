@@ -207,6 +207,10 @@ namespace basecode::compiler::utf8 {
         return _reader->seek(index);
     }
 
+    rune_t source_buffer_t::curr(result_t& r) {
+        return _reader->curr(r);
+    }
+
     rune_t source_buffer_t::prev(result_t& r) {
         return _reader->prev(r);
     }
@@ -217,6 +221,14 @@ namespace basecode::compiler::utf8 {
 
     const path_t& source_buffer_t::path() const {
         return _path;
+    }
+
+    bool source_buffer_t::move_next(result_t& r) {
+        return _reader->move_next(r);
+    }
+
+    bool source_buffer_t::move_prev(result_t& r) {
+        return _reader->move_prev(r);
     }
 
     void source_buffer_t::index_lines(result_t& r) {

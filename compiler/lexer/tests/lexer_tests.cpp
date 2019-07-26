@@ -16,38 +16,27 @@
 //
 // ----------------------------------------------------------------------------
 
-#pragma once
+#include <catch2/catch.hpp>
+#include <compiler/lexer/lexer.h>
 
-#include <compiler/types.h>
+namespace basecode {
 
-namespace basecode::compiler::lexer {
+    using namespace std::literals;
 
-    enum class token_type_t {
-        literal,
-        comment,
-        keyword,
-        operator_,
-        identifier,
-        punctuation,
-        end_of_input,
-    };
+    TEST_CASE("lexer_t::tokenize detects radix prefixed numbers") {
+        compiler::result_t r{};
+        compiler::utf8::source_buffer_t buffer(0);
 
-    struct token_t final {
-        token_type_t type{};
-        std::string_view value{};
-    };
+        const std::string source =
+            "$2334;\n"
+            "%1111_0000_1111_0101;\n"
+            "@777;\n"
+            "3444;\n";
 
-    enum class number_type_t {
-        none,
-        integer,
-        arbitrary,
-        floating_point
-    };
+        REQUIRE(buffer.load(r, source));
 
-    struct number_token_t final {
-        bool is_signed{};
-        uint8_t radix = 10;
-        number_type_t type{};
-    };
+        compiler::lexer::lexer_t lexer(&buffer);
+        REQUIRE(lexer.tokenize(r));
+    }
 
 }

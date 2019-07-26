@@ -18,7 +18,9 @@
 
 #pragma once
 
+#include <tsl/htrie_map.h>
 #include <compiler/utf8/source_buffer.h>
+#include "token.h"
 
 namespace basecode::compiler::lexer {
 
@@ -26,15 +28,9 @@ namespace basecode::compiler::lexer {
 
     using lexeme_tokenizer_t = std::function<bool (lexer_t*, result_t&)>;
 
-    enum class prefix_type_t {
-        none,
-        conditional,
-        non_conditional
-    };
-
     struct lexeme_t final {
         token_type_t type{};
-        prefix_type_t prefix{};
+        lexeme_tokenizer_t tokenizer{};
     };
 
     class lexer_t final {
@@ -44,16 +40,30 @@ namespace basecode::compiler::lexer {
         bool tokenize(result_t& r);
 
     private:
-        bool tokenize_hex_number(result_t& r);
+        bool identifier(result_t& r);
 
-        bool tokenize_octal_number(result_t& r);
+        bool rune_literal(result_t& r);
 
-        bool tokenize_binary_number(result_t& r);
+        bool line_comment(result_t& r);
+
+        bool block_comment(result_t& r);
+
+        bool string_literal(result_t& r);
+
+        bool directive_literal(result_t& r);
+
+        bool annotation_literal(result_t& r);
+
+        bool dec_number_literal(result_t& r);
+
+        bool hex_number_literal(result_t& r);
+
+        bool octal_number_literal(result_t& r);
+
+        bool binary_number_literal(result_t& r);
 
     private:
         static tsl::htrie_map<char, lexeme_t> s_lexemes;
-        static tsl::htrie_map<char, uint8_t> s_custom_lexemes;
-        static std::array<lexeme_tokenizer_t, 3> s_custom_tokenizers;
 
         utf8::source_buffer_t* _buffer{};
     };

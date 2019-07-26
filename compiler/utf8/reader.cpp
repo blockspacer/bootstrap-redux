@@ -53,7 +53,18 @@ namespace basecode::compiler::utf8 {
         if (index > _slice.size() - 1)
             return false;
         _index = index;
+        while (!_width_stack.empty())
+            _width_stack.pop();
+        while (!_mark_stack.empty())
+            _mark_stack.pop();
         return true;
+    }
+
+    rune_t reader_t::curr(result_t& r) {
+        if (eof()) return rune_eof;
+
+        uint8_t width;
+        return read(r, width);
     }
 
     rune_t reader_t::next(result_t& r) {
@@ -81,6 +92,31 @@ namespace basecode::compiler::utf8 {
         _width_stack.pop();
         uint8_t width;
         return read(r, width);
+    }
+
+    bool reader_t::move_prev(result_t& r) {
+        if (_index == 0 || _width_stack.empty()) {
+            r.error("S003", "at beginning of buffer");
+            return false;
+        }
+
+        _index = _width_stack.top();
+        _width_stack.pop();
+
+        return true;
+    }
+
+    bool reader_t::move_next(result_t& r) {
+        if (eof()) {
+            r.error("S003", "at end of buffer");
+            return false;
+        }
+
+        uint8_t width;
+        read(r, width);
+        _index += width;
+        _width_stack.push(width);
+        return true;
     }
 
     rune_t reader_t::read(result_t& r, uint8_t& width) {
