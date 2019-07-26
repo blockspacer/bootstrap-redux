@@ -179,7 +179,7 @@ namespace basecode::compiler::lexer {
         s_lexemes.burst_threshold(1024);
     }
 
-    bool lexer_t::tokenize(result_t& r) {
+    bool lexer_t::tokenize(result_t& r, entity_list_t& entities) {
         while (!_buffer->eof()) {
             auto rune = _buffer->curr(r);
             if (rune == utf8::rune_invalid)
@@ -207,7 +207,7 @@ namespace basecode::compiler::lexer {
                     matches.push_back(match_t{it.key(), it.value()});
 
                 if (matches.empty()) {
-                    if (!identifier(r)) {
+                    if (!identifier(r, entities)) {
                         r.error("X000", "expected identifier");
                         return false;
                     }
@@ -218,7 +218,7 @@ namespace basecode::compiler::lexer {
                 &&  matches[0].key.length() == len) {
                     auto& match = matches[0];
                     if (match.value.tokenizer) {
-                        if (!match.value.tokenizer(this, r))
+                        if (!match.value.tokenizer(this, r, entities))
                             return false;
                     } else {
                         auto start_pos = _buffer->pos();
@@ -228,6 +228,7 @@ namespace basecode::compiler::lexer {
                         _workspace->registry.assign<source_location_t>(
                             token,
                             make_location(start_pos, _buffer->pos()));
+                        entities.push_back(token);
                     }
                     break;
                 }
@@ -246,39 +247,40 @@ namespace basecode::compiler::lexer {
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(_buffer->pos(), _buffer->pos()));
+        entities.push_back(token);
 
         return !r.is_failed();
     }
 
-    bool lexer_t::identifier(result_t& r) {
+    bool lexer_t::identifier(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::rune_literal(result_t& r) {
+    bool lexer_t::rune_literal(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::line_comment(result_t& r) {
+    bool lexer_t::line_comment(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::block_comment(result_t& r) {
+    bool lexer_t::block_comment(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::string_literal(result_t& r) {
+    bool lexer_t::string_literal(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::directive_literal(result_t& r) {
+    bool lexer_t::directive_literal(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::annotation_literal(result_t& r) {
+    bool lexer_t::annotation_literal(result_t& r, entity_list_t& entities) {
         return false;
     }
 
-    bool lexer_t::dec_number_literal(result_t& r) {
+    bool lexer_t::dec_number_literal(result_t& r, entity_list_t& entities) {
         auto type = number_type_t::integer;
         auto rune = _buffer->curr(r);
         bool is_signed = rune == '-';
@@ -351,10 +353,12 @@ namespace basecode::compiler::lexer {
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
+
         return true;
     }
 
-    bool lexer_t::hex_number_literal(result_t& r) {
+    bool lexer_t::hex_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer->next(r);
         if (rune != '$') {
             r.error("X000", "expected hex prefix: $");
@@ -403,11 +407,12 @@ namespace basecode::compiler::lexer {
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
 
         return true;
     }
 
-    bool lexer_t::octal_number_literal(result_t& r) {
+    bool lexer_t::octal_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer->next(r);
         if (rune != '@') {
             r.error("X000", "expected octal prefix: @");
@@ -455,11 +460,12 @@ namespace basecode::compiler::lexer {
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
 
         return true;
     }
 
-    bool lexer_t::binary_number_literal(result_t& r) {
+    bool lexer_t::binary_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer->next(r);
         if (rune != '%') {
             r.error("X000", "expected binary prefix: %");
@@ -507,6 +513,7 @@ namespace basecode::compiler::lexer {
         _workspace->registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
 
         return true;
     }

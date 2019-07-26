@@ -45,6 +45,9 @@ namespace basecode::compiler {
     // uuid type aliases
     using uuid_t = boost::uuids::uuid;
 
+    // entity aliases
+    using entity_list_t = std::vector<entt::entity>;
+
     ///////////////////////////////////////////////////////////////////////////
 
     struct location_t final {

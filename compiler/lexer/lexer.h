@@ -27,7 +27,7 @@ namespace basecode::compiler::lexer {
 
     class lexer_t;
 
-    using lexeme_tokenizer_t = std::function<bool (lexer_t*, result_t&)>;
+    using lexeme_tokenizer_t = std::function<bool (lexer_t*, result_t&, entity_list_t&)>;
 
     struct lexeme_t final {
         token_type_t type{};
@@ -40,30 +40,30 @@ namespace basecode::compiler::lexer {
             workspace_t* workspace,
             utf8::source_buffer_t* buffer);
 
-        bool tokenize(result_t& r);
+        bool tokenize(result_t& r, entity_list_t& entities);
 
     private:
-        bool identifier(result_t& r);
+        bool identifier(result_t& r, entity_list_t& entities);
 
-        bool rune_literal(result_t& r);
+        bool rune_literal(result_t& r, entity_list_t& entities);
 
-        bool line_comment(result_t& r);
+        bool line_comment(result_t& r, entity_list_t& entities);
 
-        bool block_comment(result_t& r);
+        bool block_comment(result_t& r, entity_list_t& entities);
 
-        bool string_literal(result_t& r);
+        bool string_literal(result_t& r, entity_list_t& entities);
 
-        bool directive_literal(result_t& r);
+        bool directive_literal(result_t& r, entity_list_t& entities);
 
-        bool annotation_literal(result_t& r);
+        bool annotation_literal(result_t& r, entity_list_t& entities);
 
-        bool dec_number_literal(result_t& r);
+        bool dec_number_literal(result_t& r, entity_list_t& entities);
 
-        bool hex_number_literal(result_t& r);
+        bool hex_number_literal(result_t& r, entity_list_t& entities);
 
-        bool octal_number_literal(result_t& r);
+        bool octal_number_literal(result_t& r, entity_list_t& entities);
 
-        bool binary_number_literal(result_t& r);
+        bool binary_number_literal(result_t& r, entity_list_t& entities);
 
     private:
         source_location_t make_location(size_t start_pos, size_t end_pos);

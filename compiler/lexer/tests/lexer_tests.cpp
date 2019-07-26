@@ -37,15 +37,13 @@ namespace basecode {
 
         REQUIRE(buffer.load(r, source));
 
+        compiler::entity_list_t tokens{};
         compiler::lexer::lexer_t lexer(&workspace, &buffer);
-        REQUIRE(lexer.tokenize(r));
+        REQUIRE(lexer.tokenize(r, tokens));
 
-        auto view = workspace.registry.view<
-            compiler::lexer::token_t,
-            compiler::source_location_t>();
-        for (auto entity : view) {
-            const auto& token = view.get<compiler::lexer::token_t>(entity);
-            const auto& source_location = view.get<compiler::source_location_t>(entity);
+        for (auto entity : tokens) {
+            const auto& token = workspace.registry.get<compiler::lexer::token_t>(entity);
+            const auto& source_location = workspace.registry.get<compiler::source_location_t>(entity);
             fmt::print("token = {}", token);
             if (workspace.registry.has<compiler::lexer::number_token_t>(entity)) {
                 const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
