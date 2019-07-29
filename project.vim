@@ -15,34 +15,54 @@
 " For details, please read the LICENSE file.
 "
 " ----------------------------------------------------------------------------
-"cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -G "Ninja" -Wno-dev /Users/jeff/src/basecode-lang/bootstrap-redux
-"
+
 function! Project_UpdateTags()
     UpdateTags! -R bc/ compiler/ tests/
 endfunction
 
 function! Project_Cscope()
-    copen 15
+    call asyncrun#quickfix_toggle(15)
     AsyncRun cscope -Rb
 endfunction
 
-function! Project_CMakeGenerate()
-    copen 15
+function! Project_CMakeGenerate(reset)
+    call asyncrun#quickfix_toggle(15, 1)
+
+    if a:reset != ''
+        silent execute "!cd build/debug && rm -rf clang && mkdir clang"
+    endif
+
     AsyncRun cd build/debug/clang && cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -G "Ninja" -Wno-dev /Users/jeff/src/basecode-lang/bootstrap-redux
 endfunction
 
-function! Project_BuildTestLexer()
-    copen 15
-    AsyncRun cd build/debug/clang && cmake --build . --target test-lexer -- -j12
+function! Project_Build(...)
+    call asyncrun#quickfix_toggle(15, 1)
+
+    let l:cmd = "cd build/debug/clang && cmake --build ."
+    
+    for arg in a:000
+        let l:cmd = l:cmd . " --target " . arg
+    endfor
+
+    let l:cmd = l:cmd . " -- -j12"
+
+    call asyncrun#run(0, '', l:cmd) 
 endfunction
 
-function! Project_RunTestLexer()
-    copen 15
-    AsyncRun cd build/debug/clang/bin && ./test-lexer
+function! Project_Run(...)
+    call asyncrun#quickfix_toggle(15, 1)
+
+    let l:cmd = "cd build/debug/clang/bin" 
+
+    for arg in a:000
+        let l:cmd = l:cmd . " && ./" . arg
+    endfor
+
+    call asyncrun#run(0, '', l:cmd)
 endfunction
 
 command! ProjectCscope :call Project_Cscope()
 command! ProjectUpdateTags :call Project_UpdateTags()
-command! ProjectCmakeGenerate :call Project_CMakeGenerate()
-command! ProjectBuildTestLexer :call Project_BuildTestLexer()
-command! ProjectRunTestLexer :call Project_RunTestLexer()
+command! -nargs=+ ProjectRun :call Project_Run(<f-args>)
+command! -nargs=+ ProjectBuild :call Project_Build(<f-args>)
+command! -bang ProjectCmakeGenerate :call Project_CMakeGenerate('<bang>')
