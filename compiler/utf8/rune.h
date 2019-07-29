@@ -51,6 +51,8 @@ namespace basecode::compiler::utf8 {
 
         bool is_invalid() const;
 
+        bool is_eof_or_invalid() const;
+
         rune_t& operator= (int32_t rhs);
 
         explicit operator char () const;

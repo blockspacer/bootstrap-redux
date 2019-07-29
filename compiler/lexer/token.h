@@ -36,13 +36,13 @@ namespace basecode::compiler::lexer {
 
     static inline std::string_view token_type_to_name(token_type_t type) {
         switch (type) {
-            case token_type_t::literal: return "literal"sv;
-            case token_type_t::comment: return "comment"sv;
-            case token_type_t::keyword: return "keyword"sv;
-            case token_type_t::operator_: return "operator"sv;
-            case token_type_t::identifier: return "identifier"sv;
-            case token_type_t::punctuation: return "punctuation"sv;
-            case token_type_t::end_of_input: return "end_of_input"sv;
+            case token_type_t::literal:         return "literal"sv;
+            case token_type_t::comment:         return "comment"sv;
+            case token_type_t::keyword:         return "keyword"sv;
+            case token_type_t::operator_:       return "operator"sv;
+            case token_type_t::identifier:      return "identifier"sv;
+            case token_type_t::punctuation:     return "punctuation"sv;
+            case token_type_t::end_of_input:    return "end_of_input"sv;
         }
     }
 
@@ -51,12 +51,25 @@ namespace basecode::compiler::lexer {
         std::string_view value{};
     };
 
+    ///////////////////////////////////////////////////////////////////////////
+    
     enum class number_type_t {
         none,
         integer,
         arbitrary,
         floating_point
     };
+
+    static inline std::string_view number_type_to_name(number_type_t type) {
+        switch (type) {
+            case number_type_t::none:           return "none"sv;
+            case number_type_t::integer:        return "integer"sv;
+            case number_type_t::arbitrary:      return "arbitrary"sv;
+            case number_type_t::floating_point: return "floating_point"sv;
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     enum class number_size_t {
         byte,
@@ -65,14 +78,16 @@ namespace basecode::compiler::lexer {
         qword
     };
 
-    static inline std::string_view number_type_to_name(number_type_t type) {
-        switch (type) {
-            case number_type_t::none:           return "none"sv;
-            case number_type_t::integer:        return "integer"sv;
-            case number_type_t::arbitrary:      return "arbitrary"sv;
-            case number_type_t::floating_point: return "floating_point";
+    static inline std::string_view number_size_to_name(number_size_t size) {
+        switch (size) {
+            case number_size_t::byte:  return "byte"sv;
+            case number_size_t::word:  return "word"sv;
+            case number_size_t::dword: return "dword"sv;
+            case number_size_t::qword: return "qword"sv;
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     struct number_token_t final {
         bool is_signed{};
@@ -89,12 +104,43 @@ namespace basecode::compiler::lexer {
         } value{.u64 = 0};
     };
 
+    void apply_narrowed_value(
+            number_token_t& token, 
+            number_size_t size, 
+            double value);
+
+    void apply_narrowed_value(
+            number_token_t& token, 
+            number_size_t size, 
+            int64_t value, 
+            bool check_sign_bit = true);
+
     std::optional<number_size_t> narrow_type(double value);
 
     std::optional<number_size_t> narrow_type(int64_t value);
 
-    void apply_narrowed_value(number_token_t& token, number_size_t size, double value);
+    ///////////////////////////////////////////////////////////////////////////
 
-    void apply_narrowed_value(number_token_t& token, number_size_t size, int64_t value, bool check_sign_bit = true);
+    enum class comment_type_t {
+        line,
+        block
+    };
+
+    static inline std::string_view comment_type_to_name(comment_type_t type) {
+        switch (type) {
+            case comment_type_t::line:  return "line"sv;
+            case comment_type_t::block: return "block"sv;
+        }
+    }
+
+    struct comment_token_t final {
+        comment_type_t type{};
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    struct block_literal_token_t final {};
+
+    struct string_literal_token_t final {};
 
 }

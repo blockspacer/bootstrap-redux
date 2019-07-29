@@ -92,6 +92,10 @@ namespace basecode::compiler::utf8 {
         return temp;
     }
 
+    bool rune_t::is_eof_or_invalid() const {
+        return is_eof() || is_invalid();
+    }
+
     rune_t& rune_t::operator=(int32_t rhs) {
         _value = rhs;
         return *this;

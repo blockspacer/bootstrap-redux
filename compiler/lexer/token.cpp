@@ -23,6 +23,56 @@
 
 namespace basecode::compiler::lexer {
 
+    void apply_narrowed_value(
+            number_token_t& token, 
+            number_size_t size, 
+            double value) {
+        token.size = size;
+        switch (size) {
+            case number_size_t::byte: 
+            case number_size_t::word:
+                break;
+            case number_size_t::dword: 
+                token.value.f32 = value;
+                token.is_signed = token.value.f32 < 0;
+                break;
+            case number_size_t::qword: 
+                token.value.f64 = value;
+                token.is_signed = token.value.f64 < 0;
+                break;
+        }
+    }
+
+    void apply_narrowed_value(
+            number_token_t& token, 
+            number_size_t size, 
+            int64_t value, 
+            bool check_sign_bit) {
+        token.size = size;
+        switch (size) {
+            case number_size_t::byte:
+                token.value.u8 = static_cast<uint8_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u8);
+                break;
+            case number_size_t::word:
+                token.value.u16 = static_cast<uint16_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u16);
+                break;
+            case number_size_t::dword: 
+                token.value.u32 = static_cast<uint32_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u32);
+                break;
+            case number_size_t::qword: 
+                token.value.u64 = static_cast<uint64_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u64);
+                break;
+        }
+    }
+
     std::optional<number_size_t> narrow_type(double value) {
         if (value < -3.4e+38 || value > 3.4e+38)
             return number_size_t::qword;
@@ -58,49 +108,6 @@ namespace basecode::compiler::lexer {
         }
 
         return {};
-    }
-
-    void apply_narrowed_value(number_token_t& token, number_size_t size, double value) {
-        token.size = size;
-        switch (size) {
-            case number_size_t::byte: 
-            case number_size_t::word:
-                break;
-            case number_size_t::dword: 
-                token.value.f32 = value;
-                token.is_signed = token.value.f32 < 0;
-                break;
-            case number_size_t::qword: 
-                token.value.f64 = value;
-                token.is_signed = token.value.f64 < 0;
-                break;
-        }
-    }
-
-    void apply_narrowed_value(number_token_t& token, number_size_t size, int64_t value, bool check_sign_bit) {
-        token.size = size;
-        switch (size) {
-            case number_size_t::byte:
-                token.value.u8 = static_cast<uint8_t>(value);
-                if (check_sign_bit)
-                    token.is_signed = numbers::is_sign_bit_set(token.value.u8);
-                break;
-            case number_size_t::word:
-                token.value.u16 = static_cast<uint16_t>(value);
-                if (check_sign_bit)
-                    token.is_signed = numbers::is_sign_bit_set(token.value.u16);
-                break;
-            case number_size_t::dword: 
-                token.value.u32 = static_cast<uint32_t>(value);
-                if (check_sign_bit)
-                    token.is_signed = numbers::is_sign_bit_set(token.value.u32);
-                break;
-            case number_size_t::qword: 
-                token.value.u64 = static_cast<uint64_t>(value);
-                if (check_sign_bit)
-                    token.is_signed = numbers::is_sign_bit_set(token.value.u64);
-                break;
-        }
     }
 
 }

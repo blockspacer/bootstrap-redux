@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/defer.h>
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
 #include <compiler/formatters/formatters.h>
@@ -129,11 +130,55 @@ namespace basecode::compiler::lexer {
 
         {"'",           {.type = token_type_t::literal, .tokenizer = &lexer_t::rune_literal}},
         {"\"",          {.type = token_type_t::literal, .tokenizer = &lexer_t::string_literal}},
+        {"{{",          {.type = token_type_t::literal, .tokenizer = &lexer_t::block_string_literal}},
 
         {"//",          {.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
+        {"--",          {.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
         {"/*",          {.type = token_type_t::comment, .tokenizer = &lexer_t::block_comment}},
 
         {";",           {.type = token_type_t::punctuation}},
+        {",",           {.type = token_type_t::punctuation}},
+        {"{",           {.type = token_type_t::punctuation}},
+        {"}",           {.type = token_type_t::punctuation}},
+        {"(",           {.type = token_type_t::punctuation}},
+        {")",           {.type = token_type_t::punctuation}},
+        {"[",           {.type = token_type_t::punctuation}},
+        {"]",           {.type = token_type_t::punctuation}},
+        {"\\",          {.type = token_type_t::punctuation}},
+
+        {"&",           {.type = token_type_t::operator_}},
+        {"|",           {.type = token_type_t::operator_}},
+        {"~",           {.type = token_type_t::operator_}},
+        {"**",          {.type = token_type_t::operator_}},
+        {"+",           {.type = token_type_t::operator_}},
+        {"-",           {.type = token_type_t::operator_}},
+        {"*",           {.type = token_type_t::operator_}},
+        {"/",           {.type = token_type_t::operator_}},
+        {"%",           {.type = token_type_t::operator_}},
+
+        {"&&",          {.type = token_type_t::operator_}},
+        {"||",          {.type = token_type_t::operator_}},
+        {">",           {.type = token_type_t::operator_}},
+        {"<",           {.type = token_type_t::operator_}},
+        {">=",          {.type = token_type_t::operator_}},
+        {"<=",          {.type = token_type_t::operator_}},
+        {"==",          {.type = token_type_t::operator_}},
+        {"!=",          {.type = token_type_t::operator_}},
+
+        {":=",          {.type = token_type_t::operator_}},
+        {"%:=",         {.type = token_type_t::operator_}},
+        {"/:=",         {.type = token_type_t::operator_}},
+        {"*:=",         {.type = token_type_t::operator_}},
+        {"-:=",         {.type = token_type_t::operator_}},
+        {"+:=",         {.type = token_type_t::operator_}},
+        {"&:=",         {.type = token_type_t::operator_}},
+        {"|:=",         {.type = token_type_t::operator_}},
+        {"~:=",         {.type = token_type_t::operator_}},
+
+        {":",           {.type = token_type_t::operator_}}, // type operator
+        {"::",          {.type = token_type_t::operator_}}, // bind operator
+        {"=>",          {.type = token_type_t::operator_}}, // association operator
+        {"->",          {.type = token_type_t::operator_}}, // placeholder
 
         {"in",          {.type = token_type_t::operator_}},
         {"xor",         {.type = token_type_t::operator_}},
@@ -154,11 +199,10 @@ namespace basecode::compiler::lexer {
         {"enum",        {.type = token_type_t::keyword}},
         {"else",        {.type = token_type_t::keyword}},
         {"with",        {.type = token_type_t::keyword}},
+        {"goto",        {.type = token_type_t::keyword}},
         {"false",       {.type = token_type_t::keyword}},
         {"defer",       {.type = token_type_t::keyword}},
         {"break",       {.type = token_type_t::keyword}},
-        {"tuple",       {.type = token_type_t::keyword}},
-        {"array",       {.type = token_type_t::keyword}},
         {"union",       {.type = token_type_t::keyword}},
         {"yield",       {.type = token_type_t::keyword}},
         {"struct",      {.type = token_type_t::keyword}},
@@ -183,22 +227,23 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::tokenize(result_t& r, entity_list_t& entities) {
+        struct match_t final {
+            std::string_view key;
+            lexeme_t& value;
+        };
+
         while (!_buffer->eof()) {
             auto rune = _buffer->curr(r);
-            if (rune == utf8::rune_invalid)
-                break;
+            if (rune.is_eof_or_invalid())
+                return false;
 
             if (rune.is_space()) {
-                _buffer->move_next(r);
+                if (!_buffer->move_next(r))
+                    break;
                 continue;
             }
 
             // XXX: navigating into the trie-map with a full codepoint?
-
-            struct match_t final {
-                std::string_view key;
-                lexeme_t& value;
-            };
 
             auto len = 1;
             while (true) {
@@ -235,7 +280,7 @@ namespace basecode::compiler::lexer {
                     }
                     break;
                 }
-
+            
                 len += _buffer->width();
 
                 if (_buffer->pos() + len >= _buffer->length() - 1) {
@@ -264,15 +309,120 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::line_comment(result_t& r, entity_list_t& entities) {
-        return false;
+        // prefixed with // or --
+        if (!_buffer->move_next(r)) return false;
+        if (!_buffer->move_next(r)) return false;
+        
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            if (rune == '\n') break;
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto capture = _buffer->make_slice(
+            start_pos,
+            _buffer->pos() - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::comment, capture);
+        _workspace->registry.assign<comment_token_t>(token, comment_type_t::line); 
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
+
+        return true;
     }
 
     bool lexer_t::block_comment(result_t& r, entity_list_t& entities) {
-        return false;
+        // prefixed with /*
+        if (!_buffer->move_next(r)) return false;
+        if (!_buffer->move_next(r)) return false;
+
+        auto block_count = 1;
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid()) 
+                return false;
+
+            if (rune == '/') {
+                if (!_buffer->move_next(r)) 
+                    return false;
+                rune = _buffer->curr(r);
+
+                if (rune == '*') {
+                    ++block_count;
+                } else {
+                    continue;
+                }
+            } else if (rune == '*') {
+                if (!_buffer->move_next(r)) 
+                    return false;
+                rune = _buffer->curr(r);
+
+                if (rune == '/') {
+                    if (block_count > 0)
+                        --block_count;
+                    if (block_count == 0) { 
+                        if (!_buffer->move_next(r)) 
+                            return false;
+                        break;
+                    }
+                } else {
+                    continue;
+                }
+            }
+
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto end_pos = _buffer->pos() - 2;
+        auto capture = _buffer->make_slice(start_pos, end_pos - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::comment, capture);
+        _workspace->registry.assign<comment_token_t>(token, comment_type_t::block); 
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, end_pos));
+        entities.push_back(token);
+
+        return true;
     }
 
     bool lexer_t::string_literal(result_t& r, entity_list_t& entities) {
-        return false;
+        // prefixed with "
+        if (!_buffer->move_next(r)) return false;
+        
+        auto should_exit = false;
+        auto start_pos = _buffer->pos();
+        while (!should_exit) {
+            auto rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            if (rune == '\"') should_exit = true;
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto end_pos = _buffer->pos() - 1;
+        auto capture = _buffer->make_slice(start_pos, end_pos - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<string_literal_token_t>(token);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, end_pos));
+        entities.push_back(token);
+
+        return true;
     }
 
     bool lexer_t::directive_literal(result_t& r, entity_list_t& entities) {
@@ -363,7 +513,10 @@ namespace basecode::compiler::lexer {
 
         auto start_pos = _buffer->pos();
         while (true) {
-            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            auto ch = static_cast<int32_t>(rune);
             if (ch == '.') {
                 if (type == number_type_t::floating_point) {
                     r.error("X000", "unexpected decimal point");
@@ -406,6 +559,8 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer->pos();
         while (true) {
             rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
             if (rune == '_') {
                 if (!_buffer->move_next(r))
                     return false;
@@ -438,7 +593,10 @@ namespace basecode::compiler::lexer {
 
         auto start_pos = _buffer->pos();
         while (true) {
-            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            auto ch = static_cast<int32_t>(rune);
             if (ch == '_') {
                 if (!_buffer->move_next(r))
                     return false;
@@ -470,7 +628,10 @@ namespace basecode::compiler::lexer {
 
         auto start_pos = _buffer->pos();
         while (true) {
-            auto ch = static_cast<int32_t>(_buffer->curr(r));
+            rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            auto ch = static_cast<int32_t>(rune);
             if (ch == '_') {
                 if (!_buffer->move_next(r))
                     return false;
@@ -492,6 +653,51 @@ namespace basecode::compiler::lexer {
                 2, 
                 number_type_t::integer, 
                 capture);
+    }
+
+    bool lexer_t::block_string_literal(result_t& r, entity_list_t& entities) {
+        // prefixed with {{
+        if (!_buffer->move_next(r)) return false;
+        if (!_buffer->move_next(r)) return false;
+
+        auto start_pos = _buffer->pos();
+        while (true) {
+            auto rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+            if (rune == '}') {
+                if (!_buffer->move_next(r))
+                    return false;
+
+                rune = _buffer->curr(r);
+                if (rune.is_eof_or_invalid())
+                    return false;
+
+                if (rune != '}') {
+                    r.error(
+                            "X000", 
+                            fmt::format("expected }} but found: {}", rune));
+                    return false;
+                }
+
+                break;
+            }
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto end_pos = _buffer->pos() - 2;
+        auto capture = _buffer->make_slice(start_pos, end_pos - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<block_literal_token_t>(token);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, end_pos));
+        entities.push_back(token);
+
+        return true;
     }
 
     source_location_t lexer_t::make_location(size_t start_pos, size_t end_pos) {

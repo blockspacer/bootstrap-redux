@@ -63,6 +63,8 @@ namespace basecode::compiler::lexer {
 
         bool octal_number_literal(result_t& r, entity_list_t& entities);
 
+        bool block_string_literal(result_t& r, entity_list_t& entities);
+
         bool binary_number_literal(result_t& r, entity_list_t& entities);
 
     private:
