@@ -58,6 +58,13 @@ namespace basecode::compiler::lexer {
         floating_point
     };
 
+    enum class number_size_t {
+        byte,
+        word,
+        dword,
+        qword
+    };
+
     static inline std::string_view number_type_to_name(number_type_t type) {
         switch (type) {
             case number_type_t::none:           return "none"sv;
@@ -71,10 +78,23 @@ namespace basecode::compiler::lexer {
         bool is_signed{};
         uint8_t radix = 10;
         number_type_t type{};
+        number_size_t size{};
         union {
-            double d;
-            int64_t i;
-        } value{.i = 0};
+            float f32;
+            double f64;
+            uint8_t u8;
+            uint16_t u16;
+            uint32_t u32;
+            uint64_t u64;
+        } value{.u64 = 0};
     };
+
+    std::optional<number_size_t> narrow_type(double value);
+
+    std::optional<number_size_t> narrow_type(int64_t value);
+
+    void apply_narrowed_value(number_token_t& token, number_size_t size, double value);
+
+    void apply_narrowed_value(number_token_t& token, number_size_t size, int64_t value, bool check_sign_bit = true);
 
 }

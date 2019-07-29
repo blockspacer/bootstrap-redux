@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <catch2/catch.hpp>
+#include <compiler/defer.h>
 #include <compiler/lexer/lexer.h>
 #include <compiler/formatters/formatters.h>
 
@@ -29,11 +30,17 @@ namespace basecode {
         compiler::workspace_t workspace{};
         compiler::utf8::source_buffer_t buffer(0);
 
+        defer(fmt::print("result = {}\n", r));
+
         const std::string source =
             "$2334;\n"
+            "$80;\n"
             "%1111_0000_1111_0101;\n"
             "@777;\n"
-            "3444;\n";
+            "32;\n"
+            "3444;\n"
+            "-512;\n"
+            "131072;\n";
 
         REQUIRE(buffer.load(r, source));
 

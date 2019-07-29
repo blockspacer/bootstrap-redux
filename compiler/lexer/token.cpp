@@ -16,7 +16,91 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <optional>
+#include <fmt/format.h>
+#include <compiler/numbers/bytes.h>
+#include "token.h"
+
 namespace basecode::compiler::lexer {
 
+    std::optional<number_size_t> narrow_type(double value) {
+        if (value < -3.4e+38 || value > 3.4e+38)
+            return number_size_t::qword;
+        else if (value >= -3.4e+38 && value <= 3.4e+38)
+            return number_size_t::dword;
+        else
+            return {};
+    }
+
+    std::optional<number_size_t> narrow_type(int64_t value) {
+        if (value == 0)
+            return number_size_t::byte;
+       
+        uint64_t unsigned_value = static_cast<uint64_t>(value);
+        uint64_t mask = 0b0000000000000000000000000000000000000000000000000000000000000001;
+
+        uint32_t max_bit_pos = 0;
+        for (size_t i = 0; i < 64; i++) {
+            if ((unsigned_value & mask) == mask) {
+                max_bit_pos = i;                
+            }
+            mask <<= 1;
+        }
+
+        max_bit_pos = numbers::next_power_of_two(max_bit_pos);
+        auto size_in_bytes = max_bit_pos / 8;
+
+        switch (size_in_bytes) {
+            case 1: return number_size_t::byte;
+            case 2: return number_size_t::word;
+            case 4: return number_size_t::dword;
+            case 8: return number_size_t::qword;
+        }
+
+        return {};
+    }
+
+    void apply_narrowed_value(number_token_t& token, number_size_t size, double value) {
+        token.size = size;
+        switch (size) {
+            case number_size_t::byte: 
+            case number_size_t::word:
+                break;
+            case number_size_t::dword: 
+                token.value.f32 = value;
+                token.is_signed = token.value.f32 < 0;
+                break;
+            case number_size_t::qword: 
+                token.value.f64 = value;
+                token.is_signed = token.value.f64 < 0;
+                break;
+        }
+    }
+
+    void apply_narrowed_value(number_token_t& token, number_size_t size, int64_t value, bool check_sign_bit) {
+        token.size = size;
+        switch (size) {
+            case number_size_t::byte:
+                token.value.u8 = static_cast<uint8_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u8);
+                break;
+            case number_size_t::word:
+                token.value.u16 = static_cast<uint16_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u16);
+                break;
+            case number_size_t::dword: 
+                token.value.u32 = static_cast<uint32_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u32);
+                break;
+            case number_size_t::qword: 
+                token.value.u64 = static_cast<uint64_t>(value);
+                if (check_sign_bit)
+                    token.is_signed = numbers::is_sign_bit_set(token.value.u64);
+                break;
+        }
+    }
 
 }

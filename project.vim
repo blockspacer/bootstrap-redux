@@ -66,3 +66,6 @@ command! ProjectUpdateTags :call Project_UpdateTags()
 command! -nargs=+ ProjectRun :call Project_Run(<f-args>)
 command! -nargs=+ ProjectBuild :call Project_Build(<f-args>)
 command! -bang ProjectCmakeGenerate :call Project_CMakeGenerate('<bang>')
+
+autocmd FileType cpp :TagbarOpen
+autocmd BufUnload * :TagbarClose

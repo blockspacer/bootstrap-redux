@@ -63,6 +63,8 @@ DONE
     it's own small state machine.
 - FIX(lexer.cpp): hex, octal, binary parsers should convert to number and check
     sign bit.
+- FIX: formatters.h needs to check the number_token_t::size to properly
+    output numeric values.
 
 NOTES
 ------------

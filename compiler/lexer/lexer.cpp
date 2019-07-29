@@ -18,6 +18,7 @@
 
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
+#include <compiler/formatters/formatters.h>
 #include "lexer.h"
 
 namespace basecode::compiler::lexer {
@@ -51,6 +52,8 @@ namespace basecode::compiler::lexer {
         {"$5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
         {"$6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
         {"$7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$8",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$9",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
         {"$a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
         {"$b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
         {"$c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
@@ -319,13 +322,15 @@ namespace basecode::compiler::lexer {
             token,
             is_signed,
             static_cast<uint8_t>(10),
-            type);
+            type,
+            number_size_t::qword);
 
         if (type == number_type_t::integer) {
+            int64_t value;
             auto result = numbers::parse_integer(
                 capture,
                 10,
-                number_token.value.i);
+                value);
             if (result != numbers::conversion_result_t::success) {
                 r.error(
                     "X000",
@@ -335,10 +340,18 @@ namespace basecode::compiler::lexer {
                         numbers::conversion_result_to_name(result)));
                 return false;
             }
+
+            auto narrowed_size = narrow_type(value);
+            if (!narrowed_size) {
+                r.error("X000", "unable to narrow integer value");
+                return false;
+            }
+            apply_narrowed_value(number_token, *narrowed_size, value, false);
         } else if (type == number_type_t::floating_point) {
+            double value;
             auto result = numbers::parse_double(
                 capture,
-                number_token.value.d);
+                value);
             if (result != numbers::conversion_result_t::success) {
                 r.error(
                     "X000",
@@ -348,6 +361,12 @@ namespace basecode::compiler::lexer {
                         numbers::conversion_result_to_name(result)));
                 return false;
             }
+            auto narrowed_size = narrow_type(value);
+            if (!narrowed_size) {
+                r.error("X000", "unable to narrow floating point value");
+                return false;
+            }
+            apply_narrowed_value(number_token, *narrowed_size, value);
         }
 
         _workspace->registry.assign<source_location_t>(
@@ -388,11 +407,14 @@ namespace basecode::compiler::lexer {
             token,
             false,
             static_cast<uint8_t>(16),
-            number_type_t::integer);
+            number_type_t::integer,
+            number_size_t::qword);
+
+        int64_t value;
         auto result = numbers::parse_integer(
             capture,
             16,
-            number_token.value.i);
+            value);
         if (result != numbers::conversion_result_t::success) {
             r.error(
                 "X000",
@@ -402,7 +424,14 @@ namespace basecode::compiler::lexer {
                     numbers::conversion_result_to_name(result)));
             return false;
         }
-        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
+        auto narrowed_size = narrow_type(value);
+        if (!narrowed_size) {
+            r.error("X000", "unable to narrow integer value");
+            return false;
+        }
+
+        apply_narrowed_value(number_token, *narrowed_size, value);
 
         _workspace->registry.assign<source_location_t>(
             token,
@@ -441,11 +470,14 @@ namespace basecode::compiler::lexer {
             token,
             false,
             static_cast<uint8_t>(8),
-            number_type_t::integer);
+            number_type_t::integer,
+            number_size_t::qword);
+
+        int64_t value;
         auto result = numbers::parse_integer(
             capture,
             8,
-            number_token.value.i);
+            value);
         if (result != numbers::conversion_result_t::success) {
             r.error(
                 "X000",
@@ -455,7 +487,14 @@ namespace basecode::compiler::lexer {
                     numbers::conversion_result_to_name(result)));
             return false;
         }
-        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
+        auto narrowed_size = narrow_type(value);
+        if (!narrowed_size) {
+            r.error("X000", "unable to narrow integer value");
+            return false;
+        }
+
+        apply_narrowed_value(number_token, *narrowed_size, value);
 
         _workspace->registry.assign<source_location_t>(
             token,
@@ -494,11 +533,14 @@ namespace basecode::compiler::lexer {
             token,
             false,
             static_cast<uint8_t>(2),
-            number_type_t::integer);
+            number_type_t::integer,
+            number_size_t::qword);
+
+        int64_t value;
         auto result = numbers::parse_integer(
             capture,
             2,
-            number_token.value.i);
+            value);
         if (result != numbers::conversion_result_t::success) {
             r.error(
                 "X000",
@@ -508,7 +550,14 @@ namespace basecode::compiler::lexer {
                     numbers::conversion_result_to_name(result)));
             return false;
         }
-        number_token.is_signed = numbers::is_sign_bit_set(number_token.value.i);
+
+        auto narrowed_size = narrow_type(value);
+        if (!narrowed_size) {
+            r.error("X000", "unable to narrow integer value");
+            return false;
+        }
+
+        apply_narrowed_value(number_token, *narrowed_size, value);
 
         _workspace->registry.assign<source_location_t>(
             token,

@@ -26,6 +26,42 @@
 namespace fmt {
 
     template<>
+    struct formatter<basecode::compiler::result_t> {
+        template <typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template <typename FormatContext>
+        auto format(
+                const basecode::compiler::result_t& r,
+                FormatContext& ctx) {
+            auto has_messages = !r.messages().empty();
+
+            if (has_messages)
+                format_to(ctx.out(), "\n");
+
+            auto messages = r.messages();
+            for (size_t i = 0; i < messages.size(); i++) {
+                const auto& msg = messages[i];
+                format_to(
+                        ctx.out(),
+                        "[{}] {}{}\n",
+                        msg.code(),
+                        msg.is_error() ? "ERROR: " : "WARNING: ",
+                        msg.message());
+                if (!msg.details().empty()) {
+                    format_to(ctx.out(), "{}\n", msg.details());
+                }
+                if (i < messages.size() - 1)
+                    format_to(ctx.out(), "\n");
+            }
+
+            return format_to(ctx.out(), "");
+        }
+    };
+
+    template<>
     struct formatter<basecode::compiler::utf8::rune_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
@@ -105,11 +141,27 @@ namespace fmt {
                 token.radix,
                 basecode::compiler::lexer::number_type_to_name(token.type));
             if (token.type == basecode::compiler::lexer::number_type_t::integer) {
-                return format_to(ctx.out(), ", value = {}>", token.value.i);
+                switch (token.size) {
+                    case basecode::compiler::lexer::number_size_t::byte:
+                        return format_to(ctx.out(), ", value = u8({})>", token.value.u8);
+                    case basecode::compiler::lexer::number_size_t::word:
+                        return format_to(ctx.out(), ", value = u16({})>", token.value.u16);
+                    case basecode::compiler::lexer::number_size_t::dword:
+                        return format_to(ctx.out(), ", value = u32({})>", token.value.u32);
+                    case basecode::compiler::lexer::number_size_t::qword:
+                        return format_to(ctx.out(), ", value = u64({})>", token.value.u64);
+                }
             } else if (token.type == basecode::compiler::lexer::number_type_t::floating_point) {
-                return format_to(ctx.out(), ", value = {}>", token.value.d);
+                switch (token.size) {
+                    case basecode::compiler::lexer::number_size_t::dword: 
+                        return format_to(ctx.out(), ", value = f32({})>", token.value.f32);
+                    case basecode::compiler::lexer::number_size_t::qword:
+                        return format_to(ctx.out(), ", value = f64({})>", token.value.f64);
+                    default:
+                        return format_to(ctx.out(), ", value = invalid({})>", token.value.f64);
+                }
             } else {
-                // XXX: revisit
+                // XXX: revisit to potentially support other number types, e.g. arbitrary precision numbers
                 return format_to(ctx.out(), ">");
             }
         }
