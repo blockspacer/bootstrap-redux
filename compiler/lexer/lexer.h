@@ -66,6 +66,16 @@ namespace basecode::compiler::lexer {
         bool binary_number_literal(result_t& r, entity_list_t& entities);
 
     private:
+        bool make_number_token(
+                result_t& r, 
+                entity_list_t& entities,
+                size_t start_pos,
+                bool is_signed, 
+                uint8_t radix,
+                number_type_t type, 
+                std::string_view capture, 
+                bool check_sign_bit = true);
+
         source_location_t make_location(size_t start_pos, size_t end_pos);
 
     private:

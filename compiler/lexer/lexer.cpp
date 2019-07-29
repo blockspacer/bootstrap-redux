@@ -283,6 +283,75 @@ namespace basecode::compiler::lexer {
         return false;
     }
 
+    bool lexer_t::make_number_token(
+            result_t& r,
+            entity_list_t& entities,
+            size_t start_pos,
+            bool is_signed,
+            uint8_t radix,
+            number_type_t type, 
+            std::string_view capture, 
+            bool check_sign_bit) {
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+
+        auto& number_token = _workspace->registry.assign<number_token_t>(
+            token,
+            is_signed,
+            radix,
+            type,
+            number_size_t::qword);
+
+        if (type == number_type_t::integer) {
+            int64_t value;
+            auto result = numbers::parse_integer(capture, radix, value);
+            if (result != numbers::conversion_result_t::success) {
+                r.error(
+                    "X000",
+                    fmt::format(
+                        "unable to convert integer value {} because {}",
+                        capture,
+                        numbers::conversion_result_to_name(result)));
+                return false;
+            }
+
+            auto narrowed_size = narrow_type(value);
+            if (!narrowed_size) {
+                r.error("X000", "unable to narrow integer value");
+                return false;
+            }
+
+            apply_narrowed_value(number_token, *narrowed_size, value, check_sign_bit);
+        } else if (type == number_type_t::floating_point) {
+            double value;
+            auto result = numbers::parse_double(capture, value);
+            if (result != numbers::conversion_result_t::success) {
+                r.error(
+                    "X000",
+                    fmt::format(
+                        "unable to convert floating point value {} because {}",
+                        capture,
+                        numbers::conversion_result_to_name(result)));
+                return false;
+            }
+
+            auto narrowed_size = narrow_type(value);
+            if (!narrowed_size) {
+                r.error("X000", "unable to narrow floating point value");
+                return false;
+            }
+
+            apply_narrowed_value(number_token, *narrowed_size, value);
+        }
+
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, _buffer->pos()));
+        entities.push_back(token);
+
+        return true;
+    }
+
     bool lexer_t::dec_number_literal(result_t& r, entity_list_t& entities) {
         auto type = number_type_t::integer;
         auto rune = _buffer->curr(r);
@@ -316,65 +385,15 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
-        auto token = _workspace->registry.create();
-        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        auto& number_token = _workspace->registry.assign<number_token_t>(
-            token,
-            is_signed,
-            static_cast<uint8_t>(10),
-            type,
-            number_size_t::qword);
-
-        if (type == number_type_t::integer) {
-            int64_t value;
-            auto result = numbers::parse_integer(
-                capture,
-                10,
-                value);
-            if (result != numbers::conversion_result_t::success) {
-                r.error(
-                    "X000",
-                    fmt::format(
-                        "unable to convert integer value {} because {}",
-                        capture,
-                        numbers::conversion_result_to_name(result)));
-                return false;
-            }
-
-            auto narrowed_size = narrow_type(value);
-            if (!narrowed_size) {
-                r.error("X000", "unable to narrow integer value");
-                return false;
-            }
-            apply_narrowed_value(number_token, *narrowed_size, value, false);
-        } else if (type == number_type_t::floating_point) {
-            double value;
-            auto result = numbers::parse_double(
-                capture,
-                value);
-            if (result != numbers::conversion_result_t::success) {
-                r.error(
-                    "X000",
-                    fmt::format(
-                        "unable to convert floating point value {} because {}",
-                        capture,
-                        numbers::conversion_result_to_name(result)));
-                return false;
-            }
-            auto narrowed_size = narrow_type(value);
-            if (!narrowed_size) {
-                r.error("X000", "unable to narrow floating point value");
-                return false;
-            }
-            apply_narrowed_value(number_token, *narrowed_size, value);
-        }
-
-        _workspace->registry.assign<source_location_t>(
-            token,
-            make_location(start_pos, _buffer->pos()));
-        entities.push_back(token);
-
-        return true;
+        return make_number_token(
+                r,
+                entities, 
+                start_pos, 
+                is_signed, 
+                10, 
+                type, 
+                capture, 
+                false);
     }
 
     bool lexer_t::hex_number_literal(result_t& r, entity_list_t& entities) {
@@ -400,45 +419,14 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
-        auto token = _workspace->registry.create();
-        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-
-        auto& number_token = _workspace->registry.assign<number_token_t>(
-            token,
-            false,
-            static_cast<uint8_t>(16),
-            number_type_t::integer,
-            number_size_t::qword);
-
-        int64_t value;
-        auto result = numbers::parse_integer(
-            capture,
-            16,
-            value);
-        if (result != numbers::conversion_result_t::success) {
-            r.error(
-                "X000",
-                fmt::format(
-                    "unable to convert integer value {} because {}",
-                    capture,
-                    numbers::conversion_result_to_name(result)));
-            return false;
-        }
-
-        auto narrowed_size = narrow_type(value);
-        if (!narrowed_size) {
-            r.error("X000", "unable to narrow integer value");
-            return false;
-        }
-
-        apply_narrowed_value(number_token, *narrowed_size, value);
-
-        _workspace->registry.assign<source_location_t>(
-            token,
-            make_location(start_pos, _buffer->pos()));
-        entities.push_back(token);
-
-        return true;
+        return make_number_token(
+                r, 
+                entities, 
+                start_pos, 
+                false, 
+                16, 
+                number_type_t::integer, 
+                capture);
     }
 
     bool lexer_t::octal_number_literal(result_t& r, entity_list_t& entities) {
@@ -464,44 +452,13 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
-        auto token = _workspace->registry.create();
-        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        auto& number_token = _workspace->registry.assign<number_token_t>(
-            token,
-            false,
-            static_cast<uint8_t>(8),
-            number_type_t::integer,
-            number_size_t::qword);
-
-        int64_t value;
-        auto result = numbers::parse_integer(
-            capture,
-            8,
-            value);
-        if (result != numbers::conversion_result_t::success) {
-            r.error(
-                "X000",
-                fmt::format(
-                    "unable to convert integer value {} because {}",
-                    capture,
-                    numbers::conversion_result_to_name(result)));
-            return false;
-        }
-
-        auto narrowed_size = narrow_type(value);
-        if (!narrowed_size) {
-            r.error("X000", "unable to narrow integer value");
-            return false;
-        }
-
-        apply_narrowed_value(number_token, *narrowed_size, value);
-
-        _workspace->registry.assign<source_location_t>(
-            token,
-            make_location(start_pos, _buffer->pos()));
-        entities.push_back(token);
-
-        return true;
+        return make_number_token(
+                r, 
+                entities, 
+                start_pos, 
+                false, 
+                8, 
+                number_type_t::integer, capture);
     }
 
     bool lexer_t::binary_number_literal(result_t& r, entity_list_t& entities) {
@@ -527,44 +484,14 @@ namespace basecode::compiler::lexer {
             start_pos,
             _buffer->pos() - start_pos);
 
-        auto token = _workspace->registry.create();
-        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
-        auto& number_token = _workspace->registry.assign<number_token_t>(
-            token,
-            false,
-            static_cast<uint8_t>(2),
-            number_type_t::integer,
-            number_size_t::qword);
-
-        int64_t value;
-        auto result = numbers::parse_integer(
-            capture,
-            2,
-            value);
-        if (result != numbers::conversion_result_t::success) {
-            r.error(
-                "X000",
-                fmt::format(
-                    "unable to convert integer value {} because {}",
-                    capture,
-                    numbers::conversion_result_to_name(result)));
-            return false;
-        }
-
-        auto narrowed_size = narrow_type(value);
-        if (!narrowed_size) {
-            r.error("X000", "unable to narrow integer value");
-            return false;
-        }
-
-        apply_narrowed_value(number_token, *narrowed_size, value);
-
-        _workspace->registry.assign<source_location_t>(
-            token,
-            make_location(start_pos, _buffer->pos()));
-        entities.push_back(token);
-
-        return true;
+        return make_number_token(
+                r, 
+                entities, 
+                start_pos, 
+                false, 
+                2, 
+                number_type_t::integer, 
+                capture);
     }
 
     source_location_t lexer_t::make_location(size_t start_pos, size_t end_pos) {
