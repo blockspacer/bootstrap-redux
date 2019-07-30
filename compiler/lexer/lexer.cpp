@@ -228,8 +228,9 @@ namespace basecode::compiler::lexer {
 
     bool lexer_t::tokenize(result_t& r, entity_list_t& entities) {
         struct match_t final {
+            lexeme_t value;
+            bool candidate{};
             std::string_view key;
-            lexeme_t& value;
         };
 
         while (!_buffer->eof()) {
@@ -246,15 +247,37 @@ namespace basecode::compiler::lexer {
             // XXX: navigating into the trie-map with a full codepoint?
 
             auto len = 1;
+            std::vector<match_t> matches{};
+
             while (true) {
                 auto slice = _buffer->make_slice(_buffer->pos(), len);
+                fmt::print("attempt match: '{}'", slice);
                 auto range = s_lexemes.equal_prefix_range(slice);
 
-                std::vector<match_t> matches{};
-                for (auto it = range.first; it != range.second; it++)
-                    matches.push_back(match_t{it.key(), it.value()});
+                auto start_size = matches.size();
+
+                for (auto it = range.first; it != range.second; it++) {
+                    matches.push_back(match_t{
+                            .key = it.key(), 
+                            .value = it.value(),
+                            .candidate = it.key().length() == len,
+                    });
+                    fmt::print(", match.key = {}", it.key());
+                }
+
+                if (matches.size() > start_size) {
+                    for (auto it = matches.begin(); it != matches.end();) {
+                        auto& match = *it;
+                        if (match.candidate && match.key.length() < len) {
+                            it = matches.erase(it);
+                        } else {
+                            ++it;
+                        }
+                    }
+                }
 
                 if (matches.empty()) {
+                    fmt::print(", no matches; look for identifier.\n");
                     if (!identifier(r, entities)) {
                         r.error("X000", "expected identifier");
                         return false;
@@ -263,30 +286,64 @@ namespace basecode::compiler::lexer {
                 }
 
                 if (matches.size() == 1
-                &&  matches[0].key.length() == len) {
+                &&  matches[0].candidate) {
                     auto& match = matches[0];
+
                     if (match.value.tokenizer) {
+                        fmt::print(", trie match; custom tokenizer.\n");
+
                         if (!match.value.tokenizer(this, r, entities))
                             return false;
                     } else {
+                        fmt::print(", trie matches.\n");
+
+                        token_type_t type = match.value.type;
+
+                        if (match.value.type == token_type_t::keyword) {
+                            auto check_slice = _buffer->make_slice(
+                                    _buffer->pos(), 
+                                    slice.length() + 1);
+                            const auto& last_char = check_slice[slice.length()];
+                            fmt::print(", last_char = {}\n", last_char);
+                            if (isalpha(last_char) || last_char == '_') {
+                                fmt::print("not a keyword, next round\n");
+                                goto next_round;
+                            }
+
+                            type = token_type_t::identifier;
+                        }
+
                         auto start_pos = _buffer->pos();
                         _buffer->seek(_buffer->pos() + len);
                         auto token = _workspace->registry.create();
-                        _workspace->registry.assign<token_t>(token, match.value.type, slice);
+                        _workspace->registry.assign<token_t>(token, type, slice);
                         _workspace->registry.assign<source_location_t>(
                             token,
                             make_location(start_pos, _buffer->pos()));
                         entities.push_back(token);
                     }
+
                     break;
                 }
             
+            next_round:
                 len += _buffer->width();
 
                 if (_buffer->pos() + len >= _buffer->length() - 1) {
                     r.error("X000", "unexpected end of input");
                     return false;
                 }
+
+                for (auto it = matches.begin(); it != matches.end();) {
+                    auto& match = *it;
+                    if (!match.candidate) {
+                        it = matches.erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+
+                fmt::print("\n");
             }
         }
 
@@ -301,7 +358,52 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::identifier(result_t& r, entity_list_t& entities) {
-        return false;
+        auto start_pos = _buffer->pos();
+
+        auto rune = _buffer->curr(r);
+        if (rune.is_eof_or_invalid())
+            return false;
+
+        if (rune != '_' && !rune.is_alpha()) {
+            r.error(
+                    "X000", 
+                    fmt::format(
+                        "identifiers must start with _ or a letter; found: {}", 
+                        rune));
+            return false;
+        }
+
+        if (!_buffer->move_next(r))
+            return false;
+
+        while (true) {
+            rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+
+            if (!rune.is_digit() 
+            &&  !rune.is_alpha() 
+            &&  rune != '_') {
+                break;
+            }
+             
+            if (!_buffer->move_next(r))
+                return false;
+        }
+
+        auto end_pos = _buffer->pos();
+        auto capture = _buffer->make_slice(start_pos, end_pos - start_pos);
+
+        fmt::print("capture = '{}'\n", capture);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::identifier, capture);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, end_pos));
+        entities.push_back(token);
+
+        return true;
     }
 
     bool lexer_t::rune_literal(result_t& r, entity_list_t& entities) {
@@ -545,6 +647,7 @@ namespace basecode::compiler::lexer {
                 return false;
             }
 
+            fmt::print("make_number_token[capture, value] = '{}', '{}'\n", capture, value);
             auto narrowed_size = narrow_type(value);
             if (!narrowed_size) {
                 r.error("X000", "unable to narrow integer value");

@@ -97,9 +97,12 @@ namespace basecode::compiler::lexer {
             mask <<= 1;
         }
 
-        max_bit_pos = numbers::next_power_of_two(max_bit_pos);
+        max_bit_pos = std::max<uint32_t>(
+                8, 
+                numbers::next_power_of_two(max_bit_pos));
         auto size_in_bytes = max_bit_pos / 8;
 
+        fmt::print("max_bit_pos = {}, size_in_bytes = {}\n", max_bit_pos, size_in_bytes);
         switch (size_in_bytes) {
             case 1: return number_size_t::byte;
             case 2: return number_size_t::word;

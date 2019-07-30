@@ -59,6 +59,8 @@ TASKS
 - FIX(lexer.cpp): block comments should encode the nesting via the comment_token_t struct
     or similar.
 - FIX(lexer.cpp): decimal numbers should properly parse scientific notation
+- FIX(lexer.cpp): number tokenizers should assert that a non-alpha character follows the number.
+    This will prevent situations like: 123myvar: u8 := 1;
 
 DONE
 ------------

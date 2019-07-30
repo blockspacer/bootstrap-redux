@@ -110,4 +110,93 @@ namespace basecode {
         }
     }
 
+    TEST_CASE("lexer_t::tokenize detects identifiers") {
+        compiler::result_t r{};
+        compiler::workspace_t workspace{};
+        compiler::utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("result = {}\n", r));
+
+        const std::string source =
+            "foo: u8 := 33;\n"
+            "bar := foo * 16;\n"
+            "print(\"bar := {bar}\\n\");\n"
+            ;
+
+        REQUIRE(buffer.load(r, source));
+
+        compiler::entity_list_t tokens{};
+        compiler::lexer::lexer_t lexer(&workspace, &buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+
+        for (auto entity : tokens) {
+            const auto& token = workspace.registry.get<compiler::lexer::token_t>(entity);
+            const auto& source_location = workspace.registry.get<compiler::source_location_t>(entity);
+            fmt::print("token = {}", token);
+            if (workspace.registry.has<compiler::lexer::number_token_t>(entity)) {
+                const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
+                fmt::print(", number_token = {}", number_token);
+            }
+            fmt::print(", location = {}\n", source_location);
+        }
+    }
+
+    TEST_CASE("lexer_t::tokenize keywords don't match inside identifiers") {
+        compiler::result_t r{};
+        compiler::workspace_t workspace{};
+        compiler::utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("result = {}\n", r));
+
+        const std::string source =
+            "continueif: bool := false;\n"
+            ;
+            
+        REQUIRE(buffer.load(r, source));
+
+        compiler::entity_list_t tokens{};
+        compiler::lexer::lexer_t lexer(&workspace, &buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+
+        for (auto entity : tokens) {
+            const auto& token = workspace.registry.get<compiler::lexer::token_t>(entity);
+            const auto& source_location = workspace.registry.get<compiler::source_location_t>(entity);
+            fmt::print("token = {}", token);
+            if (workspace.registry.has<compiler::lexer::number_token_t>(entity)) {
+                const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
+                fmt::print(", number_token = {}", number_token);
+            }
+            fmt::print(", location = {}\n", source_location);
+        }
+    }
+
+    TEST_CASE("lexer_t::tokenize identifiers can't start with numbers") {
+        compiler::result_t r{};
+        compiler::workspace_t workspace{};
+        compiler::utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("result = {}\n", r));
+
+        const std::string source =
+            "123myVar: u8 := 1;\n"
+            ;
+            
+        REQUIRE(buffer.load(r, source));
+
+        compiler::entity_list_t tokens{};
+        compiler::lexer::lexer_t lexer(&workspace, &buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+
+        for (auto entity : tokens) {
+            const auto& token = workspace.registry.get<compiler::lexer::token_t>(entity);
+            const auto& source_location = workspace.registry.get<compiler::source_location_t>(entity);
+            fmt::print("token = {}", token);
+            if (workspace.registry.has<compiler::lexer::number_token_t>(entity)) {
+                const auto& number_token = workspace.registry.get<compiler::lexer::number_token_t>(entity);
+                fmt::print(", number_token = {}", number_token);
+            }
+            fmt::print(", location = {}\n", source_location);
+        }
+    }
+
 }
