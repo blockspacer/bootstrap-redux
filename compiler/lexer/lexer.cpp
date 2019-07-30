@@ -305,7 +305,87 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::rune_literal(result_t& r, entity_list_t& entities) {
-        return false;
+        // prefixed with '
+        if (!_buffer->move_next(r)) return false;
+        
+        auto start_pos = _buffer->pos();
+
+        auto rune = _buffer->curr(r);
+        if (rune.is_eof_or_invalid())
+            return false;
+
+        if (rune == '\\') {
+            if (!_buffer->move_next(r)) return false;
+            rune = _buffer->curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+
+            auto extra_chars = 0;
+            
+            switch ((int32_t)rune) {
+                case 'a': 
+                case 'b':
+                case 'e': 
+                case 'n':
+                case 'r':
+                case 't':
+                case 'v':
+                case '\\':
+                case '\'':
+                    if (!_buffer->move_next(r))
+                        return false;
+                    break;
+                case 'x':
+                    if (!_buffer->move_next(r))
+                        return false;
+                    extra_chars = 2;
+                    break;
+                case 'u': 
+                    if (!_buffer->move_next(r))
+                        return false;
+                    extra_chars = 4;
+                    break;
+                case 'U':  
+                    if (!_buffer->move_next(r))
+                        return false;
+                    extra_chars = 8;
+                    break;
+                default:  
+                    extra_chars = 3;
+                    break;
+            }
+
+            for (size_t i = 0; i < extra_chars; i++)
+                if (!_buffer->move_next(r))
+                    return false;
+        } else {
+            if (!_buffer->move_next(r)) return false;
+        }
+
+        rune = _buffer->curr(r);
+        if (rune.is_eof_or_invalid())
+            return false;
+
+        if (rune != '\'') {
+            r.error("X000", fmt::format("expected closing ' but found: {}", rune));
+            return false;
+        }
+
+        if (!_buffer->move_next(r))
+            return false;
+
+        auto end_pos = _buffer->pos() - 1;
+        auto capture = _buffer->make_slice(start_pos, end_pos - start_pos);
+
+        auto token = _workspace->registry.create();
+        _workspace->registry.assign<token_t>(token, token_type_t::literal, capture);
+        _workspace->registry.assign<rune_literal_token_t>(token);
+        _workspace->registry.assign<source_location_t>(
+            token,
+            make_location(start_pos, end_pos));
+        entities.push_back(token);
+
+        return true;
     }
 
     bool lexer_t::line_comment(result_t& r, entity_list_t& entities) {

@@ -81,6 +81,15 @@ namespace basecode {
             "\n"
             "\n"
             "\"this is a string literal \\n \\t \\b!\";\n"
+            "'A';\n"
+            "'\\a';\n"
+            "'\\b';\n"
+            "'\\n';\n"
+            "'\\\\';\n"
+            "'\\xa9';\n"
+            "'\\ufffe';\n"
+            "'\\Ueeffaaff';\n"
+            "'\\777';\n"
             ;
 
         REQUIRE(buffer.load(r, source));

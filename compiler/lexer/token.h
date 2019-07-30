@@ -141,6 +141,8 @@ namespace basecode::compiler::lexer {
 
     struct block_literal_token_t final {};
 
+    struct rune_literal_token_t final {};
+
     struct string_literal_token_t final {};
 
 }
