@@ -6,61 +6,12 @@ QUESTIONS
 - how to distinguish fixed-length arrays from dynamic arrays
     without hard coding how dynamic arrays work into the compiler itself.
 
-BIG PICTURE
-------------
-
-+---------------------------+  notes:
-| command-line program (bc) |    a) command-line arguments should support specifying back-end compiler toolchain
-|                           |
-|   args ...                |
-+---------------------------+
-             |
-             |
-             |
-    +-------------------+  notes:
-    |   job scheduler   |    a) number of workers is based on number of physical cores - some overhead count
-    |                   |
-    |       (queue)     |<---+
-    |                   |    |
-    +-------------------+    |
-        |           |        | (tasks processing in workers can put new work onto the scheduler queue)
-        |           |        |
-        |           |        |
-    +-------+    +-------+   |
-    |  w1   |    |  w2   |---+--<
-    +-------+    +-------+      |
-        |           |           |
-        |           |           |
-        |           |           |
-        +-----+-----+           |
-              |                 |
-              | (join)          |
-              |                 |
-        +-----+----------+      |
-        |  meta-program  |      |
-        | (compiler apis)+------>  (continues to run, until a fix point)
-        |                |         using tinyc
-        +----+-----------+
-             |
-             | (finalized c source)
-             |
-        +----+--------------+
-        | compiler back-end | (clang, etc.)  (pstream)
-        +-------------------+
-
-- single typed-ast, versioned
-- ast is converted to C99 for both meta and runtime
-
 TASKS
 ------------
 - REFACTOR: introduce our own trie/trie-map structure that allows us to
     explicitly navigate the internal trie nodes instead of having to
     perform string-like "prefix" searches from the root each time.
-- FIX(lexer.cpp): block comments should encode the nesting via the comment_token_t struct
-    or similar.
 - FIX(lexer.cpp): decimal numbers should properly parse scientific notation
-- FIX(lexer.cpp): number tokenizers should assert that a non-alpha character follows the number.
-    This will prevent situations like: 123myvar: u8 := 1;
 
 DONE
 ------------
@@ -70,72 +21,7 @@ DONE
     sign bit.
 - FIX: formatters.h needs to check the number_token_t::size to properly
     output numeric values.
-
-NOTES
-------------
-
-"parse": what does this mean?
-
-1. tokenize an input buffer.
-    synonyms: tokenizer, scanner, lexer
-
-2. take ordered list of tokens and parse grammatically
-
-======
-false
-for
-from
-(identifier)
-
-            f-----+
-            |\    |
-            | \   |
-            a  o  r--o--m
-            |  |
-            l  r
-            |
-            s
-            |
-            e
-
-foo :: struct {
-    x, y, z, w: f32;
-};
-======
-
-26 July 2019
-=============
-
-    +---------------+
-    | compiler api  |
-    +---------------+--------------------------------------------------------+
-    | build-related |                                                        |
-    | workspaces    | (1)  enqueue                                           |
- +--+>meta          +-------------------+                                    |
- |  | jobs<*        |                   |                                    |c
- |  +-+----+--------+                   |                                    |a
- |c   |    |                            |                                    |l
- |a   |i   |                            |                                    |l
- |l   |n   |                            |                                    |b
- |l   |v   |s                           |                                    |a
- |b   |o   |t                           | (many)                             |c
- |a   |k   |a                    +------*-------+                            |k
- |c   |e   |r                    | workspace    |-+                          |
- |k   |    |t                    +--------------+ |                          |
- |s   |    +---------------------+ work queue   |-+                          |
- |    |                +---------->versions     | |                          |
- |    |                |         |   state      | |                          |
- |    |                |         |      ecs     | |                          |
- |    |           +----+----+    +--+-----------+ |                          |
- |    |           | debug   |       +-------------+                          |
- |    |           +---------+                                                |
- |    |                                                                      |
- |    |                                                                      |
- |    |                                                                      |
-++----*----+                                                        +--------+---+
-| parser   |                   +---------------+                    | code gen   |
-+----------+                   | type manager  |                    +------------+
-|lexing    +<----------------->+---------------+                    | translator |
-|parsing   |                   |deps           <-------------------->  tinyc     |
-+----------+                   | inference     |                    +------------+
-                               +---------------+
+- FIX(lexer.cpp): number tokenizers should assert that a non-alpha character follows the number.
+    This will prevent situations like: 123myvar: u8 := 1;
+- FIX(lexer.cpp): block comments should encode the nesting via the comment_token_t struct
+    or similar.

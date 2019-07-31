@@ -38,7 +38,6 @@ namespace basecode {
         std::string_view v(input.data(), 1);
 
         while (true) {
-            fmt::print("input: {}\n", v);
             auto range = map.equal_prefix_range(v);
             if (range.first == range.second) {
                 break;
@@ -47,9 +46,7 @@ namespace basecode {
             for (auto it = range.first; it != range.second; ++it) {
                 if (v.length() < it.key().length())
                     continue;
-                fmt::print("it.key() = {}, v = {}\n", it.key(), v);
                 if (it.key() == v) {
-                    fmt::print("match!\n");
                     break;
                 }
             }

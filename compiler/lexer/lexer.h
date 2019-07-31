@@ -27,7 +27,16 @@ namespace basecode::compiler::lexer {
 
     class lexer_t;
 
-    using lexeme_tokenizer_t = std::function<bool (lexer_t*, result_t&, entity_list_t&)>;
+    using lexeme_tokenizer_t = std::function<bool (
+        lexer_t*,
+        result_t&,
+        entity_list_t&)>;
+
+    using entity_maker_t = std::function<entt::entity (
+        token_type_t type,
+        size_t,
+        size_t,
+        std::string_view)>;
 
     struct lexeme_t final {
         token_type_t type{};
@@ -37,8 +46,8 @@ namespace basecode::compiler::lexer {
     class lexer_t final {
     public:
         lexer_t(
-            workspace_t* workspace,
-            utf8::source_buffer_t* buffer);
+            workspace_t& workspace,
+            utf8::source_buffer_t& buffer);
 
         bool tokenize(result_t& r, entity_list_t& entities);
 
@@ -78,13 +87,19 @@ namespace basecode::compiler::lexer {
                 std::string_view capture, 
                 bool check_sign_bit = true);
 
+        bool tokenize_identifier(
+            result_t& r,
+            entity_list_t& entities,
+            token_type_t token_type,
+            const entity_maker_t& entity_maker);
+
         source_location_t make_location(size_t start_pos, size_t end_pos);
 
     private:
         static tsl::htrie_map<char, lexeme_t> s_lexemes;
 
-        workspace_t* _workspace{};
-        utf8::source_buffer_t* _buffer{};
+        workspace_t& _workspace;
+        utf8::source_buffer_t& _buffer;
     };
 
 }

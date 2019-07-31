@@ -86,7 +86,7 @@ namespace basecode::compiler::lexer {
         if (value == 0)
             return number_size_t::byte;
        
-        uint64_t unsigned_value = static_cast<uint64_t>(value);
+        auto unsigned_value = static_cast<uint64_t>(value);
         uint64_t mask = 0b0000000000000000000000000000000000000000000000000000000000000001;
 
         uint32_t max_bit_pos = 0;
@@ -102,12 +102,13 @@ namespace basecode::compiler::lexer {
                 numbers::next_power_of_two(max_bit_pos));
         auto size_in_bytes = max_bit_pos / 8;
 
-        fmt::print("max_bit_pos = {}, size_in_bytes = {}\n", max_bit_pos, size_in_bytes);
         switch (size_in_bytes) {
             case 1: return number_size_t::byte;
             case 2: return number_size_t::word;
             case 4: return number_size_t::dword;
             case 8: return number_size_t::qword;
+            default:
+                break;
         }
 
         return {};

@@ -34,6 +34,7 @@ namespace basecode::compiler {
 
     // string type aliases
     using string_list_t = std::vector<std::string>;
+    using slice_list_t = std::vector<std::string_view>;
 
     // time type aliases
     using time_point_t = std::chrono::system_clock::time_point;

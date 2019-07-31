@@ -28,8 +28,10 @@ namespace basecode::compiler::lexer {
         literal,
         comment,
         keyword,
+        directive,
         operator_,
         identifier,
+        annotation,
         punctuation,
         end_of_input,
     };
@@ -39,8 +41,10 @@ namespace basecode::compiler::lexer {
             case token_type_t::literal:         return "literal"sv;
             case token_type_t::comment:         return "comment"sv;
             case token_type_t::keyword:         return "keyword"sv;
+            case token_type_t::directive:       return "directive"sv;
             case token_type_t::operator_:       return "operator"sv;
             case token_type_t::identifier:      return "identifier"sv;
+            case token_type_t::annotation:      return "annotation"sv;
             case token_type_t::punctuation:     return "punctuation"sv;
             case token_type_t::end_of_input:    return "end_of_input"sv;
         }
@@ -121,20 +125,11 @@ namespace basecode::compiler::lexer {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    enum class comment_type_t {
-        line,
-        block
-    };
+    struct line_comment_token_t final {};
 
-    static inline std::string_view comment_type_to_name(comment_type_t type) {
-        switch (type) {
-            case comment_type_t::line:  return "line"sv;
-            case comment_type_t::block: return "block"sv;
-        }
-    }
-
-    struct comment_token_t final {
-        comment_type_t type{};
+    struct block_comment_token_t final {
+        std::string_view capture{};
+        std::vector<block_comment_token_t> children{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
