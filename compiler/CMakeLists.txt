@@ -31,6 +31,8 @@ add_library(
         numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
+        memory/pool.h
+
         hashing/murmur.cpp hashing/murmur.h
 
         errors/types.cpp errors/types.h

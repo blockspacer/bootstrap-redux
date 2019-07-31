@@ -31,198 +31,259 @@ namespace basecode::compiler::lexer {
         std::string_view key;
     };
 
-    tsl::htrie_map<char, lexeme_t> lexer_t::s_lexemes {
-        {"1",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"2",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"3",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"4",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"5",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"6",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"7",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"8",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"9",           {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+    trie_t lexer_t::s_lexemes {
+        {"1"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"2"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"3"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"4"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"5"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"6"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"7"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"8"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"9"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
 
-        {"-1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-8",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
-        {"-9",          {.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-1"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-2"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-3"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-4"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-5"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-6"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-7"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-8"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
+        {"-9"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
 
-        {"$0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$8",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$9",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
-        {"$f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$0"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$1"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$2"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$3"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$4"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$5"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$6"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$7"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$8"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$9"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$a"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$b"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$c"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$d"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$e"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+        {"$f"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
 
-        {"%0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
-        {"%1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
+        {"%0"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
+        {"%1"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
 
-        {"@0",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@1",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@2",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@3",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@4",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@5",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@6",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
-        {"@7",          {.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@0"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@1"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@2"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@3"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@4"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@5"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@6"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
+        {"@7"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::octal_number_literal}},
 
-        {"@a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@g",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@h",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@i",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@j",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@k",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@l",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@m",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@n",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@o",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@p",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@q",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@r",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@s",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@t",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@u",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@v",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@w",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@x",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@y",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
-        {"@z",          {.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@a"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@b"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@c"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@d"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@e"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@f"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@g"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@h"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@i"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@j"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@k"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@l"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@m"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@n"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@o"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@p"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@q"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@r"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@s"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@t"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@u"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@v"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@w"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@x"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@y"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
+        {"@z"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::annotation_literal}},
 
-        {"#a",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#b",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#c",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#d",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#e",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#f",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#g",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#h",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#i",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#j",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#k",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#l",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#m",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#n",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#o",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#p",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#q",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#r",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#s",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#t",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#u",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#v",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#w",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#x",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#y",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
-        {"#z",          {.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#a"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#b"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#c"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#d"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#e"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#f"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#g"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#h"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#i"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#j"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#k"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#l"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#m"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#n"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#o"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#p"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#q"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#r"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#s"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#t"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#u"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#v"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#w"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#x"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#y"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
+        {"#z"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::directive_literal}},
 
-        {"'",           {.type = token_type_t::literal, .tokenizer = &lexer_t::rune_literal}},
-        {"\"",          {.type = token_type_t::literal, .tokenizer = &lexer_t::string_literal}},
-        {"{{",          {.type = token_type_t::literal, .tokenizer = &lexer_t::block_string_literal}},
+        {"'"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::rune_literal}},
+        {"\""sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::string_literal}},
+        {"{{"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::block_string_literal}},
 
-        {"//",          {.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
-        {"--",          {.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
-        {"/*",          {.type = token_type_t::comment, .tokenizer = &lexer_t::block_comment}},
+        {"//"sv,          lexeme_t{.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
+        {"--"sv,          lexeme_t{.type = token_type_t::comment, .tokenizer = &lexer_t::line_comment}},
+        {"/*"sv,          lexeme_t{.type = token_type_t::comment, .tokenizer = &lexer_t::block_comment}},
 
-        {";",           {.type = token_type_t::punctuation}},
-        {",",           {.type = token_type_t::punctuation}},
-        {"{",           {.type = token_type_t::punctuation}},
-        {"}",           {.type = token_type_t::punctuation}},
-        {"(",           {.type = token_type_t::punctuation}},
-        {")",           {.type = token_type_t::punctuation}},
-        {"[",           {.type = token_type_t::punctuation}},
-        {"]",           {.type = token_type_t::punctuation}},
-        {"\\",          {.type = token_type_t::punctuation}},
+        {";"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {","sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"{"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"}"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"("sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {")"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"["sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"]"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"\\"sv,          lexeme_t{.type = token_type_t::punctuation}},
 
-        {"&",           {.type = token_type_t::operator_}},
-        {"|",           {.type = token_type_t::operator_}},
-        {"~",           {.type = token_type_t::operator_}},
-        {"**",          {.type = token_type_t::operator_}},
-        {"+",           {.type = token_type_t::operator_}},
-        {"-",           {.type = token_type_t::operator_}},
-        {"*",           {.type = token_type_t::operator_}},
-        {"/",           {.type = token_type_t::operator_}},
-        {"%",           {.type = token_type_t::operator_}},
+        {"&"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"|"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"~"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"**"sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"+"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"-"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"*"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"/"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"%"sv,           lexeme_t{.type = token_type_t::operator_}},
 
-        {"&&",          {.type = token_type_t::operator_}},
-        {"||",          {.type = token_type_t::operator_}},
-        {">",           {.type = token_type_t::operator_}},
-        {"<",           {.type = token_type_t::operator_}},
-        {">=",          {.type = token_type_t::operator_}},
-        {"<=",          {.type = token_type_t::operator_}},
-        {"==",          {.type = token_type_t::operator_}},
-        {"!=",          {.type = token_type_t::operator_}},
+        {"&&"sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"||"sv,          lexeme_t{.type = token_type_t::operator_}},
+        {">"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {"<"sv,           lexeme_t{.type = token_type_t::operator_}},
+        {">="sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"<="sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"=="sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"!="sv,          lexeme_t{.type = token_type_t::operator_}},
 
-        {":=",          {.type = token_type_t::operator_}},
-        {"%:=",         {.type = token_type_t::operator_}},
-        {"/:=",         {.type = token_type_t::operator_}},
-        {"*:=",         {.type = token_type_t::operator_}},
-        {"-:=",         {.type = token_type_t::operator_}},
-        {"+:=",         {.type = token_type_t::operator_}},
-        {"&:=",         {.type = token_type_t::operator_}},
-        {"|:=",         {.type = token_type_t::operator_}},
-        {"~:=",         {.type = token_type_t::operator_}},
+        {":="sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"%:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"/:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"*:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"-:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"+:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"&:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"|:="sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"~:="sv,         lexeme_t{.type = token_type_t::operator_}},
 
-        {":",           {.type = token_type_t::operator_}}, // type operator
-        {"::",          {.type = token_type_t::operator_}}, // bind operator
-        {"=>",          {.type = token_type_t::operator_}}, // association operator
-        {"->",          {.type = token_type_t::operator_}}, // placeholder
+        {":"sv,           lexeme_t{.type = token_type_t::operator_}}, // type operator
+        {"::"sv,          lexeme_t{.type = token_type_t::operator_}}, // bind operator
+        {"=>"sv,          lexeme_t{.type = token_type_t::operator_}}, // association operator
+        {"->"sv,          lexeme_t{.type = token_type_t::operator_}}, // placeholder
 
-        {"in",          {.type = token_type_t::operator_}},
-        {"xor",         {.type = token_type_t::operator_}},
-        {"shl",         {.type = token_type_t::operator_}},
-        {"shr",         {.type = token_type_t::operator_}},
-        {"rol",         {.type = token_type_t::operator_}},
-        {"ror",         {.type = token_type_t::operator_}},
+        {"in"sv,          lexeme_t{.type = token_type_t::operator_}},
+        {"xor"sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"shl"sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"shr"sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"rol"sv,         lexeme_t{.type = token_type_t::operator_}},
+        {"ror"sv,         lexeme_t{.type = token_type_t::operator_}},
 
-        {"if",          {.type = token_type_t::keyword}},
-        {"ns",          {.type = token_type_t::keyword}},
-        {"for",         {.type = token_type_t::keyword}},
-        {"nil",         {.type = token_type_t::keyword}},
-        {"use",         {.type = token_type_t::keyword}},
-        {"true",        {.type = token_type_t::keyword}},
-        {"cast",        {.type = token_type_t::keyword}},
-        {"case",        {.type = token_type_t::keyword}},
-        {"proc",        {.type = token_type_t::keyword}},
-        {"enum",        {.type = token_type_t::keyword}},
-        {"else",        {.type = token_type_t::keyword}},
-        {"with",        {.type = token_type_t::keyword}},
-        {"goto",        {.type = token_type_t::keyword}},
-        {"false",       {.type = token_type_t::keyword}},
-        {"defer",       {.type = token_type_t::keyword}},
-        {"break",       {.type = token_type_t::keyword}},
-        {"union",       {.type = token_type_t::keyword}},
-        {"yield",       {.type = token_type_t::keyword}},
-        {"struct",      {.type = token_type_t::keyword}},
-        {"return",      {.type = token_type_t::keyword}},
-        {"switch",      {.type = token_type_t::keyword}},
-        {"family",      {.type = token_type_t::keyword}},
-        {"module",      {.type = token_type_t::keyword}},
-        {"import",      {.type = token_type_t::keyword}},
-        {"else if",     {.type = token_type_t::keyword}},
-        {"continue",    {.type = token_type_t::keyword}},
-        {"transmute",   {.type = token_type_t::keyword}},
-        {"fallthrough", {.type = token_type_t::keyword}},
+        {"if"sv,          lexeme_t{.type = token_type_t::keyword}},
+        {"ns"sv,          lexeme_t{.type = token_type_t::keyword}},
+        {"for"sv,         lexeme_t{.type = token_type_t::keyword}},
+        {"nil"sv,         lexeme_t{.type = token_type_t::keyword}},
+        {"use"sv,         lexeme_t{.type = token_type_t::keyword}},
+        {"true"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"cast"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"case"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"proc"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"enum"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"else"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"with"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"goto"sv,        lexeme_t{.type = token_type_t::keyword}},
+        {"false"sv,       lexeme_t{.type = token_type_t::keyword}},
+        {"defer"sv,       lexeme_t{.type = token_type_t::keyword}},
+        {"break"sv,       lexeme_t{.type = token_type_t::keyword}},
+        {"union"sv,       lexeme_t{.type = token_type_t::keyword}},
+        {"yield"sv,       lexeme_t{.type = token_type_t::keyword}},
+        {"struct"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"return"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"switch"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"family"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"module"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"import"sv,      lexeme_t{.type = token_type_t::keyword}},
+        {"else if"sv,     lexeme_t{.type = token_type_t::keyword}},
+        {"continue"sv,    lexeme_t{.type = token_type_t::keyword}},
+        {"transmute"sv,   lexeme_t{.type = token_type_t::keyword}},
+        {"fallthrough"sv, lexeme_t{.type = token_type_t::keyword}},
     };
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    trie_t::trie_t(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
+        insert(elements);
+    }
+
+    trie_node_t* trie_t::find(trie_node_t* node, rune_t rune) {
+        auto current_node = node ? node : &_root;
+        auto& children = current_node->children;
+        auto it = children.find(rune);
+        if (it == std::end(children))
+            return nullptr;
+        const auto& nodes = it->second;
+        return nodes[0]->subclass.node;
+    }
+
+    void trie_t::insert(std::string_view key, lexeme_t* value) {
+        auto current_node = &_root;
+        std::vector<trie_node_class_t*>* current_value = nullptr;
+
+        for (const auto c : key) {
+            trie_node_t* next_node = nullptr;
+
+            auto& children = current_node->children;
+            auto it = children.find(c);
+            if (it == std::end(children)) {
+                auto result = children.emplace(
+                    c,
+                    std::vector<trie_node_class_t*>{});
+                current_value = &result.first->second;
+                current_value->resize(2);
+
+                auto class_node = _class_storage.alloc();
+                class_node->type = trie_class_type_t::node;
+                class_node->subclass.node = next_node = _node_storage.alloc();
+                current_value->at(0) = class_node;
+            } else {
+                current_value = &it->second;
+                next_node = current_value->front()->subclass.node;
+            }
+
+            current_node = next_node;
+        }
+
+        assert(current_value != nullptr);
+
+        auto class_node = _class_storage.alloc();
+        class_node->type = trie_class_type_t::node_class;
+        class_node->subclass.data = value;
+        current_value->at(1) = class_node;
+    }
+
+    void trie_t::insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
+        for (const auto& e : elements) {
+            auto lexeme = _lexeme_storage.alloc();
+            lexeme->type = e.second.type;
+            lexeme->tokenizer = e.second.tokenizer;
+            insert(e.first, lexeme);
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -230,7 +291,6 @@ namespace basecode::compiler::lexer {
             workspace_t& workspace,
             utf8::source_buffer_t& buffer) : _workspace(workspace),
                                              _buffer(buffer) {
-        s_lexemes.burst_threshold(1024);
     }
 
     bool lexer_t::make_number_token(
@@ -358,94 +418,94 @@ namespace basecode::compiler::lexer {
                 continue;
             }
 
-            auto len = 1;
-            std::vector<match_t> matches{};
-
-            while (true) {
-                auto slice = _buffer.make_slice(_buffer.pos(), len);
-                auto range = s_lexemes.equal_prefix_range(slice);
-
-                auto start_size = matches.size();
-
-                for (auto it = range.first; it != range.second; it++) {
-                    matches.push_back(match_t{
-                            .key = it.key(), 
-                            .value = it.value(),
-                            .candidate = it.key().length() == len,
-                    });
-                }
-
-                if (matches.size() > start_size) {
-                    for (auto it = matches.begin(); it != matches.end();) {
-                        auto& match = *it;
-                        if (match.candidate && match.key.length() < len) {
-                            it = matches.erase(it);
-                        } else {
-                            ++it;
-                        }
-                    }
-                }
-
-                if (matches.empty()) {
-                    if (!identifier(r, entities)) {
-                        errors::add_error(r, errors::lexer::expected_identifier);
-                        return false;
-                    }
-                    break;
-                }
-
-                if (matches.size() == 1
-                &&  matches[0].candidate) {
-                    auto& match = matches[0];
-
-                    if (match.value.tokenizer) {
-                        if (!match.value.tokenizer(this, r, entities))
-                            return false;
-                    } else {
-                        token_type_t type = match.value.type;
-
-                        if (match.value.type == token_type_t::keyword) {
-                            auto check_slice = _buffer.make_slice(
-                                    _buffer.pos(), 
-                                    slice.length() + 1);
-                            const auto& last_char = check_slice[slice.length()];
-                            if (isalpha(last_char) || last_char == '_') {
-                                goto next_round;
-                            }
-
-                            type = token_type_t::identifier;
-                        }
-
-                        auto start_pos = _buffer.pos();
-                        _buffer.seek(_buffer.pos() + len);
-                        auto token = _workspace.registry.create();
-                        _workspace.registry.assign<token_t>(token, type, slice);
-                        _workspace.registry.assign<source_location_t>(
-                            token,
-                            make_location(start_pos, _buffer.pos()));
-                        entities.push_back(token);
-                    }
-
-                    break;
-                }
-            
-            next_round:
-                len += _buffer.width();
-
-                if (_buffer.pos() + len >= _buffer.length() - 1) {
-                    errors::add_error(r, errors::lexer::unexpected_end_of_input);
-                    return false;
-                }
-
-                for (auto it = matches.begin(); it != matches.end();) {
-                    auto& match = *it;
-                    if (!match.candidate) {
-                        it = matches.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
-            }
+//            auto len = 1;
+//            std::vector<match_t> matches{};
+//
+//            while (true) {
+//                auto slice = _buffer.make_slice(_buffer.pos(), len);
+//                auto range = s_lexemes.equal_prefix_range(slice);
+//
+//                auto start_size = matches.size();
+//
+//                for (auto it = range.first; it != range.second; it++) {
+//                    matches.push_back(match_t{
+//                            .key = it.key(),
+//                            .value = it.value(),
+//                            .candidate = it.key().length() == len,
+//                    });
+//                }
+//
+//                if (matches.size() > start_size) {
+//                    for (auto it = matches.begin(); it != matches.end();) {
+//                        auto& match = *it;
+//                        if (match.candidate && match.key.length() < len) {
+//                            it = matches.erase(it);
+//                        } else {
+//                            ++it;
+//                        }
+//                    }
+//                }
+//
+//                if (matches.empty()) {
+//                    if (!identifier(r, entities)) {
+//                        errors::add_error(r, errors::lexer::expected_identifier);
+//                        return false;
+//                    }
+//                    break;
+//                }
+//
+//                if (matches.size() == 1
+//                &&  matches[0].candidate) {
+//                    auto& match = matches[0];
+//
+//                    if (match.value.tokenizer) {
+//                        if (!match.value.tokenizer(this, r, entities))
+//                            return false;
+//                    } else {
+//                        token_type_t type = match.value.type;
+//
+//                        if (match.value.type == token_type_t::keyword) {
+//                            auto check_slice = _buffer.make_slice(
+//                                    _buffer.pos(),
+//                                    slice.length() + 1);
+//                            const auto& last_char = check_slice[slice.length()];
+//                            if (isalpha(last_char) || last_char == '_') {
+//                                goto next_round;
+//                            }
+//
+//                            type = token_type_t::identifier;
+//                        }
+//
+//                        auto start_pos = _buffer.pos();
+//                        _buffer.seek(_buffer.pos() + len);
+//                        auto token = _workspace.registry.create();
+//                        _workspace.registry.assign<token_t>(token, type, slice);
+//                        _workspace.registry.assign<source_location_t>(
+//                            token,
+//                            make_location(start_pos, _buffer.pos()));
+//                        entities.push_back(token);
+//                    }
+//
+//                    break;
+//                }
+//
+//            next_round:
+//                len += _buffer.width();
+//
+//                if (_buffer.pos() + len >= _buffer.length() - 1) {
+//                    errors::add_error(r, errors::lexer::unexpected_end_of_input);
+//                    return false;
+//                }
+//
+//                for (auto it = matches.begin(); it != matches.end();) {
+//                    auto& match = *it;
+//                    if (!match.candidate) {
+//                        it = matches.erase(it);
+//                    } else {
+//                        ++it;
+//                    }
+//                }
+//            }
         }
 
         auto token = _workspace.registry.create();
