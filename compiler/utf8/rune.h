@@ -35,24 +35,6 @@ namespace basecode::compiler::utf8 {
         constexpr rune_t(const rune_t& rhs) : _value(rhs._value) {
         }
 
-        bool is_eof() const;
-
-        bool is_bom() const;
-
-        bool is_digit() const;
-
-        bool is_alpha() const;
-
-        bool is_space() const;
-
-        bool is_alnum() const;
-
-        bool is_xdigit() const;
-
-        bool is_invalid() const;
-
-        bool is_eof_or_invalid() const;
-
         rune_t& operator= (int32_t rhs);
 
         explicit operator char () const;
@@ -63,7 +45,25 @@ namespace basecode::compiler::utf8 {
 
         bool operator<(int32_t rhs) const;
 
+        bool operator>(int32_t rhs) const;
+
+        [[nodiscard]] bool is_eof() const;
+
+        [[nodiscard]] bool is_bom() const;
+
         explicit operator int32_t () const;
+
+        [[nodiscard]] bool is_digit() const;
+
+        [[nodiscard]] bool is_alpha() const;
+
+        [[nodiscard]] bool is_space() const;
+
+        [[nodiscard]] bool is_alnum() const;
+
+        [[nodiscard]] bool is_xdigit() const;
+
+        [[nodiscard]] bool is_invalid() const;
 
         explicit operator std::size_t () const;
 
@@ -71,9 +71,13 @@ namespace basecode::compiler::utf8 {
 
         bool operator<(const rune_t& rhs) const;
 
+        bool operator>(const rune_t& rhs) const;
+
         bool operator==(const rune_t& rhs) const;
 
         bool operator!=(const rune_t& rhs) const;
+
+        [[nodiscard]] bool is_eof_or_invalid() const;
 
     private:
         int32_t _value = 0xfffd;

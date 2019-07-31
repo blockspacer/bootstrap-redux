@@ -95,6 +95,7 @@ namespace basecode::compiler::lexer {
 
     struct number_token_t final {
         bool is_signed{};
+        bool imaginary{};
         uint8_t radix = 10;
         number_type_t type{};
         number_size_t size{};

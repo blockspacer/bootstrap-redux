@@ -113,6 +113,10 @@ namespace basecode::compiler::utf8 {
         return _value < rhs;
     }
 
+    bool rune_t::operator>(int32_t rhs) const {
+        return _value > rhs;
+    }
+
     bool rune_t::operator<(const rune_t& rhs) const {
         return _value < rhs._value;
     }
@@ -123,6 +127,10 @@ namespace basecode::compiler::utf8 {
 
     bool rune_t::operator!=(const rune_t& rhs) const {
         return _value != rhs._value;
+    }
+
+    bool rune_t::operator>(const rune_t& rhs) const {
+        return _value > rhs._value;
     }
 
     std::ostream& operator<<(std::ostream& os, const rune_t& rune) {

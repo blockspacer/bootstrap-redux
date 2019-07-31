@@ -236,6 +236,7 @@ namespace basecode::compiler::lexer {
             result_t& r,
             entity_list_t& entities,
             size_t start_pos,
+            bool imaginary,
             bool is_signed,
             uint8_t radix,
             number_type_t type,
@@ -247,6 +248,7 @@ namespace basecode::compiler::lexer {
         auto& number_token = _workspace.registry.assign<number_token_t>(
             token,
             is_signed,
+            imaginary,
             radix,
             type,
             number_size_t::qword);
@@ -275,6 +277,10 @@ namespace basecode::compiler::lexer {
             apply_narrowed_value(number_token, *narrowed_size, value, check_sign_bit);
         } else if (type == number_type_t::floating_point) {
             double value;
+
+            if (imaginary)
+                capture = std::string_view(capture.data(), capture.length() - 1);
+
             auto result = numbers::parse_double(capture, value);
             if (result != numbers::conversion_result_t::success) {
                 r.error(
@@ -475,6 +481,33 @@ namespace basecode::compiler::lexer {
                 entities.push_back(token);
                 return token;
             });
+    }
+
+    bool lexer_t::scan_dec_digits(result_t& r, number_type_t& type) {
+        while (true) {
+            auto rune = _buffer.curr(r);
+
+            if (rune.is_eof_or_invalid())
+                return false;
+
+            if (rune == '.') {
+                if (type == number_type_t::floating_point) {
+                    r.error(
+                        "X000",
+                        "unexpected decimal point");
+                    return false;
+                } else {
+                    type = number_type_t::floating_point;
+                }
+            } else if (rune == '_') {
+                // N.B. ignore
+            } else if (rune < 0x30 || rune > 0x39) {
+                break;
+            }
+            if (!_buffer.move_next(r))   return false;
+        }
+
+        return true;
     }
 
     bool lexer_t::rune_literal(result_t& r, entity_list_t& entities) {
@@ -770,7 +803,9 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::dec_number_literal(result_t& r, entity_list_t& entities) {
+        bool imaginary{};
         auto type = number_type_t::integer;
+
         auto rune = _buffer.curr(r);
         bool is_signed = rune == '-';
         if (is_signed) {
@@ -779,36 +814,55 @@ namespace basecode::compiler::lexer {
         }
 
         auto start_pos = _buffer.pos();
-        while (true) {
+
+        if (!scan_dec_digits(r, type))
+            return false;
+
+        rune = _buffer.curr(r);
+        if (rune.is_eof_or_invalid())
+            return false;
+
+        if (rune == 'e' || rune == 'E') {
+            if (type != number_type_t::floating_point) {
+                r.error(
+                    "X000",
+                    "exponent notation is not valid for integer literals");
+                return false;
+            }
+
+            if (!_buffer.move_next(r))
+                return false;
+
             rune = _buffer.curr(r);
             if (rune.is_eof_or_invalid())
                 return false;
-            auto ch = static_cast<int32_t>(rune);
-            if (ch == '.') {
-                if (type == number_type_t::floating_point) {
-                    r.error(
-                        "X000",
-                        "unexpected decimal point");
-                    return false;
-                } else {
-                    type = number_type_t::floating_point;
-                }
-            }
-            if (ch == '_' || ch == 'E' || ch == 'e') {
+
+            if (rune == '-' || rune == '+') {
                 if (!_buffer.move_next(r))
                     return false;
-                continue;
-            }
-            if (ch < 0x30 || ch > 0x39) {
-                if (isalpha(ch)) {
-                    r.error(
-                        "X000",
-                        "unexpected letter immediately after decimal number");
+
+                rune = _buffer.curr(r);
+                if (rune.is_eof_or_invalid())
                     return false;
-                }
-                break;
             }
-            if (!_buffer.move_next(r))  return false;
+
+            if (!scan_dec_digits(r, type))
+                return false;
+
+            rune = _buffer.curr(r);
+            if (rune.is_eof_or_invalid())
+                return false;
+
+            if (rune == 'i') {
+                if (!_buffer.move_next(r))
+                    return false;
+                imaginary = true;
+            }
+        } else if (rune.is_alpha()) {
+            r.error(
+                "X000",
+                "unexpected letter immediately after decimal number");
+            return false;
         }
 
         auto capture = _buffer.make_slice(
@@ -818,7 +872,8 @@ namespace basecode::compiler::lexer {
         return make_number_token(
                 r,
                 entities, 
-                start_pos, 
+                start_pos,
+                imaginary,
                 is_signed, 
                 10, 
                 type, 
@@ -864,7 +919,8 @@ namespace basecode::compiler::lexer {
         return make_number_token(
                 r, 
                 entities, 
-                start_pos, 
+                start_pos,
+                false,
                 false, 
                 16, 
                 number_type_t::integer, 
@@ -885,14 +941,13 @@ namespace basecode::compiler::lexer {
             rune = _buffer.curr(r);
             if (rune.is_eof_or_invalid())
                 return false;
-            auto ch = static_cast<int32_t>(rune);
-            if (ch == '_') {
+            if (rune == '_') {
                 if (!_buffer.move_next(r))
                     return false;
                 continue;
             }
-            if (ch < 0x30 || ch > 0x37) {
-                if (isalpha(ch)) {
+            if (rune < 0x30 || rune > 0x37) {
+                if (rune.is_alpha()) {
                     r.error(
                         "X000",
                         "unexpected letter immediately after octal number");
@@ -910,7 +965,8 @@ namespace basecode::compiler::lexer {
         return make_number_token(
                 r, 
                 entities, 
-                start_pos, 
+                start_pos,
+                false,
                 false, 
                 8, 
                 number_type_t::integer, capture);
@@ -930,14 +986,13 @@ namespace basecode::compiler::lexer {
             rune = _buffer.curr(r);
             if (rune.is_eof_or_invalid())
                 return false;
-            auto ch = static_cast<int32_t>(rune);
-            if (ch == '_') {
+            if (rune == '_') {
                 if (!_buffer.move_next(r))
                     return false;
                 continue;
             }
-            if (ch < 0x30 || ch > 0x31) {
-                if (isalpha(ch) || isdigit(ch)) {
+            if (rune < 0x30 || rune > 0x31) {
+                if (rune.is_alpha() || rune.is_digit()) {
                     r.error(
                         "X000",
                         "unexpected letter or non-binary digit immediately after decimal number");
@@ -955,7 +1010,8 @@ namespace basecode::compiler::lexer {
         return make_number_token(
                 r, 
                 entities, 
-                start_pos, 
+                start_pos,
+                false,
                 false, 
                 2, 
                 number_type_t::integer, 
