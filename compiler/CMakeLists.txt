@@ -31,6 +31,10 @@ add_library(
         numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
+        hashing/murmur.cpp hashing/murmur.h
+
+        errors/types.cpp errors/types.h
+
         lexer/token.cpp lexer/token.h
         lexer/lexer.cpp lexer/lexer.h
 

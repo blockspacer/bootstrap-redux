@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <compiler/defer.h>
+#include <compiler/errors/types.h>
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
 #include <compiler/formatters/formatters.h>
@@ -257,20 +258,17 @@ namespace basecode::compiler::lexer {
             int64_t value;
             auto result = numbers::parse_integer(capture, radix, value);
             if (result != numbers::conversion_result_t::success) {
-                r.error(
-                    "X000",
-                    fmt::format(
-                        "unable to convert integer value {} because {}",
-                        capture,
-                        numbers::conversion_result_to_name(result)));
+                errors::add_error(
+                    r,
+                    errors::lexer::unable_to_convert_integer_value,
+                    capture,
+                    numbers::conversion_result_to_name(result));
                 return false;
             }
 
             auto narrowed_size = narrow_type(value);
             if (!narrowed_size) {
-                r.error(
-                    "X000",
-                    "unable to narrow integer value");
+                errors::add_error(r, errors::lexer::unable_to_narrow_integer_value);
                 return false;
             }
 
@@ -283,20 +281,17 @@ namespace basecode::compiler::lexer {
 
             auto result = numbers::parse_double(capture, value);
             if (result != numbers::conversion_result_t::success) {
-                r.error(
-                    "X000",
-                    fmt::format(
-                        "unable to convert floating point value {} because {}",
-                        capture,
-                        numbers::conversion_result_to_name(result)));
+                errors::add_error(
+                    r,
+                    errors::lexer::unable_to_convert_floating_point_value,
+                    capture,
+                    numbers::conversion_result_to_name(result));
                 return false;
             }
 
             auto narrowed_size = narrow_type(value);
             if (!narrowed_size) {
-                r.error(
-                    "X000",
-                    "unable to narrow floating point value");
+                errors::add_error(r, errors::lexer::unable_to_narrow_floating_point_value);
                 return false;
             }
 
@@ -323,11 +318,7 @@ namespace basecode::compiler::lexer {
             return false;
 
         if (rune != '_' && !rune.is_alpha()) {
-            r.error(
-                "X000",
-                fmt::format(
-                    "identifiers must start with _ or a letter; found: {}",
-                    rune));
+            errors::add_error(r, errors::lexer::invalid_identifier_start_character, rune);
             return false;
         }
 
@@ -397,7 +388,7 @@ namespace basecode::compiler::lexer {
 
                 if (matches.empty()) {
                     if (!identifier(r, entities)) {
-                        r.error("X000", "expected identifier");
+                        errors::add_error(r, errors::lexer::expected_identifier);
                         return false;
                     }
                     break;
@@ -442,7 +433,7 @@ namespace basecode::compiler::lexer {
                 len += _buffer.width();
 
                 if (_buffer.pos() + len >= _buffer.length() - 1) {
-                    r.error("X000", "unexpected end of input");
+                    errors::add_error(r, errors::lexer::unexpected_end_of_input);
                     return false;
                 }
 
@@ -492,9 +483,7 @@ namespace basecode::compiler::lexer {
 
             if (rune == '.') {
                 if (type == number_type_t::floating_point) {
-                    r.error(
-                        "X000",
-                        "unexpected decimal point");
+                    errors::add_error(r, errors::lexer::unexpected_decimal_point);
                     return false;
                 } else {
                     type = number_type_t::floating_point;
@@ -573,11 +562,7 @@ namespace basecode::compiler::lexer {
             return false;
 
         if (rune != '\'') {
-            r.error(
-                "X000",
-                fmt::format(
-                    "expected closing ' but found: {}",
-                    rune));
+            errors::add_error(r, errors::lexer::expected_closing_single_quote, rune);
             return false;
         }
 
@@ -748,9 +733,7 @@ namespace basecode::compiler::lexer {
             return false;
 
         if (rune != '#') {
-            r.error(
-                "X000",
-                "expected directive prefix: #");
+            errors::add_error(r, errors::lexer::expected_directive_prefix);
             return false;
         }
 
@@ -778,9 +761,7 @@ namespace basecode::compiler::lexer {
             return false;
 
         if (rune != '@') {
-            r.error(
-                "X000",
-                "expected annotation prefix: @");
+            errors::add_error(r, errors::lexer::expected_annotation_prefix);
             return false;
         }
 
@@ -824,9 +805,7 @@ namespace basecode::compiler::lexer {
 
         if (rune == 'e' || rune == 'E') {
             if (type != number_type_t::floating_point) {
-                r.error(
-                    "X000",
-                    "exponent notation is not valid for integer literals");
+                errors::add_error(r, errors::lexer::exponent_notation_not_valid_for_integers);
                 return false;
             }
 
@@ -859,9 +838,7 @@ namespace basecode::compiler::lexer {
                 imaginary = true;
             }
         } else if (rune.is_alpha()) {
-            r.error(
-                "X000",
-                "unexpected letter immediately after decimal number");
+            errors::add_error(r, errors::lexer::unexpected_letter_after_decimal_number_literal);
             return false;
         }
 
@@ -884,9 +861,7 @@ namespace basecode::compiler::lexer {
     bool lexer_t::hex_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer.next(r);
         if (rune != '$') {
-            r.error(
-                "X000",
-                "expected hex prefix: $");
+            errors::add_error(r, errors::lexer::expected_hex_literal_prefix);
             return false;
         }
 
@@ -902,9 +877,7 @@ namespace basecode::compiler::lexer {
             }
             if (!rune.is_xdigit()) {
                 if (rune.is_alpha()) {
-                    r.error(
-                        "X000",
-                        "unexpected letter immediately after hexadecimal number");
+                    errors::add_error(r, errors::lexer::unexpected_letter_after_hexadecimal_number_literal);
                     return false;
                 }
                 break;
@@ -930,9 +903,7 @@ namespace basecode::compiler::lexer {
     bool lexer_t::octal_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer.next(r);
         if (rune != '@') {
-            r.error(
-                "X000",
-                "expected octal prefix: @");
+            errors::add_error(r, errors::lexer::expected_octal_literal_prefix);
             return false;
         }
 
@@ -948,9 +919,7 @@ namespace basecode::compiler::lexer {
             }
             if (rune < 0x30 || rune > 0x37) {
                 if (rune.is_alpha()) {
-                    r.error(
-                        "X000",
-                        "unexpected letter immediately after octal number");
+                    errors::add_error(r, errors::lexer::unexpected_letter_after_octal_number_literal);
                     return false;
                 }
                 break;
@@ -975,9 +944,7 @@ namespace basecode::compiler::lexer {
     bool lexer_t::binary_number_literal(result_t& r, entity_list_t& entities) {
         auto rune = _buffer.next(r);
         if (rune != '%') {
-            r.error(
-                "X000",
-                "expected binary prefix: %");
+            errors::add_error(r, errors::lexer::expected_binary_literal_prefix);
             return false;
         }
 
@@ -993,9 +960,7 @@ namespace basecode::compiler::lexer {
             }
             if (rune < 0x30 || rune > 0x31) {
                 if (rune.is_alpha() || rune.is_digit()) {
-                    r.error(
-                        "X000",
-                        "unexpected letter or non-binary digit immediately after decimal number");
+                    errors::add_error(r, errors::lexer::unexpected_letter_after_binary_number_literal);
                     return false;
                 }
                 break;
@@ -1037,9 +1002,7 @@ namespace basecode::compiler::lexer {
                     return false;
 
                 if (rune != '}') {
-                    r.error(
-                            "X000", 
-                            fmt::format("expected }} but found: {}", rune));
+                    errors::add_error(r, errors::lexer::expected_closing_block_literal, rune);
                     return false;
                 }
 
