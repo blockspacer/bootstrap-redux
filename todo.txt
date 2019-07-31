@@ -8,9 +8,6 @@ QUESTIONS
 
 TASKS
 ------------
-- REFACTOR: introduce our own trie/trie-map structure that allows us to
-    explicitly navigate the internal trie nodes instead of having to
-    perform string-like "prefix" searches from the root each time.
 
 DONE
 ------------
@@ -25,3 +22,6 @@ DONE
 - FIX(lexer.cpp): block comments should encode the nesting via the comment_token_t struct
     or similar.
 - FIX(lexer.cpp): decimal numbers should properly parse scientific notation
+- REFACTOR: introduce our own trie/trie-map structure that allows us to
+    explicitly navigate the internal trie nodes instead of having to
+    perform string-like "prefix" searches from the root each time.

@@ -230,50 +230,37 @@ namespace basecode::compiler::lexer {
         insert(elements);
     }
 
-    trie_node_t* trie_t::find(trie_node_t* node, rune_t rune) {
+    void trie_t::insert(std::string_view key, lexeme_t* value) {
+        auto current_node = &_root;
+
+        size_t i = 0;
+        const auto key_length = key.length() - 1;
+        for (const char c : key) {
+            auto& children = current_node->tree->children;
+            auto it = children.find(utf8::rune_t(c));
+            if (it == std::end(children)) {
+                current_node = _node_storage.alloc();
+                current_node->data = nullptr;
+                current_node->tree = nullptr;
+                if (i <= key_length)
+                    current_node->tree = _tree_node_storage.alloc();
+                children.emplace(c, current_node);
+            } else {
+                current_node = it->second;
+            }
+            ++i;
+        }
+
+        current_node->data = value;
+    }
+
+    trie_node_t* trie_t::find(trie_node_t* node, const utf8::rune_t& rune) {
         auto current_node = node ? node : &_root;
-        auto& children = current_node->children;
+        auto& children = current_node->tree->children;
         auto it = children.find(rune);
         if (it == std::end(children))
             return nullptr;
-        const auto& nodes = it->second;
-        return nodes[0]->subclass.node;
-    }
-
-    void trie_t::insert(std::string_view key, lexeme_t* value) {
-        auto current_node = &_root;
-        std::vector<trie_node_class_t*>* current_value = nullptr;
-
-        for (const auto c : key) {
-            trie_node_t* next_node = nullptr;
-
-            auto& children = current_node->children;
-            auto it = children.find(c);
-            if (it == std::end(children)) {
-                auto result = children.emplace(
-                    c,
-                    std::vector<trie_node_class_t*>{});
-                current_value = &result.first->second;
-                current_value->resize(2);
-
-                auto class_node = _class_storage.alloc();
-                class_node->type = trie_class_type_t::node;
-                class_node->subclass.node = next_node = _node_storage.alloc();
-                current_value->at(0) = class_node;
-            } else {
-                current_value = &it->second;
-                next_node = current_value->front()->subclass.node;
-            }
-
-            current_node = next_node;
-        }
-
-        assert(current_value != nullptr);
-
-        auto class_node = _class_storage.alloc();
-        class_node->type = trie_class_type_t::node_class;
-        class_node->subclass.data = value;
-        current_value->at(1) = class_node;
+        return it->second;
     }
 
     void trie_t::insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
@@ -408,6 +395,9 @@ namespace basecode::compiler::lexer {
 
     bool lexer_t::tokenize(result_t& r, entity_list_t& entities) {
         while (!_buffer.eof()) {
+            trie_node_t* current_node = nullptr;
+            lexeme_t* matched_lexeme = nullptr;
+
             auto rune = _buffer.curr(r);
             if (rune.is_eof_or_invalid())
                 return false;
@@ -418,94 +408,58 @@ namespace basecode::compiler::lexer {
                 continue;
             }
 
-//            auto len = 1;
-//            std::vector<match_t> matches{};
-//
-//            while (true) {
-//                auto slice = _buffer.make_slice(_buffer.pos(), len);
-//                auto range = s_lexemes.equal_prefix_range(slice);
-//
-//                auto start_size = matches.size();
-//
-//                for (auto it = range.first; it != range.second; it++) {
-//                    matches.push_back(match_t{
-//                            .key = it.key(),
-//                            .value = it.value(),
-//                            .candidate = it.key().length() == len,
-//                    });
-//                }
-//
-//                if (matches.size() > start_size) {
-//                    for (auto it = matches.begin(); it != matches.end();) {
-//                        auto& match = *it;
-//                        if (match.candidate && match.key.length() < len) {
-//                            it = matches.erase(it);
-//                        } else {
-//                            ++it;
-//                        }
-//                    }
-//                }
-//
-//                if (matches.empty()) {
-//                    if (!identifier(r, entities)) {
-//                        errors::add_error(r, errors::lexer::expected_identifier);
-//                        return false;
-//                    }
-//                    break;
-//                }
-//
-//                if (matches.size() == 1
-//                &&  matches[0].candidate) {
-//                    auto& match = matches[0];
-//
-//                    if (match.value.tokenizer) {
-//                        if (!match.value.tokenizer(this, r, entities))
-//                            return false;
-//                    } else {
-//                        token_type_t type = match.value.type;
-//
-//                        if (match.value.type == token_type_t::keyword) {
-//                            auto check_slice = _buffer.make_slice(
-//                                    _buffer.pos(),
-//                                    slice.length() + 1);
-//                            const auto& last_char = check_slice[slice.length()];
-//                            if (isalpha(last_char) || last_char == '_') {
-//                                goto next_round;
-//                            }
-//
-//                            type = token_type_t::identifier;
-//                        }
-//
-//                        auto start_pos = _buffer.pos();
-//                        _buffer.seek(_buffer.pos() + len);
-//                        auto token = _workspace.registry.create();
-//                        _workspace.registry.assign<token_t>(token, type, slice);
-//                        _workspace.registry.assign<source_location_t>(
-//                            token,
-//                            make_location(start_pos, _buffer.pos()));
-//                        entities.push_back(token);
-//                    }
-//
-//                    break;
-//                }
-//
-//            next_round:
-//                len += _buffer.width();
-//
-//                if (_buffer.pos() + len >= _buffer.length() - 1) {
-//                    errors::add_error(r, errors::lexer::unexpected_end_of_input);
-//                    return false;
-//                }
-//
-//                for (auto it = matches.begin(); it != matches.end();) {
-//                    auto& match = *it;
-//                    if (!match.candidate) {
-//                        it = matches.erase(it);
-//                    } else {
-//                        ++it;
-//                    }
-//                }
-//            }
+            _buffer.push_mark();
+
+            while (true) {
+                current_node = s_lexemes.find(current_node, rune);
+                if (current_node == nullptr) {
+                    if (matched_lexeme
+                    &&  matched_lexeme->type == token_type_t::keyword) {
+                        if (rune.is_alpha() || rune == '_')
+                            matched_lexeme = nullptr;
+                    }
+                    break;
+                }
+
+                if (current_node->data != nullptr)
+                    matched_lexeme = current_node->data;
+
+                if (!_buffer.move_next(r))
+                    return false;
+
+                rune = _buffer.curr(r);
+                if (rune.is_eof_or_invalid())
+                    return false;
+            }
+
+            if (matched_lexeme == nullptr) {
+                _buffer.restore_top_mark();
+                _buffer.pop_mark();
+
+                if (!identifier(r, entities)) {
+                    errors::add_error(r, errors::lexer::expected_identifier);
+                    return false;
+                }
+            } else {
+                if (matched_lexeme->tokenizer) {
+                    _buffer.restore_top_mark();
+                    _buffer.pop_mark();
+                    if (!matched_lexeme->tokenizer(this, r, entities))
+                        return false;
+                } else {
+                    auto start_pos = _buffer.pop_mark();
+                    auto end_pos = _buffer.pos();
+                    auto token = _workspace.registry.create();
+                    _workspace.registry.assign<token_t>(
+                        token,
+                        matched_lexeme->type,
+                        _buffer.make_slice(start_pos, end_pos - start_pos));
+                    _workspace.registry.assign<source_location_t>(
+                        token,
+                        make_location(start_pos, end_pos));
+                    entities.push_back(token);
+                }
+            }
         }
 
         auto token = _workspace.registry.create();

@@ -27,21 +27,6 @@
 
 namespace basecode::compiler::lexer {
 
-//    false
-//    for
-//    from
-//
-//    f-----+
-//    |\    |
-//    | \   |
-//    a  o  r--o--m
-//    |  |
-//    l  r
-//    |
-//    s
-//    |
-//    e
-
     class lexer_t;
 
     using lexeme_tokenizer_t = std::function<bool (
@@ -54,32 +39,24 @@ namespace basecode::compiler::lexer {
         lexeme_tokenizer_t tokenizer{};
     };
 
-    enum class trie_class_type_t : uint8_t {
-        node,
-        node_class
-    };
-
-    struct trie_node_t;
-
-    struct trie_node_class_t final {
-        trie_class_type_t type;
-        union {
-            lexeme_t* data;
-            trie_node_t* node;
-        } subclass;
-    };
+    struct trie_tree_node_t;
 
     struct trie_node_t final {
-        std::unordered_map<rune_t, std::vector<trie_node_class_t*>> children{};
+        lexeme_t* data{};
+        trie_tree_node_t* tree{};
+    };
+
+    struct trie_tree_node_t final {
+        std::unordered_map<utf8::rune_t, trie_node_t*, utf8::rune_hash_t> children{};
     };
 
     class trie_t final {
     public:
         trie_t(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
 
-        trie_node_t* find(trie_node_t* node, rune_t rune);
-
         void insert(std::string_view key, lexeme_t* value);
+
+        trie_node_t* find(trie_node_t* node, const utf8::rune_t& rune);
 
         trie_t& operator =(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
             insert(elements);
@@ -90,10 +67,11 @@ namespace basecode::compiler::lexer {
         void insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
 
     private:
-        trie_node_t _root{};
+        trie_tree_node_t _tree_root{};
+        trie_node_t _root{nullptr, &_tree_root};
         memory::pool_t<lexeme_t> _lexeme_storage{256};
         memory::pool_t<trie_node_t> _node_storage{256};
-        memory::pool_t<trie_node_class_t> _class_storage{256};
+        memory::pool_t<trie_tree_node_t> _tree_node_storage{256};
     };
 
     ///////////////////////////////////////////////////////////////////////////
