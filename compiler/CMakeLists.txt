@@ -49,11 +49,11 @@ add_library(
 
         terminal/stream_builder.cpp terminal/stream_builder.h
 
+        language/core/lexer/token.cpp language/core/lexer/token.h
+        language/core/lexer/lexer.cpp language/core/lexer/lexer.h
+
         threading/auto_reset_event.cpp threading/auto_reset_event.h
         threading/manual_reset_event.cpp threading/manual_reset_event.h
-
-        language/basecode/lexer/token.cpp language/basecode/lexer/token.h
-        language/basecode/lexer/lexer.cpp language/basecode/lexer/lexer.h
 )
 target_link_libraries(
         ${PROJECT_NAME}
@@ -65,4 +65,4 @@ target_link_libraries(
         mstch
 )
 
-add_subdirectory(language/basecode/lexer/tests)
+add_subdirectory(language/core/lexer/tests)

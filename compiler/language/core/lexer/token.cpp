@@ -21,7 +21,7 @@
 #include <compiler/numbers/bytes.h>
 #include "token.h"
 
-namespace basecode::compiler::lexer {
+namespace basecode::compiler::language::core::lexer {
 
     void apply_narrowed_value(
             number_token_t& token, 

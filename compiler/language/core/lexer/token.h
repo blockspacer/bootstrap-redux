@@ -20,7 +20,7 @@
 
 #include <compiler/types.h>
 
-namespace basecode::compiler::lexer {
+namespace basecode::compiler::language::core::lexer {
 
     using namespace std::literals;
 

@@ -21,12 +21,14 @@
 #include <fmt/format.h>
 #include <compiler/types.h>
 #include <compiler/utf8/rune.h>
-#include <compiler/language/basecode/lexer/token.h>
+#include <compiler/language/core/lexer/token.h>
 
 namespace fmt {
 
+    using namespace basecode::compiler;
+
     template<>
-    struct formatter<basecode::compiler::result_t> {
+    struct formatter<result_t> {
         template <typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -34,7 +36,7 @@ namespace fmt {
 
         template <typename FormatContext>
         auto format(
-                const basecode::compiler::result_t& r,
+                const result_t& r,
                 FormatContext& ctx) {
             auto has_messages = !r.messages().empty();
 
@@ -62,7 +64,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<basecode::compiler::utf8::rune_t> {
+    struct formatter<utf8::rune_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -70,10 +72,10 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const basecode::compiler::utf8::rune_t& rune,
+                const utf8::rune_t& rune,
                 FormatContext& ctx) {
             std::string temp{};
-            auto encode_result = basecode::compiler::utf8::encode(rune);
+            auto encode_result = utf8::encode(rune);
             for (size_t j = 0; j < encode_result.width; j++)
                 temp += static_cast<char>(encode_result.data[j]);
             return format_to(ctx.out(), "{}", temp);
@@ -81,7 +83,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<basecode::compiler::source_location_t> {
+    struct formatter<source_location_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -89,7 +91,7 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const basecode::compiler::source_location_t& loc,
+                const source_location_t& loc,
                 FormatContext& ctx) {
             return format_to(
                 ctx.out(),
@@ -102,7 +104,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<basecode::compiler::lexer::token_t> {
+    struct formatter<language::core::lexer::token_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -110,12 +112,12 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const basecode::compiler::lexer::token_t& token,
+                const language::core::lexer::token_t& token,
                 FormatContext& ctx) {
             format_to(
                 ctx.out(),
                 "<type = {}",
-                basecode::compiler::lexer::token_type_to_name(token.type));
+                language::core::lexer::token_type_to_name(token.type));
             if (!token.value.empty()) {
                 format_to(ctx.out(), ", value = {}", token.value);
             }
@@ -124,7 +126,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<basecode::compiler::lexer::number_token_t> {
+    struct formatter<language::core::lexer::number_token_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -132,30 +134,30 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const basecode::compiler::lexer::number_token_t& token,
+                const language::core::lexer::number_token_t& token,
                 FormatContext& ctx) {
             format_to(
                 ctx.out(),
                 "<is_signed = {}, radix = {}, type = {}",
                 token.is_signed,
                 token.radix,
-                basecode::compiler::lexer::number_type_to_name(token.type));
-            if (token.type == basecode::compiler::lexer::number_type_t::integer) {
+                language::core::lexer::number_type_to_name(token.type));
+            if (token.type == language::core::lexer::number_type_t::integer) {
                 switch (token.size) {
-                    case basecode::compiler::lexer::number_size_t::byte:
+                    case language::core::lexer::number_size_t::byte:
                         return format_to(ctx.out(), ", value = u8({})>", token.value.u8);
-                    case basecode::compiler::lexer::number_size_t::word:
+                    case language::core::lexer::number_size_t::word:
                         return format_to(ctx.out(), ", value = u16({})>", token.value.u16);
-                    case basecode::compiler::lexer::number_size_t::dword:
+                    case language::core::lexer::number_size_t::dword:
                         return format_to(ctx.out(), ", value = u32({})>", token.value.u32);
-                    case basecode::compiler::lexer::number_size_t::qword:
+                    case language::core::lexer::number_size_t::qword:
                         return format_to(ctx.out(), ", value = u64({})>", token.value.u64);
                 }
-            } else if (token.type == basecode::compiler::lexer::number_type_t::floating_point) {
+            } else if (token.type == language::core::lexer::number_type_t::floating_point) {
                 switch (token.size) {
-                    case basecode::compiler::lexer::number_size_t::dword: 
+                    case language::core::lexer::number_size_t::dword:
                         return format_to(ctx.out(), ", value = f32({})>", token.value.f32);
-                    case basecode::compiler::lexer::number_size_t::qword:
+                    case language::core::lexer::number_size_t::qword:
                         return format_to(ctx.out(), ", value = f64({})>", token.value.f64);
                     default:
                         return format_to(ctx.out(), ", value = invalid({})>", token.value.f64);

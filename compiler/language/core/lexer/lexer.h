@@ -19,13 +19,12 @@
 #pragma once
 
 #include <utility>
-#include <tsl/htrie_map.h>
 #include <compiler/types.h>
 #include <compiler/memory/pool.h>
 #include <compiler/utf8/source_buffer.h>
 #include "token.h"
 
-namespace basecode::compiler::lexer {
+namespace basecode::compiler::language::core::lexer {
 
     class lexer_t;
 

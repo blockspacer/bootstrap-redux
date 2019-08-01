@@ -16,20 +16,13 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <compiler/defer.h>
 #include <compiler/errors/types.h>
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
 #include <compiler/formatters/formatters.h>
 #include "lexer.h"
 
-namespace basecode::compiler::lexer {
-
-    struct match_t final {
-        lexeme_t value;
-        bool candidate{};
-        std::string_view key;
-    };
+namespace basecode::compiler::language::core::lexer {
 
     trie_t lexer_t::s_lexemes {
         {"1"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
