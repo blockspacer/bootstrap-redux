@@ -51,6 +51,7 @@ add_library(
 
         language/core/lexer/token.cpp language/core/lexer/token.h
         language/core/lexer/lexer.cpp language/core/lexer/lexer.h
+        language/core/parser/parser.cpp language/core/parser/parser.h
 
         threading/auto_reset_event.cpp threading/auto_reset_event.h
         threading/manual_reset_event.cpp threading/manual_reset_event.h
@@ -66,3 +67,4 @@ target_link_libraries(
 )
 
 add_subdirectory(language/core/lexer/tests)
+add_subdirectory(language/core/parser/tests)

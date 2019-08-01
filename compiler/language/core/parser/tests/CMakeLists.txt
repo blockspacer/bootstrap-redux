@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(test-core-lexer)
+project(test-core-parser)
 
-add_executable(${PROJECT_NAME} main.cpp trie_tests.cpp lexer_tests.cpp)
+add_executable(${PROJECT_NAME} main.cpp parser_tests.cpp)
 target_link_libraries(${PROJECT_NAME} compiler)
 
 enable_testing()
