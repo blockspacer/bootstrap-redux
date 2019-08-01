@@ -71,6 +71,10 @@ namespace basecode::compiler::errors {
         static constexpr error_code_t expected_closing_block_literal = 20;
     }
 
+    namespace parser {
+        static constexpr error_code_t invalid_token = 21;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     template <typename... Args>

@@ -21,6 +21,10 @@
 namespace basecode::compiler::errors {
 
     static std::unordered_map<error_decl_key_t, error_decl_t> s_error_decls{
+        // ----------------------
+        // lexer
+        // ----------------------
+
         {{.code = lexer::unable_to_convert_integer_value, .locale = "en_US"},
          {.code = "L001", .message = "unable to convert integer value {} because {}"}},
 
@@ -80,6 +84,13 @@ namespace basecode::compiler::errors {
          
         {{.code = lexer::expected_closing_block_literal, .locale = "en_US"},
          {.code = "L020", .message = "expected }} but found: {}"}},
+
+         // ----------------------
+         // parser
+         // ----------------------
+
+        {{.code = parser::invalid_token, .locale = "en_US"},
+            {.code = "P001", .message = "a token has not been properly configured for parsing"}},
     };
 
     error_decl_t* find_decl(error_code_t code) {
