@@ -21,7 +21,7 @@
 #include <fmt/format.h>
 #include <compiler/types.h>
 #include <compiler/utf8/rune.h>
-#include <compiler/lexer/token.h>
+#include <compiler/language/basecode/lexer/token.h>
 
 namespace fmt {
 

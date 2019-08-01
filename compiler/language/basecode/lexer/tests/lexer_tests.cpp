@@ -18,8 +18,8 @@
 
 #include <catch2/catch.hpp>
 #include <compiler/defer.h>
-#include <compiler/lexer/lexer.h>
 #include <compiler/formatters/formatters.h>
+#include <compiler/language/basecode/lexer/lexer.h>
 
 namespace basecode {
 

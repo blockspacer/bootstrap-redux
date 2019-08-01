@@ -21,6 +21,9 @@ add_library(
 
         types.cpp types.h
 
+        memory/pool.h
+        memory/allocator.h
+
         id/pool.cpp id/pool.h
 
         io/text.cpp io/text.h
@@ -28,32 +31,29 @@ add_library(
 
         formatters/formatters.h
 
+        errors/types.cpp errors/types.h
+
+        signals/hook.cpp signals/hook.h
+
         numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
-        memory/pool.h
-        memory/allocator.h
-
         hashing/murmur.cpp hashing/murmur.h
-
-        errors/types.cpp errors/types.h
-
-        lexer/token.cpp lexer/token.h
-        lexer/lexer.cpp lexer/lexer.h
-
-        strings/transforms.cpp strings/transforms.h
-        strings/escape_parser.cpp strings/escape_parser.h
 
         utf8/rune.cpp utf8/rune.h
         utf8/reader.cpp utf8/reader.h
         utf8/source_buffer.cpp utf8/source_buffer.h
 
-        signals/hook.cpp signals/hook.h
+        strings/transforms.cpp strings/transforms.h
+        strings/escape_parser.cpp strings/escape_parser.h
 
         terminal/stream_builder.cpp terminal/stream_builder.h
 
         threading/auto_reset_event.cpp threading/auto_reset_event.h
         threading/manual_reset_event.cpp threading/manual_reset_event.h
+
+        language/basecode/lexer/token.cpp language/basecode/lexer/token.h
+        language/basecode/lexer/lexer.cpp language/basecode/lexer/lexer.h
 )
 target_link_libraries(
         ${PROJECT_NAME}
@@ -65,4 +65,4 @@ target_link_libraries(
         mstch
 )
 
-add_subdirectory(lexer/tests)
+add_subdirectory(language/basecode/lexer/tests)
