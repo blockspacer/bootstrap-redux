@@ -41,17 +41,15 @@ namespace basecode::compiler::utf8 {
     };
 
     struct source_buffer_line_t {
-        size_t end {};
-        size_t begin {};
-        uint32_t line {};
-        uint32_t columns {};
+        size_t end{};
+        size_t begin{};
+        int32_t line{};
+        int32_t columns{};
     };
 
     class source_buffer_t {
     public:
-        explicit source_buffer_t(
-            id::type_t id,
-            bool console_color_enabled = true);
+        explicit source_buffer_t(id::type_t id);
 
         bool load(
             result_t& r,
@@ -60,12 +58,6 @@ namespace basecode::compiler::utf8 {
         bool load(
             result_t& r,
             const path_t& path);
-
-        void error(
-            result_t& r,
-            const std::string& code,
-            const std::string& message,
-            const source_location_t& location) const;
 
         void push_mark();
 
@@ -105,7 +97,7 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] size_t number_of_lines() const;
 
-        [[nodiscard]] uint32_t column_by_index(size_t index) const;
+        [[nodiscard]] int32_t column_by_index(size_t index) const;
 
         [[nodiscard]] std::string_view substring(size_t start, size_t end) const;
 
@@ -125,7 +117,6 @@ namespace basecode::compiler::utf8 {
         id::type_t _id{};
         std::vector<uint8_t> _buffer{};
         std::unique_ptr<reader_t> _reader;
-        terminal::stream_builder_t _term_builder{};
         std::map<size_t, source_buffer_line_t*> _lines_by_number {};
         std::map<
             source_buffer_range_t,

@@ -20,10 +20,7 @@
 
 namespace basecode::compiler::utf8 {
 
-    source_buffer_t::source_buffer_t(
-            id::type_t id,
-            bool console_color_enabled) : _id(id) {
-        _term_builder.enabled(console_color_enabled);
+    source_buffer_t::source_buffer_t(id::type_t id) : _id(id) {
     }
 
     bool source_buffer_t::load(
@@ -85,79 +82,6 @@ namespace basecode::compiler::utf8 {
                 fmt::format("unable to open source file: {}", _path.string()));
         }
         return !r.is_failed();
-    }
-
-    void source_buffer_t::error(
-            result_t& r,
-            const std::string& code,
-            const std::string& message,
-            const source_location_t& location) const {
-        std::stringstream stream;
-
-        const auto number_of_lines = static_cast<int32_t>(_lines_by_number.size());
-        const auto target_line = static_cast<int32_t>(location.start.line);
-        const auto message_indicator = _term_builder.colorize(
-            "^ " + message,
-            terminal::colors_t::red);
-
-        auto start_line = static_cast<int32_t>(location.start.line - 4);
-        if (start_line < 0)
-            start_line = 0;
-
-        auto stop_line = static_cast<int32_t>(location.end.line + 4);
-        if (stop_line >= number_of_lines)
-            stop_line = number_of_lines;
-
-        for (int32_t i = start_line; i < stop_line; i++) {
-            const auto source_line = line_by_number(static_cast<size_t>(i));
-            if (source_line == nullptr)
-                break;
-            const auto source_text = substring(
-                source_line->begin,
-                source_line->end);
-            if (i == target_line) {
-                stream << fmt::format("{:04d}: ", i + 1)
-                       << _term_builder.colorize_range(
-                           source_text,
-                           location.start.column,
-                           location.end.column,
-                           terminal::colors_t::yellow,
-                           terminal::colors_t::blue)
-                       << "\n"
-                       << fmt::format("{}{}",
-                                      std::string(6 + location.start.column, ' '),
-                                      message_indicator);
-            } else {
-                stream << fmt::format("{:04d}: ", i + 1)
-                       << source_text;
-            }
-
-            if (i < static_cast<int32_t>(stop_line - 1))
-                stream << "\n";
-        }
-
-        if (!_path.empty()) {
-            r.error(
-                code,
-                fmt::format(
-                    "({}@{}:{}) {}",
-                    _path.filename().string(),
-                    location.start.line + 1,
-                    location.start.column + 1,
-                    message),
-                location,
-                stream.str());
-        } else {
-            r.error(
-                code,
-                fmt::format(
-                    "((anonymous source)@{}:{}) {}",
-                    location.start.line + 1,
-                    location.start.column + 1,
-                    message),
-                location,
-                stream.str());
-        }
     }
 
     void source_buffer_t::push_mark() {
@@ -236,8 +160,8 @@ namespace basecode::compiler::utf8 {
     }
 
     void source_buffer_t::index_lines(result_t& r) {
-        uint32_t line = 0;
-        uint32_t columns = 0;
+        int32_t line = 0;
+        int32_t columns = 0;
         size_t line_start = 0;
 
         while (true) {
@@ -286,11 +210,11 @@ namespace basecode::compiler::utf8 {
         return _buffer[index];
     }
 
-    uint32_t source_buffer_t::column_by_index(size_t index) const {
+    int32_t source_buffer_t::column_by_index(size_t index) const {
         auto line = line_by_index(index);
         if (line == nullptr)
             return 0;
-        return static_cast<const uint32_t>(index - line->begin);
+        return index - line->begin;
     }
 
     std::string_view source_buffer_t::substring(size_t start, size_t end) const {

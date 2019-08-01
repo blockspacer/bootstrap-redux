@@ -63,6 +63,8 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] bool is_xdigit() const;
 
+        [[nodiscard]] bool is_errored() const;
+
         [[nodiscard]] bool is_invalid() const;
 
         explicit operator std::size_t () const;
@@ -76,8 +78,6 @@ namespace basecode::compiler::utf8 {
         bool operator==(const rune_t& rhs) const;
 
         bool operator!=(const rune_t& rhs) const;
-
-        [[nodiscard]] bool is_eof_or_invalid() const;
 
     private:
         int32_t _value = 0xfffd;

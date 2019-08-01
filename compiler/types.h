@@ -52,8 +52,8 @@ namespace basecode::compiler {
     ///////////////////////////////////////////////////////////////////////////
 
     struct location_t final {
-        uint32_t line = 0;
-        uint32_t column = 0;
+        int32_t line = 0;
+        int32_t column = 0;
     };
 
     struct source_location_t final {

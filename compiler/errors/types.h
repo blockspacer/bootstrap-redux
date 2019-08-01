@@ -22,6 +22,8 @@
 #include <fmt/format.h>
 #include <compiler/types.h>
 #include <compiler/hashing/murmur.h>
+#include <compiler/utf8/source_buffer.h>
+#include <compiler/terminal/stream_builder.h>
 
 namespace basecode::compiler::errors {
 
@@ -142,6 +144,89 @@ namespace basecode::compiler::errors {
         }
 
         r.warning(decl->code, message, {}, decl->details);
+    }
+
+    template <typename... Args>
+    void add_source_highlighted_error(
+            result_t& r,
+            error_code_t code,
+            utf8::source_buffer_t& buffer,
+            const source_location_t& loc,
+            Args&&... args) {
+        auto decl = find_decl(code);
+        assert(decl != nullptr);
+
+        auto message = decl->message;
+        if (sizeof...(args) > 0)
+            message = fmt::format(message, std::forward<Args>(args)...);
+
+        fmt::memory_buffer stream;
+        terminal::stream_builder_t term{};
+        term.enabled(true);
+
+        const auto number_of_lines = buffer.number_of_lines();
+        const auto target_line = loc.start.line;
+        const auto message_indicator = term.colorize(
+            fmt::format("^ {}", message),
+            terminal::colors_t::red);
+
+        auto start_line = loc.start.line - 4;
+        if (start_line < 0)
+            start_line = 0;
+
+        auto stop_line = loc.end.line + 4;
+        if (stop_line >= number_of_lines)
+            stop_line = number_of_lines;
+
+        for (int32_t i = start_line; i < stop_line; i++) {
+            const auto source_line = buffer.line_by_number(i);
+            if (source_line == nullptr)
+                break;
+            const auto source_text = buffer.substring(
+                source_line->begin,
+                source_line->end);
+            if (!source_text.empty()) {
+                if (i == target_line) {
+                    fmt::format_to(stream, "{:8d}: ", i + 1);
+                    fmt::format_to(
+                        stream,
+                        "{}\n",
+                        term.colorize_range(
+                            source_text,
+                            loc.start.column,
+                            loc.end.column,
+                            terminal::colors_t::yellow,
+                            terminal::colors_t::blue));
+                    fmt::format_to(
+                        stream,
+                        "{}{}",
+                        std::string(10 + loc.start.column, ' '),
+                        message_indicator);
+                } else {
+                    fmt::format_to(stream, "{:8d}: {}", i + 1, source_text);
+                }
+            }
+            if (i < static_cast<int32_t>(stop_line - 1))
+                fmt::format_to(stream, "\n");
+        }
+
+        auto& path = buffer.path();
+        if (!path.empty()) {
+            message = fmt::format(
+                "({}@{}:{}) {}",
+                path.filename().string(),
+                loc.start.line + 1,
+                loc.start.column + 1,
+                message);
+        } else {
+            message = fmt::format(
+                "((anonymous source)@{}:{}) {}",
+                loc.start.line + 1,
+                loc.start.column + 1,
+                message);
+        }
+
+        r.error(decl->code, message, loc, fmt::to_string(stream));
     }
 
 }

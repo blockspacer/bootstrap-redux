@@ -76,6 +76,10 @@ namespace basecode::compiler::utf8 {
         return _value == rune_invalid._value;
     }
 
+    bool rune_t::is_errored() const {
+        return is_eof() || is_invalid();
+    }
+
     rune_t::operator int32_t() const {
         return _value;
     }
@@ -90,10 +94,6 @@ namespace basecode::compiler::utf8 {
         for (size_t j = 0; j < encode_result.width; j++)
             temp += static_cast<char>(encode_result.data[j]);
         return temp;
-    }
-
-    bool rune_t::is_eof_or_invalid() const {
-        return is_eof() || is_invalid();
     }
 
     rune_t& rune_t::operator=(int32_t rhs) {

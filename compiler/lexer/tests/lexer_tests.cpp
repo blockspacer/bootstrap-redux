@@ -25,7 +25,7 @@ namespace basecode {
 
     using namespace std::literals;
 
-    static void format_tokens(
+    [[maybe_unused]] static void format_tokens(
             basecode::compiler::workspace_t& workspace,
             compiler::entity_list_t& tokens) {
         for (auto entity : tokens) {
@@ -180,7 +180,7 @@ namespace basecode {
         compiler::lexer::lexer_t lexer(workspace, buffer);
         REQUIRE(!lexer.tokenize(r, tokens));
         REQUIRE(r.is_failed());
-        REQUIRE(r.messages()[0].message() == "unexpected letter immediately after decimal number");
+        REQUIRE(r.messages()[0].message() == "((anonymous source)@1:1) unexpected letter immediately after decimal number");
     }
 
 }

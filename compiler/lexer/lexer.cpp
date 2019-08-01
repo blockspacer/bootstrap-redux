@@ -305,9 +305,11 @@ namespace basecode::compiler::lexer {
             int64_t value;
             auto result = numbers::parse_integer(capture, radix, value);
             if (result != numbers::conversion_result_t::success) {
-                errors::add_error(
+                errors::add_source_highlighted_error(
                     r,
                     errors::lexer::unable_to_convert_integer_value,
+                    _buffer,
+                    make_location(start_pos, _buffer.pos()),
                     capture,
                     numbers::conversion_result_to_name(result));
                 return false;
@@ -315,7 +317,11 @@ namespace basecode::compiler::lexer {
 
             auto narrowed_size = narrow_type(value);
             if (!narrowed_size) {
-                errors::add_error(r, errors::lexer::unable_to_narrow_integer_value);
+                errors::add_source_highlighted_error(
+                    r,
+                    errors::lexer::unable_to_narrow_integer_value,
+                    _buffer,
+                    make_location(start_pos, _buffer.pos()));
                 return false;
             }
 
@@ -328,9 +334,11 @@ namespace basecode::compiler::lexer {
 
             auto result = numbers::parse_double(capture, value);
             if (result != numbers::conversion_result_t::success) {
-                errors::add_error(
+                errors::add_source_highlighted_error(
                     r,
                     errors::lexer::unable_to_convert_floating_point_value,
+                    _buffer,
+                    make_location(start_pos, _buffer.pos()),
                     capture,
                     numbers::conversion_result_to_name(result));
                 return false;
@@ -338,7 +346,11 @@ namespace basecode::compiler::lexer {
 
             auto narrowed_size = narrow_type(value);
             if (!narrowed_size) {
-                errors::add_error(r, errors::lexer::unable_to_narrow_floating_point_value);
+                errors::add_source_highlighted_error(
+                    r,
+                    errors::lexer::unable_to_narrow_floating_point_value,
+                    _buffer,
+                    make_location(start_pos, _buffer.pos()));
                 return false;
             }
 
@@ -361,11 +373,16 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer.pos();
 
         auto rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune != '_' && !rune.is_alpha()) {
-            errors::add_error(r, errors::lexer::invalid_identifier_start_character, rune);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::invalid_identifier_start_character,
+                _buffer,
+                make_location(start_pos, _buffer.pos()),
+                rune);
             return false;
         }
 
@@ -374,7 +391,7 @@ namespace basecode::compiler::lexer {
 
         while (true) {
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
 
             if (!rune.is_digit()
@@ -399,7 +416,7 @@ namespace basecode::compiler::lexer {
             lexeme_t* matched_lexeme = nullptr;
 
             auto rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
 
             if (rune.is_space()) {
@@ -428,16 +445,20 @@ namespace basecode::compiler::lexer {
                     return false;
 
                 rune = _buffer.curr(r);
-                if (rune.is_eof_or_invalid())
+                if (rune.is_errored())
                     return false;
             }
 
             if (matched_lexeme == nullptr) {
                 _buffer.restore_top_mark();
-                _buffer.pop_mark();
+                auto start_pos = _buffer.pop_mark();
 
                 if (!identifier(r, entities)) {
-                    errors::add_error(r, errors::lexer::expected_identifier);
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::expected_identifier,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()));
                     return false;
                 }
             } else {
@@ -488,31 +509,6 @@ namespace basecode::compiler::lexer {
             });
     }
 
-    bool lexer_t::scan_dec_digits(result_t& r, number_type_t& type) {
-        while (true) {
-            auto rune = _buffer.curr(r);
-
-            if (rune.is_eof_or_invalid())
-                return false;
-
-            if (rune == '.') {
-                if (type == number_type_t::floating_point) {
-                    errors::add_error(r, errors::lexer::unexpected_decimal_point);
-                    return false;
-                } else {
-                    type = number_type_t::floating_point;
-                }
-            } else if (rune == '_') {
-                // N.B. ignore
-            } else if (rune < 0x30 || rune > 0x39) {
-                break;
-            }
-            if (!_buffer.move_next(r))   return false;
-        }
-
-        return true;
-    }
-
     bool lexer_t::rune_literal(result_t& r, entity_list_t& entities) {
         // prefixed with '
         if (!_buffer.move_next(r)) return false;
@@ -520,13 +516,13 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer.pos();
 
         auto rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune == '\\') {
             if (!_buffer.move_next(r)) return false;
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
 
             auto extra_chars = 0;
@@ -572,11 +568,16 @@ namespace basecode::compiler::lexer {
         }
 
         rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune != '\'') {
-            errors::add_error(r, errors::lexer::expected_closing_single_quote, rune);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_closing_single_quote,
+                _buffer,
+                make_location(start_pos, _buffer.pos()),
+                rune);
             return false;
         }
 
@@ -605,7 +606,7 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer.pos();
         while (true) {
             auto rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '\n') break;
             if (!_buffer.move_next(r))
@@ -645,7 +646,7 @@ namespace basecode::compiler::lexer {
 
         while (true) {
             auto rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid()) 
+            if (rune.is_errored())
                 return false;
 
             if (rune == '/') {
@@ -720,7 +721,7 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer.pos();
         while (!should_exit) {
             auto rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '\"') should_exit = true;
             if (!_buffer.move_next(r))
@@ -742,12 +743,18 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::directive_literal(result_t& r, entity_list_t& entities) {
+        auto start_pos = _buffer.pos();
+
         auto rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune != '#') {
-            errors::add_error(r, errors::lexer::expected_directive_prefix);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_directive_prefix,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
@@ -770,12 +777,18 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::annotation_literal(result_t& r, entity_list_t& entities) {
+        auto start_pos = _buffer.pos();
+
         auto rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune != '@') {
-            errors::add_error(r, errors::lexer::expected_annotation_prefix);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_annotation_prefix,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
@@ -810,16 +823,20 @@ namespace basecode::compiler::lexer {
 
         auto start_pos = _buffer.pos();
 
-        if (!scan_dec_digits(r, type))
+        if (!scan_dec_digits(r, start_pos, type))
             return false;
 
         rune = _buffer.curr(r);
-        if (rune.is_eof_or_invalid())
+        if (rune.is_errored())
             return false;
 
         if (rune == 'e' || rune == 'E') {
             if (type != number_type_t::floating_point) {
-                errors::add_error(r, errors::lexer::exponent_notation_not_valid_for_integers);
+                errors::add_source_highlighted_error(
+                    r,
+                    errors::lexer::exponent_notation_not_valid_for_integers,
+                    _buffer,
+                    make_location(start_pos, _buffer.pos()));
                 return false;
             }
 
@@ -827,7 +844,7 @@ namespace basecode::compiler::lexer {
                 return false;
 
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
 
             if (rune == '-' || rune == '+') {
@@ -835,15 +852,15 @@ namespace basecode::compiler::lexer {
                     return false;
 
                 rune = _buffer.curr(r);
-                if (rune.is_eof_or_invalid())
+                if (rune.is_errored())
                     return false;
             }
 
-            if (!scan_dec_digits(r, type))
+            if (!scan_dec_digits(r, _buffer.pos(), type))
                 return false;
 
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
 
             if (rune == 'i') {
@@ -852,7 +869,11 @@ namespace basecode::compiler::lexer {
                 imaginary = true;
             }
         } else if (rune.is_alpha()) {
-            errors::add_error(r, errors::lexer::unexpected_letter_after_decimal_number_literal);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::unexpected_letter_after_decimal_number_literal,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
@@ -873,16 +894,22 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::hex_number_literal(result_t& r, entity_list_t& entities) {
+        auto start_pos = _buffer.pos();
+
         auto rune = _buffer.next(r);
         if (rune != '$') {
-            errors::add_error(r, errors::lexer::expected_hex_literal_prefix);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_hex_literal_prefix,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
-        auto start_pos = _buffer.pos();
+        start_pos = _buffer.pos();
         while (true) {
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '_') {
                 if (!_buffer.move_next(r))
@@ -891,7 +918,11 @@ namespace basecode::compiler::lexer {
             }
             if (!rune.is_xdigit()) {
                 if (rune.is_alpha()) {
-                    errors::add_error(r, errors::lexer::unexpected_letter_after_hexadecimal_number_literal);
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::unexpected_letter_after_hexadecimal_number_literal,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()));
                     return false;
                 }
                 break;
@@ -915,16 +946,22 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::octal_number_literal(result_t& r, entity_list_t& entities) {
+        auto start_pos = _buffer.pos();
+
         auto rune = _buffer.next(r);
         if (rune != '@') {
-            errors::add_error(r, errors::lexer::expected_octal_literal_prefix);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_octal_literal_prefix,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
-        auto start_pos = _buffer.pos();
+        start_pos = _buffer.pos();
         while (true) {
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '_') {
                 if (!_buffer.move_next(r))
@@ -933,7 +970,11 @@ namespace basecode::compiler::lexer {
             }
             if (rune < 0x30 || rune > 0x37) {
                 if (rune.is_alpha()) {
-                    errors::add_error(r, errors::lexer::unexpected_letter_after_octal_number_literal);
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::unexpected_letter_after_octal_number_literal,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()));
                     return false;
                 }
                 break;
@@ -956,16 +997,22 @@ namespace basecode::compiler::lexer {
     }
 
     bool lexer_t::binary_number_literal(result_t& r, entity_list_t& entities) {
+        auto start_pos = _buffer.pos();
+
         auto rune = _buffer.next(r);
         if (rune != '%') {
-            errors::add_error(r, errors::lexer::expected_binary_literal_prefix);
+            errors::add_source_highlighted_error(
+                r,
+                errors::lexer::expected_binary_literal_prefix,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
             return false;
         }
 
-        auto start_pos = _buffer.pos();
+        start_pos = _buffer.pos();
         while (true) {
             rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '_') {
                 if (!_buffer.move_next(r))
@@ -974,7 +1021,11 @@ namespace basecode::compiler::lexer {
             }
             if (rune < 0x30 || rune > 0x31) {
                 if (rune.is_alpha() || rune.is_digit()) {
-                    errors::add_error(r, errors::lexer::unexpected_letter_after_binary_number_literal);
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::unexpected_letter_after_binary_number_literal,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()));
                     return false;
                 }
                 break;
@@ -1005,18 +1056,23 @@ namespace basecode::compiler::lexer {
         auto start_pos = _buffer.pos();
         while (true) {
             auto rune = _buffer.curr(r);
-            if (rune.is_eof_or_invalid())
+            if (rune.is_errored())
                 return false;
             if (rune == '}') {
                 if (!_buffer.move_next(r))
                     return false;
 
                 rune = _buffer.curr(r);
-                if (rune.is_eof_or_invalid())
+                if (rune.is_errored())
                     return false;
 
                 if (rune != '}') {
-                    errors::add_error(r, errors::lexer::expected_closing_block_literal, rune);
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::expected_closing_block_literal,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()),
+                        rune);
                     return false;
                 }
 
@@ -1048,6 +1104,35 @@ namespace basecode::compiler::lexer {
         auto end_column = _buffer.column_by_index(end_pos);
 
         return {{end_line->line, end_column}, {start_line->line, start_column}};
+    }
+
+    bool lexer_t::scan_dec_digits(result_t& r, size_t start_pos, number_type_t& type) {
+        while (true) {
+            auto rune = _buffer.curr(r);
+
+            if (rune.is_errored())
+                return false;
+
+            if (rune == '.') {
+                if (type == number_type_t::floating_point) {
+                    errors::add_source_highlighted_error(
+                        r,
+                        errors::lexer::unexpected_decimal_point,
+                        _buffer,
+                        make_location(start_pos, _buffer.pos()));
+                    return false;
+                } else {
+                    type = number_type_t::floating_point;
+                }
+            } else if (rune == '_') {
+                // N.B. ignore
+            } else if (rune < 0x30 || rune > 0x39) {
+                break;
+            }
+            if (!_buffer.move_next(r))   return false;
+        }
+
+        return true;
     }
 
 }
