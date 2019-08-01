@@ -32,6 +32,7 @@ add_library(
         numbers/parse.cpp numbers/parse.h
 
         memory/pool.h
+        memory/allocator.h
 
         hashing/murmur.cpp hashing/murmur.h
 
