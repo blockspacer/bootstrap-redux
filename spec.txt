@@ -1,3 +1,198 @@
+The Basecode Programming Language
+=================================
+
+Types
+=====
+
+    Type
+    --------
+    The Type type will be a family:
+
+        Module_Info :: struct {
+            name: String;
+            path: String;
+        };
+
+        Type_Info :: struct {
+            name: String;
+            module: ^Module_Info;
+        };
+
+        Integer_Type_Info :: struct {
+            type:       ^Type_Info import;
+            signed:     bool;
+            min_value:  s64;
+            max_value:  u64;
+        };
+
+        Floating_Point_Type_Info :: struct {
+            type:       ^Type_Info import;
+        };
+
+        Field_Info :: struct {
+            type: Type;
+            name: String;
+        };
+
+        Aggregate_Type_Info :: struct {
+            type:       ^Type_Info import;
+            fields:     []^Field_Info;
+        };
+
+        Type :: family(Integer_Type_Info, Floating_Point_Type, Aggregate_Type_Info);
+
+    Integers
+    --------
+    u0          NOTE: equivalent to "void" in C/C++
+    u8,  s8
+    u16, s16
+    u32, s32
+    u64, s32
+
+    Boolean
+    --------
+    bool
+
+    Floating Point
+    --------------
+    f32
+    f64
+
+    Unicode/Character
+    -----------------
+    Rune
+
+    A rune will most likely be defined as a type alias:
+
+        Rune :: #type s32;
+
+    Variant
+    -------
+    Any
+
+    An Any will most likely be defined as so:
+
+        Any :: struct {
+            type:   ^Type;
+            value:  ^u0;
+        };
+
+    Ranges
+    ------
+    Range<T>
+
+    Slices
+    ------
+    Slice<T>
+
+    Procedures
+    ----------
+    proc
+
+    Aggregate
+    ----------
+    struct
+    union
+
+    Union
+    -----
+    family
+
+    Instances of a family type would be an Any.
+
+    Constants
+    ---------
+    enum
+
+    Pointers
+    --------
+    ^{type}
+
+    Fixed-Size Arrays
+    -----------------
+    [{size}]{type}
+
+    examples:
+        buffer: [32]u8;             // 32 bytes
+        grid:   [32][32]u8;         // a grid of bytes 32 x 32
+        cube:   [32][32][32]u8;     // a cube of bytes 32 x 32 x 32
+
+    Association/Pair
+    ----------------
+    Pair
+
+    notes:
+        A pair most likely will look like this:
+
+        Pair :: struct {
+            key:    Any;
+            value:  Any;
+        };
+
+    example: o: Pair := "oranges" => "are sweet!";
+
+Literals
+========
+
+    Strings
+    -------
+    These are interned and emitted into the read-only data heap
+    by the compiler and a slice<rune> is created to reference the value.  The compiler
+    adds a null byte at the end so that the string is compatible with C library functions.
+
+    For example:
+
+        hello_world :: "Hello World!";
+        #assert(#type hello_world == #type slice<rune>);
+
+    Runes
+    ------
+    Character literals, which are actually utf-8 encoded unicode values, can be created
+    as in this example:
+
+        the_letter_a :: Rune{"A"};
+
+        - or -
+
+        the_letter_a :: #rune "A";
+
+
+    Runes are interned at compile time and emitted into the read-only data heap by
+    the compiler.
+
+    Arrays
+    ------
+    Array literals can be declared like this:
+
+        numbers := []String {"one", "two", "three"};
+        fruits  := [3]String {"apple", "pear", "banana"};
+        cells   := [4][4]s32 {
+            { 0,  0, -1,  0},
+            {-1,  0,  0, -1},
+            { 0,  0, -1, -1},
+            {-1, -1, -1, -1}
+        };
+
+        Or, where the type is specified:
+
+        numbers: [3]String := {"one", "two", "three"};
+
+    Associative Arrays/Maps
+    -----------------------
+    Associative arrays can be created using the pair syntax, e.g.
+
+    roman_numerals: Map<s32, Rune> := {
+        1       => "I",
+        5       => "V",
+        10      => "X",
+        50      => "L",
+        100     => "C",
+        500     => "D",
+        1000    => "M"
+    };
+
+==============================================================================
+
 allocation/memory:
 ------------------
     alloc & free: default to intrinsic but can be overridden

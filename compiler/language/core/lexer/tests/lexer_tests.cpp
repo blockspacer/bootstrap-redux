@@ -42,7 +42,7 @@ namespace basecode {
         }
     }
 
-    TEST_CASE("lexer_t::tokenize detects radix prefixed numbers") {
+    TEST_CASE("lexer_t::tokenize number literals") {
         result_t r{};
         workspace_t workspace{};
         utf8::source_buffer_t buffer(0);
@@ -74,7 +74,7 @@ namespace basecode {
         REQUIRE(r.messages().empty());
     }
 
-    TEST_CASE("lexer_t::tokenize detects literals") {
+    TEST_CASE("lexer_t::tokenize comment literals") {
         result_t r{};
         workspace_t workspace{};
         utf8::source_buffer_t buffer(0);
@@ -92,23 +92,6 @@ namespace basecode {
             "       /* nesting is fun! */\n"
             "   */\n"
             "*/\n"
-            "{{\n"
-            "   .local foo\n"
-            "   move.qw foo, 256\n"
-            "   shl.w   foo, foo, 8\n"
-            "}}\n"
-            "\n"
-            "\n"
-            "\"this is a string literal \\n \\t \\b!\";\n"
-            "'A';\n"
-            "'\\a';\n"
-            "'\\b';\n"
-            "'\\n';\n"
-            "'\\\\';\n"
-            "'\\xa9';\n"
-            "'\\ufffe';\n"
-            "'\\Ueeffaaff';\n"
-            "'\\777';\n"
             ;
 
         REQUIRE(buffer.load(r, source));
@@ -120,7 +103,90 @@ namespace basecode {
         REQUIRE(r.messages().empty());
     }
 
-    TEST_CASE("lexer_t::tokenize detects identifiers") {
+    TEST_CASE("lexer_t::tokenize string literals") {
+        result_t r{};
+        workspace_t workspace{};
+        utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("{}", r));
+
+        const std::string source =
+            "{{\n"
+            "   .local foo\n"
+            "   move.qw foo, 256\n"
+            "   shl.w   foo, foo, 8\n"
+            "}}\n"
+            "\n"
+            "\n"
+            "\"this is a string literal \\n \\t \\b!\";\n"
+            "#rune \"A\";\n"
+            "#rune \"\\a\";\n"
+            "#rune \"\\b\";\n"
+            "#rune \"\\n\";\n"
+            "#rune \"\\\\\";\n"
+            "#rune \"\\xa9\";\n"
+            "#rune \"\\ufffe\";\n"
+            "#rune \"\\Ueeffaaff\";\n"
+            "#rune \"\\777\";\n"
+        ;
+
+        REQUIRE(buffer.load(r, source));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(workspace, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
+        REQUIRE(r.messages().empty());
+    }
+
+    TEST_CASE("lexer_t::tokenize directives") {
+        result_t r{};
+        workspace_t workspace{};
+        utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("{}", r));
+
+        const std::string source =
+            "#rune \"A\";\n"
+            "#assert(1 == 1);\n"
+            "#run some_user_proc();\n"
+            "#foreign { \n };\n"
+            "#run print(\"Hello, Sailor!\");\n"
+            "#eval 6 * 6 + 32;\n"
+        ;
+
+        REQUIRE(buffer.load(r, source));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(workspace, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
+        REQUIRE(r.messages().empty());
+    }
+
+    TEST_CASE("lexer_t::tokenize attributes") {
+        result_t r{};
+        workspace_t workspace{};
+        utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("{}", r));
+
+        const std::string source =
+            "@no_fold b := 3 * 3;\n"
+            "@library \"libopengl\";\n"
+            "@coroutine j :: proc();\n"
+        ;
+
+        REQUIRE(buffer.load(r, source));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(workspace, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
+        REQUIRE(r.messages().empty());
+    }
+
+    TEST_CASE("lexer_t::tokenize identifiers") {
         result_t r{};
         workspace_t workspace{};
         utf8::source_buffer_t buffer(0);
@@ -142,6 +208,8 @@ namespace basecode {
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
+
+        format_tokens(workspace, tokens);
     }
 
     TEST_CASE("lexer_t::tokenize keywords don't match inside identifiers") {

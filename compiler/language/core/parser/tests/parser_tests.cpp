@@ -19,6 +19,8 @@
 #include <catch2/catch.hpp>
 #include <compiler/defer.h>
 #include <compiler/formatters/formatters.h>
+#include <compiler/language/core/lexer/lexer.h>
+#include <compiler/language/core/parser/parser.h>
 
 namespace basecode {
 
@@ -26,5 +28,31 @@ namespace basecode {
     using namespace compiler;
     using namespace compiler::language::core;
 
+    TEST_CASE("lexer_t::tokenize identifiers") {
+        result_t r{};
+        workspace_t workspace{};
+        utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("{}", r));
+
+        const std::string source =
+            "@no_fold\n"
+            "foo: u8 := 33;\n"
+            "bar := foo * 16;\n"
+            "print(\"bar := {bar}\\n\");\n"
+            "#type foo;\n"
+        ;
+
+        REQUIRE(buffer.load(r, source));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(workspace, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
+        REQUIRE(r.messages().empty());
+
+        parser::parser_t parser(workspace, buffer, tokens);
+        REQUIRE(parser.initialize(r));
+    }
 
 }

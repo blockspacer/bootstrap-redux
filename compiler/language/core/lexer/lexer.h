@@ -92,17 +92,11 @@ namespace basecode::compiler::language::core::lexer {
     private:
         bool identifier(result_t& r, entity_list_t& entities);
 
-        bool rune_literal(result_t& r, entity_list_t& entities);
-
         bool line_comment(result_t& r, entity_list_t& entities);
 
         bool block_comment(result_t& r, entity_list_t& entities);
 
         bool string_literal(result_t& r, entity_list_t& entities);
-
-        bool directive_literal(result_t& r, entity_list_t& entities);
-
-        bool annotation_literal(result_t& r, entity_list_t& entities);
 
         bool dec_number_literal(result_t& r, entity_list_t& entities);
 

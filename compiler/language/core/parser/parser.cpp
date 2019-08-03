@@ -55,12 +55,6 @@ namespace basecode::compiler::language::core::parser {
         constant("false"sv, 0);
         constant("nil"sv, nullptr);
 
-        symbol(","sv);
-        symbol(";"sv);
-        symbol(")"sv);
-        symbol("}"sv);
-        symbol("]"sv);
-
         infix("+"sv, 10);
         infix("-"sv, 10);
         infix("*"sv, 20);
@@ -82,6 +76,8 @@ namespace basecode::compiler::language::core::parser {
         prefix("!");
         prefix("~");
         prefix("-");
+        prefix("@");
+        prefix("#");
         prefix("(", [&](auto r) {
             auto expr = expression(r);
             advance(")"sv);
