@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <compiler/utf8/reader.h>
-#include "stream_builder.h"
+#include "stream_factory.h"
 
 namespace basecode::compiler::terminal {
 
@@ -30,7 +30,7 @@ namespace basecode::compiler::terminal {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    std::string stream_builder_t::colorize(
+    std::string stream_factory_t::colorize(
         std::string_view text,
         colors_t fg_color,
         colors_t bg_color) const {
@@ -43,15 +43,15 @@ namespace basecode::compiler::terminal {
             color_code_reset());
     }
 
-    bool stream_builder_t::enabled() const {
+    bool stream_factory_t::enabled() const {
         return _enabled;
     }
 
-    void stream_builder_t::enabled(bool value) {
+    void stream_factory_t::enabled(bool value) {
         _enabled = value;
     }
 
-    std::string stream_builder_t::colorize_range(
+    std::string stream_factory_t::colorize_range(
             std::string_view text,
             size_t begin,
             size_t end,
@@ -95,7 +95,7 @@ namespace basecode::compiler::terminal {
         return colored_source.str();
     }
 
-    stream_unique_ptr_t stream_builder_t::use_stream(std::stringstream& stream) const {
+    stream_unique_ptr_t stream_factory_t::use_stream(std::stringstream& stream) const {
         if (_enabled)
             return stream_unique_ptr_t(new ansi_stream_t(stream));
         else

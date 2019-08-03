@@ -51,7 +51,7 @@ namespace basecode::compiler::utf8 {
 
     bool source_buffer_t::load(
             result_t& r,
-            const boost::filesystem::path& path) {
+            const path_t& path) {
         _path = path;
         _buffer.clear();
         _lines_by_number.clear();

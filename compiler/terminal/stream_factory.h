@@ -248,11 +248,11 @@ namespace basecode::compiler::terminal {
 
     using stream_unique_ptr_t = std::unique_ptr<stream_t>;
 
-    class stream_builder_t {
+    class stream_factory_t {
     public:
-        stream_builder_t() = default;
+        stream_factory_t() = default;
 
-        stream_builder_t(const stream_builder_t&) = delete;
+        stream_factory_t(const stream_factory_t&) = delete;
 
         void enabled(bool value);
 

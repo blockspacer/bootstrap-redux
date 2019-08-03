@@ -47,7 +47,7 @@ add_library(
         strings/transforms.cpp strings/transforms.h
         strings/escape_parser.cpp strings/escape_parser.h
 
-        terminal/stream_builder.cpp terminal/stream_builder.h
+        terminal/stream_factory.cpp terminal/stream_factory.h
 
         language/core/lexer/token.cpp language/core/lexer/token.h
         language/core/lexer/lexer.cpp language/core/lexer/lexer.h

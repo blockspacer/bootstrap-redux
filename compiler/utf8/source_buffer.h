@@ -25,7 +25,7 @@
 #include <compiler/types.h>
 #include <compiler/id/pool.h>
 #include <boost/filesystem.hpp>
-#include <compiler/terminal/stream_builder.h>
+#include <compiler/terminal/stream_factory.h>
 #include "reader.h"
 
 namespace basecode::compiler::utf8 {

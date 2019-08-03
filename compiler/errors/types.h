@@ -23,7 +23,7 @@
 #include <compiler/types.h>
 #include <compiler/hashing/murmur.h>
 #include <compiler/utf8/source_buffer.h>
-#include <compiler/terminal/stream_builder.h>
+#include <compiler/terminal/stream_factory.h>
 
 namespace basecode::compiler::errors {
 
@@ -165,7 +165,7 @@ namespace basecode::compiler::errors {
             message = fmt::format(message, std::forward<Args>(args)...);
 
         fmt::memory_buffer stream;
-        terminal::stream_builder_t term{};
+        terminal::stream_factory_t term{};
         term.enabled(true);
 
         const auto number_of_lines = buffer.number_of_lines();
