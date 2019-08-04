@@ -55,7 +55,7 @@ namespace basecode::compiler::memory {
 
         // reached the end of the buffer, wrap around to the beginning
         if (p > _end) {
-            h->size = (_end - (uint8_t*)h) | 0x80000000u;
+            h->size = _end - (uint8_t*) h | 0x80000000u;
 
             p = _begin;
             h = (header_t *)p;
