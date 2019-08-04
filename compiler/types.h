@@ -209,10 +209,4 @@ namespace basecode::compiler {
         result_message_t::list_t _messages {};
     };
 
-    ///////////////////////////////////////////////////////////////////////////
-
-    struct workspace_t final {
-        entt::registry registry{};
-    };
-
 }

@@ -30,7 +30,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize identifiers") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -46,12 +46,12 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
 
-        parser::parser_t parser(workspace, buffer, tokens);
+        parser::parser_t parser(session, buffer, tokens);
         REQUIRE(parser.initialize(r));
     }
 

@@ -21,7 +21,7 @@
 #include <utility>
 #include <compiler/types.h>
 #include <compiler/memory/pool.h>
-#include <compiler/utf8/source_buffer.h>
+#include <compiler/workspace/session.h>
 #include "token.h"
 
 namespace basecode::compiler::language::core::lexer {
@@ -84,7 +84,7 @@ namespace basecode::compiler::language::core::lexer {
     class lexer_t final {
     public:
         lexer_t(
-            workspace_t& workspace,
+            workspace::session_t& workspace,
             utf8::source_buffer_t& buffer);
 
         bool tokenize(result_t& r, entity_list_t& entities);
@@ -133,8 +133,8 @@ namespace basecode::compiler::language::core::lexer {
     private:
         static trie_t s_lexemes;
 
-        workspace_t& _workspace;
         utf8::source_buffer_t& _buffer;
+        workspace::session_t& _session;
     };
 
 }

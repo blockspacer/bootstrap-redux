@@ -28,14 +28,15 @@ namespace basecode {
     using namespace compiler::language::core;
 
     [[maybe_unused]] static void format_tokens(
-            basecode::compiler::workspace_t& workspace,
+            basecode::compiler::workspace::session_t& session,
             compiler::entity_list_t& tokens) {
+        auto& registry = session.registry();
         for (auto entity : tokens) {
-            const auto& token = workspace.registry.get<lexer::token_t>(entity);
-            const auto& source_location = workspace.registry.get<compiler::source_location_t>(entity);
+            const auto& token = registry.get<lexer::token_t>(entity);
+            const auto& source_location = registry.get<compiler::source_location_t>(entity);
             fmt::print("token = {}", token);
-            if (workspace.registry.has<lexer::number_token_t>(entity)) {
-                const auto& number_token = workspace.registry.get<lexer::number_token_t>(entity);
+            if (registry.has<lexer::number_token_t>(entity)) {
+                const auto& number_token = registry.get<lexer::number_token_t>(entity);
                 fmt::print(", number_token = {}", number_token);
             }
             fmt::print(", location = {}\n", source_location);
@@ -44,7 +45,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize number literals") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -68,7 +69,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -76,7 +77,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize comment literals") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -97,7 +98,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -105,7 +106,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize string literals") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -133,7 +134,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -141,7 +142,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize directives") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -158,7 +159,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -166,7 +167,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize attributes") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -180,7 +181,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -188,7 +189,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize identifiers") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -204,17 +205,17 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
 
-        format_tokens(workspace, tokens);
+        format_tokens(session, tokens);
     }
 
     TEST_CASE("lexer_t::tokenize keywords don't match inside identifiers") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -227,7 +228,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(lexer.tokenize(r, tokens));
         REQUIRE(!r.is_failed());
         REQUIRE(r.messages().empty());
@@ -235,7 +236,7 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize identifiers can't start with numbers") {
         result_t r{};
-        workspace_t workspace{};
+        workspace::session_t session{};
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));
@@ -247,7 +248,7 @@ namespace basecode {
         REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
-        lexer::lexer_t lexer(workspace, buffer);
+        lexer::lexer_t lexer(session, buffer);
         REQUIRE(!lexer.tokenize(r, tokens));
         REQUIRE(r.is_failed());
         REQUIRE(r.messages()[0].message() == "((anonymous source)@1:1) unexpected letter immediately after decimal number");

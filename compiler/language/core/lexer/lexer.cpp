@@ -215,9 +215,9 @@ namespace basecode::compiler::language::core::lexer {
     ///////////////////////////////////////////////////////////////////////////
 
     lexer_t::lexer_t(
-            workspace_t& workspace,
-            utf8::source_buffer_t& buffer) : _workspace(workspace),
-                                             _buffer(buffer) {
+            workspace::session_t& session,
+            utf8::source_buffer_t& buffer) : _buffer(buffer),
+                                             _session(session) {
     }
 
     bool lexer_t::make_number_token(
@@ -230,10 +230,12 @@ namespace basecode::compiler::language::core::lexer {
             number_type_t type,
             std::string_view capture,
             bool check_sign_bit) {
-        auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::literal, capture);
+        auto& registry = _session.registry();
 
-        auto& number_token = _workspace.registry.assign<number_token_t>(
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::literal, capture);
+
+        auto& number_token = registry.assign<number_token_t>(
             token,
             is_signed,
             imaginary,
@@ -297,7 +299,7 @@ namespace basecode::compiler::language::core::lexer {
             apply_narrowed_value(number_token, *narrowed_size, value);
         }
 
-        _workspace.registry.assign<source_location_t>(
+        registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer.pos()));
         entities.push_back(token);
@@ -351,6 +353,8 @@ namespace basecode::compiler::language::core::lexer {
     }
 
     bool lexer_t::tokenize(result_t& r, entity_list_t& entities) {
+        auto& registry = _session.registry();
+
         while (!_buffer.eof()) {
             trie_node_t* current_node = nullptr;
             lexeme_t* matched_lexeme = nullptr;
@@ -410,12 +414,12 @@ namespace basecode::compiler::language::core::lexer {
                 } else {
                     auto start_pos = _buffer.pop_mark();
                     auto end_pos = _buffer.pos();
-                    auto token = _workspace.registry.create();
-                    _workspace.registry.assign<token_t>(
+                    auto token = registry.create();
+                    registry.assign<token_t>(
                         token,
                         matched_lexeme->type,
                         _buffer.make_slice(start_pos, end_pos - start_pos));
-                    _workspace.registry.assign<source_location_t>(
+                    registry.assign<source_location_t>(
                         token,
                         make_location(start_pos, end_pos));
                     entities.push_back(token);
@@ -423,9 +427,9 @@ namespace basecode::compiler::language::core::lexer {
             }
         }
 
-        auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::end_of_input);
-        _workspace.registry.assign<source_location_t>(
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::end_of_input);
+        registry.assign<source_location_t>(
             token,
             make_location(_buffer.pos(), _buffer.pos()));
         entities.push_back(token);
@@ -439,9 +443,10 @@ namespace basecode::compiler::language::core::lexer {
             entities,
             token_type_t::identifier,
             [&](auto token_type, auto start_pos, auto end_pos, auto capture) {
-                auto token = _workspace.registry.create();
-                _workspace.registry.assign<token_t>(token, token_type, capture);
-                _workspace.registry.assign<source_location_t>(
+                auto& registry = _session.registry();
+                auto token = registry.create();
+                registry.assign<token_t>(token, token_type, capture);
+                registry.assign<source_location_t>(
                     token,
                     make_location(start_pos, end_pos));
                 entities.push_back(token);
@@ -468,10 +473,11 @@ namespace basecode::compiler::language::core::lexer {
             start_pos,
             _buffer.pos() - start_pos);
 
-        auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::comment, capture);
-        _workspace.registry.assign<line_comment_token_t>(token);
-        _workspace.registry.assign<source_location_t>(
+        auto& registry = _session.registry();
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::comment, capture);
+        registry.assign<line_comment_token_t>(token);
+        registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer.pos()));
         entities.push_back(token);
@@ -553,10 +559,11 @@ namespace basecode::compiler::language::core::lexer {
         auto end_pos = _buffer.pos() - 2;
         auto capture = _buffer.make_slice(start_pos, end_pos - start_pos);
 
-         auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::comment, capture);
-        _workspace.registry.assign<block_comment_token_t>(token, root.capture, root.children);
-        _workspace.registry.assign<source_location_t>(
+        auto& registry = _session.registry();
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::comment, capture);
+        registry.assign<block_comment_token_t>(token, root.capture, root.children);
+        registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));
         entities.push_back(token);
@@ -582,10 +589,12 @@ namespace basecode::compiler::language::core::lexer {
         auto end_pos = _buffer.pos() - 1;
         auto capture = _buffer.make_slice(start_pos, end_pos - start_pos);
 
-        auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace.registry.assign<string_literal_token_t>(token);
-        _workspace.registry.assign<source_location_t>(
+        auto& registry = _session.registry();
+
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::literal, capture);
+        registry.assign<string_literal_token_t>(token);
+        registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));
         entities.push_back(token);
@@ -868,10 +877,11 @@ namespace basecode::compiler::language::core::lexer {
         auto end_pos = _buffer.pos() - 2;
         auto capture = _buffer.make_slice(start_pos, end_pos - start_pos);
 
-        auto token = _workspace.registry.create();
-        _workspace.registry.assign<token_t>(token, token_type_t::literal, capture);
-        _workspace.registry.assign<block_literal_token_t>(token);
-        _workspace.registry.assign<source_location_t>(
+        auto& registry = _session.registry();
+        auto token = registry.create();
+        registry.assign<token_t>(token, token_type_t::literal, capture);
+        registry.assign<block_literal_token_t>(token);
+        registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));
         entities.push_back(token);

@@ -20,7 +20,7 @@
 
 #include <boost/any.hpp>
 #include <compiler/types.h>
-#include <compiler/utf8/source_buffer.h>
+#include <compiler/workspace/session.h>
 
 namespace basecode::compiler::language::core::parser {
 
@@ -63,7 +63,7 @@ namespace basecode::compiler::language::core::parser {
     class parser_t final {
     public:
         parser_t(
-            workspace_t& workspace,
+            workspace::session_t& session,
             utf8::source_buffer_t& buffer,
             entity_list_t tokens);
 
@@ -92,7 +92,7 @@ namespace basecode::compiler::language::core::parser {
     private:
         size_t _token_index{};
         entity_list_t _tokens;
-        workspace_t& _workspace;
+        workspace::session_t& _session;
         utf8::source_buffer_t& _buffer;
     };
 

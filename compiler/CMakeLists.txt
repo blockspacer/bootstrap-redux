@@ -23,6 +23,10 @@ add_library(
 
         memory/pool.h
         memory/allocator.h
+        memory/temp_allocator.h
+        memory/system.cpp memory/system.h
+        memory/system_allocator.cpp memory/system_allocator.h
+        memory/scratch_allocator.cpp memory/scratch_allocator.h
 
         id/pool.cpp id/pool.h
 
@@ -49,12 +53,15 @@ add_library(
 
         terminal/stream_factory.cpp terminal/stream_factory.h
 
+        language/core/ast/ast.cpp language/core/ast/ast.h
         language/core/lexer/token.cpp language/core/lexer/token.h
         language/core/lexer/lexer.cpp language/core/lexer/lexer.h
         language/core/parser/parser.cpp language/core/parser/parser.h
 
         threading/auto_reset_event.cpp threading/auto_reset_event.h
         threading/manual_reset_event.cpp threading/manual_reset_event.h
+
+        workspace/session.cpp workspace/session.h
 )
 target_link_libraries(
         ${PROJECT_NAME}

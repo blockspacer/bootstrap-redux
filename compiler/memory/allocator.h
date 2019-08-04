@@ -16,10 +16,22 @@
 //
 // ----------------------------------------------------------------------------
 
+#pragma once
+
 #include <cstdint>
 #include <optional>
 
 namespace basecode::compiler::memory {
+
+    inline void* align_forward(void* p, uint32_t align) {
+        auto pi = uintptr_t(p);
+        const uint32_t mod = pi % align;
+        if (mod)
+            pi += (align - mod);
+        return (void*) pi;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
 
     class allocator_t {
     public:

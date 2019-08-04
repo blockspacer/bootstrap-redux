@@ -23,10 +23,10 @@
 namespace basecode::compiler::language::core::parser {
 
     parser_t::parser_t(
-            workspace_t& workspace,
+            workspace::session_t& session,
             utf8::source_buffer_t& buffer,
             entity_list_t tokens) : _tokens(std::move(tokens)),
-                                    _workspace(workspace),
+                                    _session(session),
                                     _buffer(buffer) {
     }
 
@@ -62,8 +62,9 @@ namespace basecode::compiler::language::core::parser {
         infix("%"sv, 20);
 
         infix("["sv, 80, [&](auto r, auto lhs) {
-            auto ast_node = _workspace.registry.create();
-            auto& binary_op = _workspace.registry.assign<binary_op_t>(ast_node);
+            auto& registry = _session.registry();
+            auto ast_node = registry.create();
+            auto& binary_op = registry.assign<binary_op_t>(ast_node);
             binary_op.lhs = lhs;
             binary_op.rhs = expression(r, 0);
             advance("]"sv);
@@ -91,9 +92,10 @@ namespace basecode::compiler::language::core::parser {
     }
 
     bool parser_t::token(result_t& r, token_info_t& info) const {
+        auto& registry = _session.registry();
         info.token = _tokens[_token_index];
-        info.loc = _workspace.registry.get<source_location_t>(info.token);
-        info.atom = _workspace.registry.try_get<symbol_t>(info.token);
+        info.loc = registry.get<source_location_t>(info.token);
+        info.atom = registry.try_get<symbol_t>(info.token);
         if (!info.atom) {
             errors::add_source_highlighted_error(
                 r,

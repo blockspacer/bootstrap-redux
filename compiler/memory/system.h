@@ -16,17 +16,18 @@
 //
 // ----------------------------------------------------------------------------
 
-#define CATCH_CONFIG_RUNNER
-#include <catch2/catch.hpp>
-#include <compiler/defer.h>
-#include <compiler/memory/system.h>
+#pragma once
 
-using namespace basecode::compiler;
+#include "allocator.h"
 
-int main(int argc, char** argv) {
-    memory::initialize();
-    defer(memory::shutdown());
+namespace basecode::compiler::memory {
 
-    auto result = Catch::Session().run(argc, argv);
-    return (result < 0xff ? result : 0xff);
+    void shutdown();
+
+    allocator_t* default_allocator();
+
+    allocator_t* default_scratch_allocator();
+
+    void initialize(uint32_t scratch_buffer_size = 4*1024*1024);
+
 }

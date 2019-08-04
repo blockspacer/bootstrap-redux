@@ -16,17 +16,23 @@
 //
 // ----------------------------------------------------------------------------
 
-#define CATCH_CONFIG_RUNNER
-#include <catch2/catch.hpp>
-#include <compiler/defer.h>
-#include <compiler/memory/system.h>
+#pragma once
 
-using namespace basecode::compiler;
+#include <compiler/types.h>
+#include <compiler/utf8/source_buffer.h>
 
-int main(int argc, char** argv) {
-    memory::initialize();
-    defer(memory::shutdown());
+namespace basecode::compiler::workspace {
 
-    auto result = Catch::Session().run(argc, argv);
-    return (result < 0xff ? result : 0xff);
+    class session_t final {
+    public:
+        session_t() = default;
+
+        entt::registry& registry() {
+            return _registry;
+        }
+
+    private:
+        entt::registry _registry{};
+    };
+
 }

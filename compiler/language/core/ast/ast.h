@@ -16,17 +16,16 @@
 //
 // ----------------------------------------------------------------------------
 
-#define CATCH_CONFIG_RUNNER
-#include <catch2/catch.hpp>
-#include <compiler/defer.h>
-#include <compiler/memory/system.h>
+#pragma once
 
-using namespace basecode::compiler;
+#include <compiler/types.h>
 
-int main(int argc, char** argv) {
-    memory::initialize();
-    defer(memory::shutdown());
+namespace basecode::compiler::language::core::ast {
 
-    auto result = Catch::Session().run(argc, argv);
-    return (result < 0xff ? result : 0xff);
+    struct module_t final {
+        path_t path;
+        std::string_view name{};
+    };
+
+
 }

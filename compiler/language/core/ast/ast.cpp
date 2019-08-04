@@ -16,17 +16,8 @@
 //
 // ----------------------------------------------------------------------------
 
-#define CATCH_CONFIG_RUNNER
-#include <catch2/catch.hpp>
-#include <compiler/defer.h>
-#include <compiler/memory/system.h>
+#include "ast.h"
 
-using namespace basecode::compiler;
+namespace basecode::compiler::language::core::ast {
 
-int main(int argc, char** argv) {
-    memory::initialize();
-    defer(memory::shutdown());
-
-    auto result = Catch::Session().run(argc, argv);
-    return (result < 0xff ? result : 0xff);
 }
