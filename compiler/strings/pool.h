@@ -18,32 +18,32 @@
 
 #pragma once
 
-#include <compiler/types.h>
-#include <compiler/strings/pool.h>
-#include <compiler/utf8/source_buffer.h>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <compiler/memory/allocator.h>
 
-namespace basecode::compiler::workspace {
+namespace basecode::compiler::strings {
 
-    struct session_options_t final {
-        uint32_t intern_string_block_size = 64*1024;
-    };
-
-    class session_t final {
+    class pool_t final {
     public:
-        explicit session_t(const session_options_t& options);
-
-        entt::registry& registry() {
-            return _registry;
-        }
+        explicit pool_t(
+            memory::allocator_t* allocator,
+            uint32_t block_size = 64*1024);
 
         std::string_view intern(std::string_view value);
 
         std::string_view intern(const std::string& value);
 
     private:
-        entt::registry _registry{};
-        const session_options_t& _options;
-        strings::pool_t _interned_strings;
+        char* next_data_pointer(uint32_t length);
+
+    private:
+        char* _block{};
+        uint32_t _block_size;
+        uint32_t _block_offset{};
+        memory::allocator_t* _allocator;
+        std::unordered_map<uint64_t, std::string_view> _index{};
     };
 
 }

@@ -83,6 +83,7 @@ namespace basecode::compiler::language::core::lexer {
 
         {"#"sv,           lexeme_t{.type = token_type_t::punctuation}},
         {"@"sv,           lexeme_t{.type = token_type_t::punctuation}},
+        {"'"sv,           lexeme_t{.type = token_type_t::punctuation}},
         {":"sv,           lexeme_t{.type = token_type_t::punctuation}},
         {";"sv,           lexeme_t{.type = token_type_t::punctuation}},
         {","sv,           lexeme_t{.type = token_type_t::punctuation}},

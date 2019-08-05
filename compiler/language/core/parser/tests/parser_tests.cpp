@@ -30,7 +30,8 @@ namespace basecode {
 
     TEST_CASE("lexer_t::tokenize identifiers") {
         result_t r{};
-        workspace::session_t session{};
+        workspace::session_options_t options{};
+        workspace::session_t session(options);
         utf8::source_buffer_t buffer(0);
 
         defer(fmt::print("{}", r));

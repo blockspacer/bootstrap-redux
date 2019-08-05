@@ -8,6 +8,9 @@ QUESTIONS
 
 TASKS
 ------------
+- FIX: result_t & result_message_t are using std::string, which is creating copies.
+        need to refactor to use std::string_view and plumb in strings::pool_t
+        to ensure the values are interned.
 
 DONE
 ------------

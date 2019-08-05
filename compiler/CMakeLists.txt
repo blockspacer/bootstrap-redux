@@ -17,7 +17,7 @@ add_library(
 
         defer.h
 
-        graph/directed.h
+        data/directed.h
 
         types.cpp types.h
 
@@ -48,6 +48,7 @@ add_library(
         utf8/reader.cpp utf8/reader.h
         utf8/source_buffer.cpp utf8/source_buffer.h
 
+        strings/pool.cpp strings/pool.h
         strings/transforms.cpp strings/transforms.h
         strings/escape_parser.cpp strings/escape_parser.h
 

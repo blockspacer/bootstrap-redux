@@ -25,7 +25,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace basecode::compiler::graph {
+namespace basecode::compiler::data {
 
     template <typename V>
     struct directed_edge_t {
