@@ -135,6 +135,7 @@ namespace basecode::compiler::language::core::lexer {
         {"rol"sv,         lexeme_t{.type = token_type_t::operator_}},
         {"ror"sv,         lexeme_t{.type = token_type_t::operator_}},
 
+        {"_"sv,           lexeme_t{.type = token_type_t::keyword}},
         {"if"sv,          lexeme_t{.type = token_type_t::keyword}},
         {"ns"sv,          lexeme_t{.type = token_type_t::keyword}},
         {"for"sv,         lexeme_t{.type = token_type_t::keyword}},

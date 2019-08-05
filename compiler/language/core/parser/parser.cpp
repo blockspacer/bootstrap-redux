@@ -64,9 +64,9 @@ namespace basecode::compiler::language::core::parser {
         infix("["sv, 80, [&](auto r, auto lhs) {
             auto& registry = _session.registry();
             auto ast_node = registry.create();
-            auto& binary_op = registry.assign<binary_op_t>(ast_node);
-            binary_op.lhs = lhs;
-            binary_op.rhs = expression(r, 0);
+            auto& op = registry.assign<ast::binary_operator_t>(ast_node);
+            op.lhs = lhs;
+            op.rhs = expression(r, 0);
             advance("]"sv);
             return ast_node;
         });

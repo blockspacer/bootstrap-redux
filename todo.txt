@@ -11,6 +11,14 @@ TASKS
 - FIX: result_t & result_message_t are using std::string, which is creating copies.
         need to refactor to use std::string_view and plumb in strings::pool_t
         to ensure the values are interned.
+- FIX: how to handle expression return values for normal loop termination?
+        // i: s32;
+        // result := while i < 10 {
+        //   print("i = {i}\n");
+        //   i +:= 1;
+        // };
+
+        what is result here?
 
 DONE
 ------------

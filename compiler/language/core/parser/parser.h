@@ -21,6 +21,7 @@
 #include <boost/any.hpp>
 #include <compiler/types.h>
 #include <compiler/workspace/session.h>
+#include <compiler/language/core/ast/ast.h>
 
 namespace basecode::compiler::language::core::parser {
 
@@ -37,19 +38,6 @@ namespace basecode::compiler::language::core::parser {
         nud_callback_t nud{};
         led_callback_t led{};
         std::string_view token{};
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    struct unary_op_t final {
-        entt::entity lhs;
-        entt::entity symbol;
-    };
-
-    struct binary_op_t final {
-        entt::entity lhs;
-        entt::entity rhs;
-        entt::entity symbol;
     };
 
     ///////////////////////////////////////////////////////////////////////////

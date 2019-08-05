@@ -47,6 +47,7 @@ namespace basecode::compiler {
     using uuid_t = boost::uuids::uuid;
 
     // entity aliases
+    using entity_t = entt::entity;
     using entity_list_t = std::vector<entt::entity>;
 
     ///////////////////////////////////////////////////////////////////////////
