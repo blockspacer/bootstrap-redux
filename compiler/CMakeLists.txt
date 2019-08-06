@@ -77,5 +77,6 @@ target_link_libraries(
         mstch
 )
 
+add_subdirectory(data/tests)
 add_subdirectory(language/core/lexer/tests)
 add_subdirectory(language/core/parser/tests)

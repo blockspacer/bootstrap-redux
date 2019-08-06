@@ -46,61 +46,76 @@ namespace basecode::compiler::data {
                 _allocator->deallocate(_data);
         }
 
+        array_t(const array_t& other) : _size(other._size),
+                                        _capacity(other._capacity),
+                                        _allocator(other._allocator) {
+            adjust_capacity(_capacity);
+            std::memcpy(_data, other._data, _capacity * sizeof(T));
+        }
+
+        T* end() {
+            return _data + _size;
+        }
+
+        T* begin() {
+            return _data;
+        }
+
         void reset() {
-            std::memset(_data, 0, _capacity);
+            std::memset(_data, 0, _capacity * sizeof(T));
             _size = 0;
         }
 
         void add(T&& value) {
-            const auto value_size = numbers::align(sizeof(T), alignof(T));
-            const auto offset = _size * value_size;
-            if (offset + value_size > _capacity)
+            if (_size + 1 > _capacity)
                 adjust_capacity();
-            uint64_t addr = reinterpret_cast<uint64_t>(_data) + offset;
-            auto data = reinterpret_cast<T*>(addr);
-            *data = value;
-            ++_size;
+            _data[_size++] = value;
+        }
+
+        const T* end() const {
+            return _data + _size;
+        }
+
+        const T* begin() const {
+            return _data;
         }
 
         T& operator[](size_t index) {
-            const auto value_size = numbers::align(sizeof(T), alignof(T));
-            const auto offset = index * value_size;
-            uint64_t addr = reinterpret_cast<uint64_t>(_data) + offset;
-            return *(reinterpret_cast<T*>(addr));
+            return _data[index];
         }
 
-        // N.B. this function does not shrink the array if element_count < _size
-        void resize(size_t element_count) {
+        [[nodiscard]] bool empty() const {
+            return _size == 0;
+        }
+
+        void resize(uint32_t element_count) {
             reserve(element_count);
             for (size_t i = 0; i < element_count; i++)
-                add(T{});
+                _data[i] = T{};
             _size = element_count;
         }
 
-        void reserve(size_t element_count) {
-            if (element_count == 0) return;
-
-            const auto value_size = numbers::align(sizeof(T), alignof(T));
-            auto new_capacity = numbers::next_power_of_two(value_size * element_count);
-            if (new_capacity > _capacity) {
-                adjust_capacity(new_capacity);
-            }
-        }
-
-        [[nodiscard]] size_t size() const {
+        [[nodiscard]] uint32_t size() const {
             return _size;
         }
 
-        [[nodiscard]] size_t capacity() const {
+        void reserve(uint32_t element_count) {
+            if (element_count == 0
+            ||  element_count == _capacity) {
+                return;
+            }
+            adjust_capacity(element_count);
+        }
+
+        [[nodiscard]] uint32_t capacity() const {
             return _capacity;
         }
 
-        array_t& operator = (array_t&& other) noexcept {
-            // XXX: it would be nice to assert that the other type is equivalent to our array type
-            //static_assert(
-            //    std::is_same<decltype(this), decltype(other)>::value,
-            //    "arrays must be of equivalent type");
+        const T& operator[](size_t index) const {
+            return _data[index];
+        }
 
+        array_t& operator = (array_t&& other) noexcept {
             assert(_allocator == other._allocator);
 
             // free any memory we're already using
@@ -119,25 +134,22 @@ namespace basecode::compiler::data {
     private:
         void insert(std::initializer_list<T> elements) {
             reserve(elements.size());
-            for (auto& e : elements) add(e);
+            for (const auto& e : elements)
+                _data[_size++] = e;
         }
 
-        void adjust_capacity(std::optional<size_t> target_capacity = {}) {
-            const auto value_size = numbers::align(sizeof(T), alignof(T));
+        void adjust_capacity(std::optional<uint32_t> target_capacity = {}) {
             if (!_data) {
                 _size = 0;
-                _capacity = target_capacity ?
-                    *target_capacity :
-                    numbers::next_power_of_two(value_size * 16);
-                _data = static_cast<T*>(_allocator->allocate(_capacity));
+                _capacity = target_capacity ? *target_capacity : 16;
+                auto new_size = numbers::next_power_of_two(_capacity) * sizeof(T);
+                _data = static_cast<T*>(_allocator->allocate(new_size, alignof(T)));
             } else {
-                auto new_capacity = target_capacity ?
-                    *target_capacity :
-                    numbers::next_power_of_two(_capacity);
-                auto new_data = _allocator->allocate(new_capacity, alignof(T));
+                _capacity = target_capacity ? *target_capacity : _capacity;
+                auto new_size = numbers::next_power_of_two(_capacity) * sizeof(T);
+                auto new_data = _allocator->allocate(new_size, alignof(T));
                 std::memcpy(new_data, _data, _capacity);
                 _allocator->deallocate(_data);
-                _capacity = new_capacity;
                 _data = static_cast<T*>(new_data);
             }
         }
