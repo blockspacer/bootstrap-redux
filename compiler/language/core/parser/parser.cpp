@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <utility>
-#include <compiler/errors/types.h>
+#include <compiler/errors/errors.h>
 #include "parser.h"
 
 namespace basecode::compiler::language::core::parser {
@@ -99,6 +99,7 @@ namespace basecode::compiler::language::core::parser {
         if (!info.atom) {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::parser::invalid_token,
                 _buffer,
                 info.loc);

@@ -21,6 +21,7 @@
 #include <compiler/types.h>
 #include <compiler/strings/pool.h>
 #include <compiler/utf8/source_buffer.h>
+#include <compiler/memory/block_allocator.h>
 
 namespace basecode::compiler::workspace {
 
@@ -36,14 +37,15 @@ namespace basecode::compiler::workspace {
             return _registry;
         }
 
-        std::string_view intern(std::string_view value);
-
-        std::string_view intern(const std::string& value);
+        strings::pool_t& intern_pool() {
+            return _intern_pool;
+        }
 
     private:
         entt::registry _registry{};
+        strings::pool_t _intern_pool;
         const session_options_t& _options;
-        strings::pool_t _interned_strings;
+        memory::block_allocator_t<64*1024, 32> _intern_allocator{};
     };
 
 }

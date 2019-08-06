@@ -24,6 +24,7 @@ add_library(
         memory/pool.h
         memory/allocator.h
         memory/temp_allocator.h
+        memory/block_allocator.h
         memory/system.cpp memory/system.h
         memory/system_allocator.cpp memory/system_allocator.h
         memory/scratch_allocator.cpp memory/scratch_allocator.h
@@ -35,7 +36,7 @@ add_library(
 
         formatters/formatters.h
 
-        errors/types.cpp errors/types.h
+        errors/errors.cpp errors/errors.h
 
         signals/hook.cpp signals/hook.h
 

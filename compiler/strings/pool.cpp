@@ -32,7 +32,7 @@ namespace basecode::compiler::strings {
 
         if (_block == nullptr
         ||  _block_offset > _block_size) {
-            _block = (char*)_allocator->allocate(_block_size, 1);
+            _block = (char*)_allocator->allocate(_block_size);
             _block_offset = 0;
         }
 

@@ -78,14 +78,14 @@ namespace basecode::compiler {
         };
 
         result_message_t(
-            std::string code,
-            std::string message,
+            std::string_view code,
+            std::string_view message,
             const source_location_t& loc = {},
-            std::string details = "",
+            std::string_view details = "",
             types type = types::info) : _type(type),
-                                        _code(std::move(code)),
-                                        _message(std::move(message)),
-                                        _details(std::move(details)),
+                                        _code(code),
+                                        _message(message),
+                                        _details(details),
                                         _location(loc) {
         }
 
@@ -97,15 +97,15 @@ namespace basecode::compiler {
             return _type == types::error;
         }
 
-        [[nodiscard]] inline const std::string& code() const {
+        [[nodiscard]] inline std::string_view code() const {
             return _code;
         }
 
-        [[nodiscard]] inline const std::string& details() const {
+        [[nodiscard]] inline std::string_view details() const {
             return _details;
         }
 
-        [[nodiscard]] inline const std::string& message() const {
+        [[nodiscard]] inline std::string_view message() const {
             return _message;
         }
 
@@ -115,9 +115,9 @@ namespace basecode::compiler {
 
     private:
         types _type;
-        std::string _code{};
-        std::string _message {};
-        std::string _details {};
+        std::string_view _code{};
+        std::string_view _message {};
+        std::string_view _details {};
         source_location_t _location {};
     };
 
@@ -136,10 +136,10 @@ namespace basecode::compiler {
         }
 
         inline void info(
-                const std::string& code,
-                const std::string& message,
+                std::string_view code,
+                std::string_view message,
                 const source_location_t& loc = {},
-                const std::string& details = {}) {
+                std::string_view details = {}) {
             _messages.emplace_back(
                 code,
                 message,
@@ -149,10 +149,10 @@ namespace basecode::compiler {
         }
 
         inline void error(
-                const std::string& code,
-                const std::string& message,
+                std::string_view code,
+                std::string_view message,
                 const source_location_t& loc = {},
-                const std::string& details = {}) {
+                std::string_view details = {}) {
             _messages.emplace_back(
                 code,
                 message,
@@ -163,10 +163,10 @@ namespace basecode::compiler {
         }
 
         inline void warning(
-                const std::string& code,
-                const std::string& message,
+                std::string_view code,
+                std::string_view message,
                 const source_location_t& loc = {},
-                const std::string& details = {}) {
+                std::string_view details = {}) {
             _messages.emplace_back(
                 code,
                 message,
@@ -175,7 +175,7 @@ namespace basecode::compiler {
                 result_message_t::types::warning);
         }
 
-        void remove_code(const std::string& code) {
+        void remove_code(std::string_view code) {
             for (auto it = _messages.begin(); it != _messages.end(); ++it) {
                 if ((*it).code() == code)
                     it = _messages.erase(it);
@@ -186,7 +186,7 @@ namespace basecode::compiler {
             return !_success;
         }
 
-        [[nodiscard]] inline bool has_code(const std::string& code) const {
+        [[nodiscard]] inline bool has_code(std::string_view code) const {
             for (const auto& msg : _messages)
                 if (msg.code() == code)
                     return true;
@@ -197,7 +197,7 @@ namespace basecode::compiler {
             return _messages;
         }
 
-        [[nodiscard]] inline const result_message_t* find_code(const std::string& code) const {
+        [[nodiscard]] inline const result_message_t* find_code(std::string_view code) const {
             for (const auto& _message : _messages) {
                 if (_message.code() == code)
                     return &_message;

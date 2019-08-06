@@ -21,6 +21,7 @@
 #include <locale>
 #include <fmt/format.h>
 #include <compiler/types.h>
+#include <compiler/strings/pool.h>
 #include <compiler/hashing/murmur.h>
 #include <compiler/utf8/source_buffer.h>
 #include <compiler/terminal/stream_factory.h>
@@ -80,79 +81,104 @@ namespace basecode::compiler::errors {
     template <typename... Args>
     void add_error(
             result_t& r,
+            strings::pool_t& intern_pool,
             error_code_t code,
             const source_location_t& loc,
             Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
         if (sizeof...(args) > 0) {
-            message = fmt::format(message, std::forward<Args>(args)...);
+            auto formatted_message = intern_pool.intern(fmt::format(
+                decl->message,
+                std::forward<Args>(args)...));
+            r.error(decl->code, formatted_message, loc, decl->details);
+        } else {
+            r.error(decl->code, decl->message, loc, decl->details);
         }
-
-        r.error(decl->code, message, loc, decl->details);
     }
 
     template <typename... Args>
     void add_warning(
             result_t& r,
+            strings::pool_t& intern_pool,
             error_code_t code,
             const source_location_t& loc,
             Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
         if (sizeof...(args) > 0) {
-            message = fmt::format(message, std::forward<Args>(args)...);
+            auto formatted_message = intern_pool.intern(fmt::format(
+                decl->message,
+                std::forward<Args>(args)...));
+            r.warning(decl->code, formatted_message, loc, decl->details);
+        } else {
+            r.warning(decl->code, decl->message, loc, decl->details);
         }
-
-        r.warning(decl->code, message, loc, decl->details);
     }
 
     template <typename... Args>
-    void add_info(result_t& r, error_code_t code, Args&&... args) {
+    void add_info(
+            result_t& r,
+            strings::pool_t& intern_pool,
+            error_code_t code,
+            Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
         if (sizeof...(args) > 0) {
-            message = fmt::format(message, std::forward<Args>(args)...);
+            auto formatted_message = intern_pool.intern(fmt::format(
+                decl->message,
+                std::forward<Args>(args)...));
+            r.info(decl->code, formatted_message, {}, decl->details);
+        } else {
+            r.info(decl->code, decl->message, {}, decl->details);
         }
-
-        r.info(decl->code, message, {}, decl->details);
     }
 
     template <typename... Args>
-    void add_error(result_t& r, error_code_t code, Args&&... args) {
+    void add_error(
+            result_t& r,
+            strings::pool_t& intern_pool,
+            error_code_t code,
+            Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
         if (sizeof...(args) > 0) {
-            message = fmt::format(message, std::forward<Args>(args)...);
+            auto formatted_message = intern_pool.intern(fmt::format(
+                decl->message,
+                std::forward<Args>(args)...));
+            r.error(decl->code, formatted_message, {}, decl->details);
+        } else {
+            r.error(decl->code, decl->message, {}, decl->details);
         }
-
-        r.error(decl->code, message, {}, decl->details);
     }
 
     template <typename... Args>
-    void add_warning(result_t& r, error_code_t code, Args&&... args) {
+    void add_warning(
+            result_t& r,
+            strings::pool_t& intern_pool,
+            error_code_t code,
+            Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
         if (sizeof...(args) > 0) {
-            message = fmt::format(message, std::forward<Args>(args)...);
+            auto formatted_message = intern_pool.intern(fmt::format(
+                decl->message,
+                std::forward<Args>(args)...));
+            r.warning(decl->code, formatted_message, {}, decl->details);
+        } else {
+            r.warning(decl->code, decl->message, {}, decl->details);
         }
-
-        r.warning(decl->code, message, {}, decl->details);
     }
 
     template <typename... Args>
     void add_source_highlighted_error(
             result_t& r,
+            strings::pool_t& intern_pool,
             error_code_t code,
             utf8::source_buffer_t& buffer,
             const source_location_t& loc,
@@ -230,7 +256,9 @@ namespace basecode::compiler::errors {
                 message);
         }
 
-        r.error(decl->code, message, loc, fmt::to_string(stream));
+        auto interned_message = intern_pool.intern(message);
+        auto interned_details = intern_pool.intern(fmt::to_string(stream));
+        r.error(decl->code, interned_message, loc, interned_details);
     }
 
 }

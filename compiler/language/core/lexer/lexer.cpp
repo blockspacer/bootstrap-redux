@@ -16,7 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <compiler/errors/types.h>
+#include <compiler/errors/errors.h>
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
 #include <compiler/formatters/formatters.h>
@@ -251,6 +251,7 @@ namespace basecode::compiler::language::core::lexer {
             if (result != numbers::conversion_result_t::success) {
                 errors::add_source_highlighted_error(
                     r,
+                    _session.intern_pool(),
                     errors::lexer::unable_to_convert_integer_value,
                     _buffer,
                     make_location(start_pos, _buffer.pos()),
@@ -263,6 +264,7 @@ namespace basecode::compiler::language::core::lexer {
             if (!narrowed_size) {
                 errors::add_source_highlighted_error(
                     r,
+                    _session.intern_pool(),
                     errors::lexer::unable_to_narrow_integer_value,
                     _buffer,
                     make_location(start_pos, _buffer.pos()));
@@ -280,6 +282,7 @@ namespace basecode::compiler::language::core::lexer {
             if (result != numbers::conversion_result_t::success) {
                 errors::add_source_highlighted_error(
                     r,
+                    _session.intern_pool(),
                     errors::lexer::unable_to_convert_floating_point_value,
                     _buffer,
                     make_location(start_pos, _buffer.pos()),
@@ -292,6 +295,7 @@ namespace basecode::compiler::language::core::lexer {
             if (!narrowed_size) {
                 errors::add_source_highlighted_error(
                     r,
+                    _session.intern_pool(),
                     errors::lexer::unable_to_narrow_floating_point_value,
                     _buffer,
                     make_location(start_pos, _buffer.pos()));
@@ -323,6 +327,7 @@ namespace basecode::compiler::language::core::lexer {
         if (rune != '_' && !rune.is_alpha()) {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::lexer::invalid_identifier_start_character,
                 _buffer,
                 make_location(start_pos, _buffer.pos()),
@@ -402,6 +407,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (!identifier(r, entities)) {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::expected_identifier,
                         _buffer,
                         make_location(start_pos, _buffer.pos()));
@@ -628,6 +634,7 @@ namespace basecode::compiler::language::core::lexer {
             if (type != number_type_t::floating_point) {
                 errors::add_source_highlighted_error(
                     r,
+                    _session.intern_pool(),
                     errors::lexer::exponent_notation_not_valid_for_integers,
                     _buffer,
                     make_location(start_pos, _buffer.pos()));
@@ -665,6 +672,7 @@ namespace basecode::compiler::language::core::lexer {
         } else if (rune.is_alpha()) {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::lexer::unexpected_letter_after_decimal_number_literal,
                 _buffer,
                 make_location(start_pos, _buffer.pos()));
@@ -694,6 +702,7 @@ namespace basecode::compiler::language::core::lexer {
         if (rune != '$') {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::lexer::expected_hex_literal_prefix,
                 _buffer,
                 make_location(start_pos, _buffer.pos()));
@@ -714,6 +723,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (rune.is_alpha()) {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::unexpected_letter_after_hexadecimal_number_literal,
                         _buffer,
                         make_location(start_pos, _buffer.pos()));
@@ -746,6 +756,7 @@ namespace basecode::compiler::language::core::lexer {
         if (rune != '@') {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::lexer::expected_octal_literal_prefix,
                 _buffer,
                 make_location(start_pos, _buffer.pos()));
@@ -766,6 +777,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (rune.is_alpha()) {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::unexpected_letter_after_octal_number_literal,
                         _buffer,
                         make_location(start_pos, _buffer.pos()));
@@ -797,6 +809,7 @@ namespace basecode::compiler::language::core::lexer {
         if (rune != '%') {
             errors::add_source_highlighted_error(
                 r,
+                _session.intern_pool(),
                 errors::lexer::expected_binary_literal_prefix,
                 _buffer,
                 make_location(start_pos, _buffer.pos()));
@@ -817,6 +830,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (rune.is_alpha() || rune.is_digit()) {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::unexpected_letter_after_binary_number_literal,
                         _buffer,
                         make_location(start_pos, _buffer.pos()));
@@ -863,6 +877,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (rune != '}') {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::expected_closing_block_literal,
                         _buffer,
                         make_location(start_pos, _buffer.pos()),
@@ -912,6 +927,7 @@ namespace basecode::compiler::language::core::lexer {
                 if (type == number_type_t::floating_point) {
                     errors::add_source_highlighted_error(
                         r,
+                        _session.intern_pool(),
                         errors::lexer::unexpected_decimal_point,
                         _buffer,
                         make_location(start_pos, _buffer.pos()));
