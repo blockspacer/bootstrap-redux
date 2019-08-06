@@ -20,10 +20,11 @@
 
 #include <set>
 #include <map>
-#include <vector>
 #include <cstdint>
 #include <functional>
-#include <unordered_map>
+#include <compiler/memory/allocator.h>
+#include "array.h"
+#include "hash_table.h"
 
 namespace basecode::compiler::data {
 
@@ -38,14 +39,16 @@ namespace basecode::compiler::data {
     public:
         using vertex_t = V*;
         using vertex_set_t = std::set<vertex_t>;
+        using vertex_list_t = array_t<vertex_t>;
         using directed_edge_t = directed_edge_t<V>;
-        using vertex_list_t = std::vector<vertex_t>;
-        using edge_list_t = std::vector<directed_edge_t>;
-        using component_list_t = std::vector<vertex_set_t>;
-        using edge_map_t = std::unordered_map<vertex_t, edge_list_t>;
+        using edge_list_t = array_t<directed_edge_t>;
+        using component_list_t = array_t<vertex_set_t>;
+        using edge_map_t = hash_table_t<vertex_t, edge_list_t>;
         using transpose_callback_t = std::function<directed_edge_t (const directed_edge_t&)>;
 
-        directed_graph_t() = default;
+        explicit directed_graph_t(memory::allocator_t* allocator) : _graph(_allocator),
+                                                                    _allocator(allocator) {
+        }
 
         vertex_set_t vertices() const {
             vertex_set_t set{};
@@ -87,7 +90,7 @@ namespace basecode::compiler::data {
         }
 
         directed_graph_t<V> transpose(const transpose_callback_t& reverse_edge) {
-            directed_graph_t<V> t{};
+            directed_graph_t<V> t(_allocator);
             for (const auto& kvp : _graph) {
                 t.add_vertex(kvp.first);
                 for (const auto& e : kvp.second)
@@ -97,11 +100,11 @@ namespace basecode::compiler::data {
         }
 
         component_list_t strongly_connected_components(const transpose_callback_t& reverse_edge) const {
-            component_list_t components{};
+            component_list_t components(_allocator);
 
             uint32_t time = 0;
             vertex_set_t visited{};
-            std::map<vertex_t, uint32_t> finishing_times{};
+            hash_table_t<vertex_t, uint32_t> finishing_times(_allocator);
 
             std::function<void (vertex_t)> dfs = [&](vertex_t v) {
                 ++time;
@@ -111,7 +114,7 @@ namespace basecode::compiler::data {
                     if (!visited.count(e.dest) == 0)
                         dfs(e.dest);
                 }
-                finishing_times.insert(std::make_pair(v, ++time));
+                finishing_times.insert(v, ++time);
             };
 
             for (auto v : vertices()) {
@@ -130,7 +133,7 @@ namespace basecode::compiler::data {
                 }
             };
 
-            vertex_list_t ordered_vertices{};
+            vertex_list_t ordered_vertices(_allocator);
             for (auto it = finishing_times.rbegin(); it != finishing_times.rend(); ++it) {
                 ordered_vertices.push_back((*it).first);
             }
@@ -150,6 +153,7 @@ namespace basecode::compiler::data {
 
     private:
         edge_map_t _graph{};
+        memory::allocator_t* _allocator{};
     };
 
 }

@@ -18,7 +18,7 @@ add_library(
         defer.h
 
         data/array.h
-        data/directed.h
+        data/directed_graph.h
         data/hash_table.h
 
         types.cpp types.h

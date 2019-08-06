@@ -196,7 +196,7 @@ namespace basecode::compiler::data {
         }
 
         void reserve(size_t new_size) {
-            rehash(new_size * 2);
+            rehash(new_size * 3 / 2);
         }
 
         [[nodiscard]] size_t size() const {
