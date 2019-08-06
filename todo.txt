@@ -8,9 +8,6 @@ QUESTIONS
 
 TASKS
 ------------
-- FIX: result_t & result_message_t are using std::string, which is creating copies.
-        need to refactor to use std::string_view and plumb in strings::pool_t
-        to ensure the values are interned.
 - FIX: how to handle expression return values for normal loop termination?
         // i: s32;
         // result := while i < 10 {
@@ -36,3 +33,6 @@ DONE
 - REFACTOR: introduce our own trie/trie-map structure that allows us to
     explicitly navigate the internal trie nodes instead of having to
     perform string-like "prefix" searches from the root each time.
+- FIX: result_t & result_message_t are using std::string, which is creating copies.
+        need to refactor to use std::string_view and plumb in strings::pool_t
+        to ensure the values are interned.

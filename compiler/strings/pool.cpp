@@ -16,15 +16,25 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/memory/system.h>
 #include <compiler/hashing/murmur.h>
 #include "pool.h"
+
+namespace basecode::compiler::data {
+
+    template <> uint64_t hash_key(std::string_view key) {
+        return hashing::murmur::hash64(key.data(), key.length());
+    }
+
+}
 
 namespace basecode::compiler::strings {
 
     pool_t::pool_t(
             memory::allocator_t* allocator,
             uint32_t block_size) : _block_size(block_size),
-                                   _allocator(allocator) {
+                                   _allocator(allocator),
+                                   _index(memory::default_allocator()) {
     }
 
     char* pool_t::next_data_pointer(uint32_t length) {
@@ -40,19 +50,17 @@ namespace basecode::compiler::strings {
     }
 
     std::string_view pool_t::intern(std::string_view value) {
-        auto hash = hashing::murmur::hash64(
-            value.data(),
-            value.length());
-        auto it = _index.find(hash);
-        if (it == std::end(_index)) {
+        if (value.empty())
+            return value;
+
+        auto data = _index.find(value);
+        if (data == nullptr) {
             auto data_ptr = next_data_pointer(value.length());
             std::memcpy(data_ptr, value.data(), value.length());
-            auto result = _index.insert(std::make_pair(
-                hash,
-                std::string_view(data_ptr, value.length())));
-            return result.first->second;
+            _index.insert(value, data_ptr);
+            return data_ptr;
         }
-        return it->second;
+        return data;
     }
 
     std::string_view pool_t::intern(const std::string& value) {
