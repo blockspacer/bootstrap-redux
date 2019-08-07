@@ -160,11 +160,10 @@ namespace basecode::compiler::data {
             array_t<T> list(_allocator);
             list.resize(_size);
 
-            auto i = 0;
+            size_t i = 0, j = 0;
             for (const auto& b : _buckets) {
-                if (b.state == hash_bucket_state_t::s_filled) {
-                    list.add(_values[i].value);
-                }
+                if (b.state == hash_bucket_state_t::s_filled)
+                    list[j++] = _values[i].value;
                 ++i;
             }
 

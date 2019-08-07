@@ -54,7 +54,7 @@ namespace basecode {
                 return lhs < rhs;
             });
 
-        for (auto e : elements) fmt::print("{}\n", e);
+        REQUIRE(elements.size() == 98);
     }
 
     TEST_CASE("array_t with small initializer list") {
