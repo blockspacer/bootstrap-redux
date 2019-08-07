@@ -17,9 +17,11 @@ add_library(
 
         defer.h
 
+        data/set.h
         data/array.h
-        data/directed_graph.h
         data/hash_table.h
+        data/directed_graph.h
+        data/hashable.cpp data/hashable.h
 
         types.cpp types.h
 

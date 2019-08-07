@@ -20,14 +20,6 @@
 #include <compiler/hashing/murmur.h>
 #include "pool.h"
 
-namespace basecode::compiler::data {
-
-    template <> uint64_t hash_key(std::string_view key) {
-        return hashing::murmur::hash64(key.data(), key.length());
-    }
-
-}
-
 namespace basecode::compiler::strings {
 
     pool_t::pool_t(

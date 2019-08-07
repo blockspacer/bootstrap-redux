@@ -26,7 +26,7 @@
 
 namespace basecode::compiler::data {
 
-    template <typename T>
+    template <typename T, std::uint32_t Initial_Capacity = 16>
     class array_t final {
     public:
         using item_type_t = T;
@@ -64,6 +64,12 @@ namespace basecode::compiler::data {
         void reset() {
             std::memset(_data, 0, _capacity * sizeof(T));
             _size = 0;
+        }
+
+        void add(const T& value) {
+            if (_size + 1 > _capacity)
+                adjust_capacity();
+            _data[_size++] = value;
         }
 
         void add(T&& value) {
@@ -141,14 +147,19 @@ namespace basecode::compiler::data {
         void adjust_capacity(std::optional<uint32_t> target_capacity = {}) {
             if (!_data) {
                 _size = 0;
-                _capacity = target_capacity ? *target_capacity : 16;
-                auto new_size = numbers::next_power_of_two(_capacity) * sizeof(T);
+                _capacity = numbers::next_power_of_two(target_capacity ?
+                    *target_capacity :
+                    Initial_Capacity);
+                auto new_size = _capacity * sizeof(T);
                 _data = static_cast<T*>(_allocator->allocate(new_size, alignof(T)));
             } else {
-                _capacity = target_capacity ? *target_capacity : _capacity;
-                auto new_size = numbers::next_power_of_two(_capacity) * sizeof(T);
+                auto old_size = _capacity * sizeof(T);
+                _capacity = numbers::next_power_of_two(target_capacity ?
+                    *target_capacity :
+                    _capacity + 1);
+                auto new_size = _capacity * sizeof(T);
                 auto new_data = _allocator->allocate(new_size, alignof(T));
-                std::memcpy(new_data, _data, _capacity);
+                std::memcpy(new_data, _data, old_size);
                 _allocator->deallocate(_data);
                 _data = static_cast<T*>(new_data);
             }

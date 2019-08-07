@@ -16,14 +16,46 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <fmt/format.h>
 #include <catch2/catch.hpp>
-#include <compiler/language/core/lexer/lexer.h>
+#include <compiler/data/set.h>
+#include <compiler/data/array.h>
 
 namespace basecode {
 
     using namespace std::literals;
     using namespace compiler;
     using namespace compiler::data;
+
+    TEST_CASE("set_t with small initializer list") {
+        set_t<int32_t> set_of_integers{0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+        REQUIRE(!set_of_integers.empty());
+        REQUIRE(set_of_integers.size() == 9);
+
+        REQUIRE(set_of_integers.count(1) == 1);
+        REQUIRE(set_of_integers.has(6));
+        REQUIRE(!set_of_integers.has(10));
+
+        REQUIRE(set_of_integers.remove(3));
+        REQUIRE(!set_of_integers.has(3));
+        REQUIRE(set_of_integers.count(3) == 0);
+
+        for (size_t i = 10; i < 100; i++)
+            set_of_integers.insert(i);
+
+        REQUIRE(set_of_integers.size() == 98);
+
+        auto elements = set_of_integers.elements();
+        std::sort(
+            std::begin(elements),
+            std::end(elements),
+            [](auto lhs, auto rhs) {
+                return lhs < rhs;
+            });
+
+        for (auto e : elements) fmt::print("{}\n", e);
+    }
 
     TEST_CASE("array_t with small initializer list") {
         array_t<int32_t> numbers{0, 1, 2, 3, 4, 5, 6, 7, 8};

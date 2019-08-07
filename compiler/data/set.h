@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <initializer_list>
+#include <compiler/memory/system.h>
 #include <compiler/hashing/murmur.h>
 #include <compiler/memory/allocator.h>
 #include "array.h"
@@ -28,13 +29,13 @@
 
 namespace basecode::compiler::data {
 
-    template <typename K, typename V, std::uint32_t InitialSize = 16>
-    class hash_table_t final {
+    template <typename T, std::uint32_t InitialSize = 16>
+    class set_t final {
         static constexpr uint64_t hash_mask = 0b0011111111111111111111111111111111111111111111111111111111111111;
 
-        struct hash_pair_t final {
-            K key;
-            V value;
+        struct hash_value_t final {
+            T value{};
+            uint32_t count{};
         };
 
         enum hash_bucket_state_t {
@@ -44,63 +45,90 @@ namespace basecode::compiler::data {
         };
 
         struct hash_bucket_t final {
+            hash_bucket_t() : hash(0), state(0) {}
             size_t hash:62;
             size_t state:2;
         };
 
     public:
-        hash_table_t(
-                std::initializer_list<std::pair<K, V>> elements,
-                memory::allocator_t* allocator) : _pairs(allocator),
-                                                  _allocator(allocator),
-                                                  _buckets(allocator) {
+        set_t(
+                std::initializer_list<T> elements,
+                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
             init();
             insert(elements);
         }
 
-        explicit hash_table_t(memory::allocator_t* allocator) : _pairs(allocator),
-                                                                _allocator(allocator),
-                                                                _buckets(allocator) {
+        explicit set_t(memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
             init();
         }
 
-        void reset() {
-            _size = 0;
-            _pairs.reset();
-            _buckets.reset();
-        }
-
-        V find(K key) {
-            size_t hash = hash_key(key) & hash_mask;
+        bool has(T&& value) {
+            size_t hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
-            hash_pair_t* target_pair{};
+            hash_value_t* target_pair{};
             hash_bucket_t* target_bucket{};
 
-            auto found = find_bucket_and_pair_by_matching_key(
+            return find_bucket_and_pair_by_matching_value(
                 bucket_start_index,
                 hash,
-                key,
+                value,
                 &target_bucket,
                 &target_pair);
-
-            if (!found) return {};
-            return target_pair->value;
         }
 
-        bool remove(K key) {
-            auto hash = hash_key(key) & hash_mask;
+        bool insert(T&& value) {
+            if (_size * 3 > _buckets.size() * 2)
+                rehash(_buckets.size() * 2);
+
+            size_t hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
-            hash_pair_t* target_pair{};
+            hash_value_t* target_value{};
             hash_bucket_t* target_bucket{};
 
-            auto found = find_bucket_and_pair_by_matching_key(
+            auto found = find_bucket_and_pair_by_matching_value(
                 bucket_start_index,
                 hash,
-                key,
+                value,
                 &target_bucket,
-                &target_pair);
+                &target_value);
+            if (found) {
+                target_value->count++;
+                return false;
+            }
+
+            found = find_available_bucket_and_value(
+                _buckets,
+                _values,
+                bucket_start_index,
+                &target_bucket,
+                &target_value);
+            assert(found);
+
+            target_bucket->hash = hash;
+            target_bucket->state = hash_bucket_state_t::s_filled;
+            target_value->value = value;
+            target_value->count = 1;
+
+            ++_size;
+
+            return true;
+        }
+
+        bool remove(T&& value) {
+            auto hash = hash_key(value) & hash_mask;
+            auto bucket_start_index = hash % _buckets.size();
+
+            hash_value_t* target_value{};
+            hash_bucket_t* target_bucket{};
+
+            auto found = find_bucket_and_pair_by_matching_value(
+                bucket_start_index,
+                hash,
+                value,
+                &target_bucket,
+                &target_value);
             if (found) {
                 target_bucket->hash = 0;
                 target_bucket->state = hash_bucket_state_t::s_removed;
@@ -111,30 +139,36 @@ namespace basecode::compiler::data {
             return false;
         }
 
-        void insert(K key, V value) {
-            if (_size * 3 > _buckets.size() * 2)
-                rehash(_buckets.size() * 2);
-
-            auto hash = hash_key(key) & hash_mask;
+        uint32_t count(T&& value) {
+            size_t hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
-            hash_pair_t* target_pair{};
+            hash_value_t* target_value{};
             hash_bucket_t* target_bucket{};
 
-            auto found = find_available_bucket_and_pair(
-                _buckets,
-                _pairs,
+            auto found = find_bucket_and_pair_by_matching_value(
                 bucket_start_index,
+                hash,
+                value,
                 &target_bucket,
-                &target_pair);
-            assert(found);
+                &target_value);
+            if (!found) return 0;
+            return target_value->count;
+        }
 
-            target_bucket->hash = hash;
-            target_bucket->state = hash_bucket_state_t::s_filled;
-            target_pair->key = key;
-            target_pair->value = value;
+        array_t<T> elements() const {
+            array_t<T> list(_allocator);
+            list.resize(_size);
 
-            ++_size;
+            auto i = 0;
+            for (const auto& b : _buckets) {
+                if (b.state == hash_bucket_state_t::s_filled) {
+                    list.add(_values[i].value);
+                }
+                ++i;
+            }
+
+            return list;
         }
 
         void reserve(uint32_t new_size) {
@@ -145,23 +179,23 @@ namespace basecode::compiler::data {
             return _size == 0;
         }
 
-        [[nodiscard]] size_t size() const {
+        [[nodiscard]] uint32_t size() const {
             return _size;
         }
 
     private:
         void init() {
-            _pairs.resize(InitialSize);
+            _values.resize(InitialSize);
             _buckets.resize(InitialSize);
         }
 
         void rehash(uint32_t new_bucket_count) {
-            new_bucket_count = std::max<uint32_t>(
-                std::max<uint32_t>(new_bucket_count, _size),
+            new_bucket_count = std::max(
+                std::max(new_bucket_count, _size),
                 InitialSize);
 
-            array_t<hash_pair_t> new_pairs(_allocator);
-            new_pairs.resize(new_bucket_count);
+            array_t<hash_value_t> new_values(_allocator);
+            new_values.resize(new_bucket_count);
 
             array_t<hash_bucket_t> new_buckets(_allocator);
             new_buckets.resize(new_bucket_count);
@@ -173,44 +207,44 @@ namespace basecode::compiler::data {
                     continue;
                 }
 
-                hash_pair_t* target_pair{};
+                hash_value_t* target_value{};
                 hash_bucket_t* target_bucket{};
                 auto bucket_start_index = bucket.hash % new_bucket_count;
 
-                auto found = find_available_bucket_and_pair(
+                auto found = find_available_bucket_and_value(
                     new_buckets,
-                    new_pairs,
+                    new_values,
                     bucket_start_index,
                     &target_bucket,
-                    &target_pair);
+                    &target_value);
 
                 assert(found);
 
                 target_bucket->hash = bucket.hash;
                 target_bucket->state = hash_bucket_state_t::s_filled;
 
-                auto& original_pair = _pairs[i];
-                target_pair->key = std::move(original_pair.key);
-                target_pair->value = std::move(original_pair.value);
+                auto& original_value = _values[i];
+                target_value->value = std::move(original_value.value);
+                target_value->count = std::move(original_value.count);
 
                 ++i;
             }
 
-            _pairs = std::move(new_pairs);
+            _values = std::move(new_values);
             _buckets = std::move(new_buckets);
         }
 
-        bool find_available_bucket_and_pair(
+        bool find_available_bucket_and_value(
                 array_t<hash_bucket_t>& buckets,
-                array_t<hash_pair_t>& pairs,
+                array_t<hash_value_t>& values,
                 uint32_t bucket_start_index,
                 hash_bucket_t** target_bucket,
-                hash_pair_t** target_pair) {
+                hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < buckets.size(); i++) {
                 auto& bucket = buckets[i];
                 if (bucket.state != hash_bucket_state_t::s_filled) {
                     *target_bucket = &bucket;
-                    *target_pair = &pairs[i];
+                    *target_value = &values[i];
                     return true;
                 }
             }
@@ -219,7 +253,7 @@ namespace basecode::compiler::data {
                 auto& bucket = buckets[i];
                 if (bucket.state != hash_bucket_state_t::s_filled) {
                     *target_bucket = &bucket;
-                    *target_pair = &pairs[i];
+                    *target_value = &values[i];
                     return true;
                 }
             }
@@ -227,12 +261,12 @@ namespace basecode::compiler::data {
             return false;
         }
 
-        bool find_bucket_and_pair_by_matching_key(
+        bool find_bucket_and_pair_by_matching_value(
                 uint32_t bucket_start_index,
                 size_t hash,
-                K key,
+                T value,
                 hash_bucket_t** target_bucket,
-                hash_pair_t** target_pair) {
+                hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < _buckets.size(); i++) {
                 auto& bucket = _buckets[i];
                 switch (bucket.state) {
@@ -240,10 +274,10 @@ namespace basecode::compiler::data {
                         return false;
                     case hash_bucket_state_t::s_filled: {
                         if (bucket.hash == hash) {
-                            auto& pair = _pairs[i];
-                            if (pair.key == key) {
-                                *target_pair = &pair;
+                            auto& hash_value = _values[i];
+                            if (hash_value.value == value) {
                                 *target_bucket = &bucket;
+                                *target_value = &hash_value;
                                 return true;
                             }
                         }
@@ -261,10 +295,10 @@ namespace basecode::compiler::data {
                         return false;
                     case hash_bucket_state_t::s_filled: {
                         if (bucket.hash == hash) {
-                            auto& pair = _pairs[i];
-                            if (pair.key == key) {
-                                *target_pair = &pair;
+                            auto& hash_value = _values[i];
+                            if (hash_value.value == value) {
                                 *target_bucket = &bucket;
+                                *target_value = &hash_value;
                                 return true;
                             }
                         }
@@ -278,17 +312,17 @@ namespace basecode::compiler::data {
             return false;
         }
 
-        void insert(std::initializer_list<std::pair<K, V>> elements) {
+        void insert(std::initializer_list<T> elements) {
             reserve(elements.size());
-            for (auto e : elements)
-                insert(e.first, e.second);
+            for (const auto& e : elements)
+                insert(const_cast<T&&>(e));
         }
 
     private:
-        size_t _size{};
-        array_t<hash_pair_t> _pairs;
+        uint32_t _size{};
+        array_t<hash_value_t> _values{};
         memory::allocator_t* _allocator;
-        array_t<hash_bucket_t> _buckets;
+        array_t<hash_bucket_t> _buckets{};
     };
 
 }
