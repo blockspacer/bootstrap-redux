@@ -64,10 +64,10 @@ namespace basecode::compiler::strings {
     }
 
     std::string remove_underscores(const std::string_view& value) {
-        std::stringstream stream {};
+        fmt::memory_buffer buffer{};
         for (const auto& c : value)
-            if (c != '_') stream << c;
-        return stream.str();
+            if (c != '_') fmt::format_to(buffer, "{}", c);
+        return fmt::to_string(buffer);
     }
 
     std::pair<std::string, std::string> size_to_units(size_t size) {
@@ -83,15 +83,15 @@ namespace basecode::compiler::strings {
     }
 
     std::string list_to_string(const string_list_t& list, const char& sep) {
-        std::stringstream stream;
+        fmt::memory_buffer buffer{};
 
         for (size_t i = 0; i < list.size(); i++) {
             if (i > 0)
-                stream << sep;
-            stream << list[i];
+                fmt::format_to(buffer, "{}", sep);
+            fmt::format_to(buffer, "{}", list[i]);
         }
 
-        return stream.str();
+        return fmt::to_string(buffer);
     }
 
     string_list_t string_to_list(const std::string& value, const char& sep) {
@@ -100,7 +100,7 @@ namespace basecode::compiler::strings {
         std::istringstream f(value);
         std::string s;
         while (std::getline(f, s, sep)) {
-            list.push_back(s);
+            list.add(s);
         }
 
         return list;

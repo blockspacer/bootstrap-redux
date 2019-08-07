@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <fmt/format.h>
 #include <initializer_list>
 #include <compiler/numbers/bytes.h>
 #include <compiler/memory/system.h>
@@ -33,17 +34,19 @@ namespace basecode::compiler::data {
 
         explicit array_t(
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            assert(allocator);
         }
 
         array_t(
                 std::initializer_list<T> elements,
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            assert(allocator);
             insert(elements);
         }
 
         ~array_t() {
             if (!_moved)
-                _allocator->deallocate(_data);
+                _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
         }
 
         array_t(const array_t& other) : _size(other._size),
@@ -121,11 +124,18 @@ namespace basecode::compiler::data {
             return _data[index];
         }
 
+        array_t& operator=(const array_t& other) {
+            adjust_capacity(other._capacity);
+            std::memcpy(_data, other._data, _capacity * sizeof(T));
+            _size = other._size;
+            return *this;
+        }
+
         array_t& operator = (array_t&& other) noexcept {
             assert(_allocator == other._allocator);
 
             // free any memory we're already using
-            _allocator->deallocate(_data);
+            _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
 
             _data = other._data;
             _size = other._size;
@@ -151,16 +161,26 @@ namespace basecode::compiler::data {
                     *target_capacity :
                     Initial_Capacity);
                 auto new_size = _capacity * sizeof(T);
-                _data = static_cast<T*>(_allocator->allocate(new_size, alignof(T)));
+                _data = static_cast<T*>(_allocator->allocate(
+                    new_size,
+                    alignof(T),
+                    fmt::format("{}<no data yet>", __FILE__).c_str(),
+                    __FUNCTION__,
+                    __LINE__));
             } else {
                 auto old_size = _capacity * sizeof(T);
                 _capacity = numbers::next_power_of_two(target_capacity ?
                     *target_capacity :
                     _capacity + 1);
                 auto new_size = _capacity * sizeof(T);
-                auto new_data = _allocator->allocate(new_size, alignof(T));
-                std::memcpy(new_data, _data, old_size);
-                _allocator->deallocate(_data);
+                auto new_data = _allocator->allocate(
+                    new_size,
+                    alignof(T),
+                    fmt::format("{}<existing data>", __FILE__).c_str(),
+                    __FUNCTION__,
+                    __LINE__);
+                std::memcpy(new_data, _data, std::min(old_size, new_size));
+                _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
                 _data = static_cast<T*>(new_data);
             }
         }

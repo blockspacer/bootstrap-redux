@@ -95,11 +95,11 @@ namespace basecode::compiler::terminal {
         return colored_source.str();
     }
 
-    stream_unique_ptr_t stream_factory_t::use_stream(std::stringstream& stream) const {
+    stream_unique_ptr_t stream_factory_t::use_memory_buffer(fmt::memory_buffer& buffer) const {
         if (_enabled)
-            return stream_unique_ptr_t(new ansi_stream_t(stream));
+            return stream_unique_ptr_t(new ansi_stream_t(buffer));
         else
-            return stream_unique_ptr_t(new ascii_stream_t(stream));
+            return stream_unique_ptr_t(new ascii_stream_t(buffer));
     }
 
 }

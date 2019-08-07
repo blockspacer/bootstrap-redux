@@ -18,39 +18,16 @@
 
 #pragma once
 
-#include <string_view>
+#include <compiler/terminal/stream_factory.h>
 #include "allocator.h"
 
 namespace basecode::compiler::memory {
 
-    struct header_t final {
-        uint32_t size;
-    };
-
-    const uint32_t header_pad_value = 0xffffffffu;
-
-    inline header_t* header(void* data) {
-        auto p = static_cast<uint32_t*>(data);
-        while (p[-1] == header_pad_value)
-            --p;
-        return reinterpret_cast<header_t*>(p - 1);
-    }
-
-    inline void* data_pointer(header_t* header, uint32_t align) {
-        void* p = header + 1;
-        return align_forward(p, align);
-    }
-
-    inline void fill(header_t* header, void* data, uint32_t size) {
-        header->size = size;
-        auto p = reinterpret_cast<uint32_t*>(header + 1);
-        while (p < data)
-            *p++ = header_pad_value;
-    }
-
-    class system_allocator_t : public allocator_t {
+    class debug_allocator_t : public allocator_t {
     public:
-        ~system_allocator_t() override;
+        explicit debug_allocator_t(allocator_t* backing);
+
+        ~debug_allocator_t() override;
 
         void* allocate(
             uint32_t size,
@@ -67,15 +44,13 @@ namespace basecode::compiler::memory {
 
         std::optional<uint32_t> total_allocated() override;
 
-        std::optional<uint32_t> allocated_size(void* p) override;
+        std::optional<uint32_t> allocated_size(void *p) override;
 
     private:
-        static inline uint32_t size_with_padding(uint32_t size, uint32_t align) {
-            return size + align + sizeof(header_t);
-        }
-
-    private:
-        uint32_t _total_allocated = 0;
+        allocator_t* _backing{};
+        fmt::memory_buffer _buffer{};
+        terminal::stream_unique_ptr_t _stream{};
+        terminal::stream_factory_t _stream_factory{};
     };
 
 }

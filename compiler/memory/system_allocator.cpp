@@ -26,7 +26,10 @@ namespace basecode::compiler::memory {
 
     void* system_allocator_t::allocate(
             uint32_t size,
-            uint32_t align) {
+            uint32_t align,
+            [[maybe_unused]] const char* file_name,
+            [[maybe_unused]] const char* function_name,
+            [[maybe_unused]] int line_number) {
         const uint32_t ts = size_with_padding(size, align);
         auto h = (header_t*)malloc(ts);
         void *p = data_pointer(h, align);
@@ -35,7 +38,11 @@ namespace basecode::compiler::memory {
         return p;
     }
 
-    void system_allocator_t::deallocate(void* p) {
+    void system_allocator_t::deallocate(
+            void* p,
+            const char* file_name,
+            const char* function_name,
+            int line_number) {
         if (!p)
             return;
 

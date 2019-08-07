@@ -54,11 +54,14 @@ namespace basecode::compiler::data {
         set_t(
                 std::initializer_list<T> elements,
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            assert(allocator);
             init();
             insert(elements);
         }
 
-        explicit set_t(memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+        explicit set_t(
+                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            assert(allocator);
             init();
         }
 

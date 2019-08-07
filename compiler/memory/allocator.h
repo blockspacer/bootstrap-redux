@@ -47,9 +47,16 @@ namespace basecode::compiler::memory {
 
         virtual void* allocate(
             uint32_t size,
-            uint32_t align = default_align) = 0;
+            uint32_t align = default_align,
+            const char* file_name = {},
+            const char* function_name = {},
+            int line_number = {}) = 0;
 
-        virtual void deallocate(void* p) = 0;
+        virtual void deallocate(
+            void* p,
+            const char* file_name = {},
+            const char* function_name = {},
+            int line_number = {}) = 0;
 
         virtual std::optional<uint32_t> total_allocated() = 0;
 

@@ -21,6 +21,7 @@
 #include <memory>
 #include <cstdint>
 #include <cstddef>
+#include <unordered_set>
 
 namespace basecode::compiler::memory {
 
@@ -33,6 +34,11 @@ namespace basecode::compiler::memory {
         }
 
         pool_t(const pool_t&) = delete;
+
+        ~pool_t() {
+            for (auto obj : _objects)
+                obj->~T();
+        }
 
         template <typename... Args>
         T* alloc(Args&&... args) {
@@ -47,6 +53,7 @@ namespace basecode::compiler::memory {
             _free_list = current_item->next_item();
 
             auto result = current_item->storage();
+            _objects.insert(result);
             new (result) T(std::forward<Args>(args)...);
             return result;
         }
@@ -57,6 +64,7 @@ namespace basecode::compiler::memory {
             auto current_item = item_t::storage_to_item(value);
             current_item->next_item(_free_list);
             _free_list = current_item;
+            _objects.erase(value);
         }
 
     private:
@@ -110,6 +118,7 @@ namespace basecode::compiler::memory {
         size_t _arena_size;
         item_t* _free_list;
         std::unique_ptr<arena_t> _arena;
+        std::unordered_set<T*> _objects{};
     };
 
 }

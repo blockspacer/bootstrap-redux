@@ -23,7 +23,12 @@ namespace basecode::compiler::memory {
     scratch_allocator_t::scratch_allocator_t(
             allocator_t* backing,
             uint32_t size) : _backing(backing) {
-        _begin = (uint8_t*)_backing->allocate(size);
+        _begin = (uint8_t*)_backing->allocate(
+            size,
+            default_align,
+            __FILE__,
+            __FUNCTION__,
+            __LINE__);
         _end = _begin + size;
         _allocate = _begin;
         _free = _begin;
@@ -31,7 +36,11 @@ namespace basecode::compiler::memory {
 
     scratch_allocator_t::~scratch_allocator_t() {
         assert(_free == _allocate);
-        _backing->deallocate(_begin);
+        _backing->deallocate(
+            _begin,
+            __FILE__,
+            __FUNCTION__,
+            __LINE__);
     }
 
     bool scratch_allocator_t::in_use(void* p) {
@@ -44,7 +53,10 @@ namespace basecode::compiler::memory {
 
     void* scratch_allocator_t::allocate(
             uint32_t size,
-            uint32_t align) {
+            uint32_t align,
+            const char* file_name,
+            const char* function_name,
+            int line_number) {
         assert(align % 4 == 0);
         size = ((size + 3)/4)*4;
 
@@ -55,7 +67,7 @@ namespace basecode::compiler::memory {
 
         // reached the end of the buffer, wrap around to the beginning
         if (p > _end) {
-            h->size = _end - (uint8_t*) h | 0x80000000u;
+            h->size = (_end - (uint8_t*)h) | 0x80000000u;
 
             p = _begin;
             h = (header_t *)p;
@@ -64,20 +76,33 @@ namespace basecode::compiler::memory {
         }
 
         // if the buffer is exhausted use the backing allocator instead
-        if (in_use(p))
-            return _backing->allocate(size, align);
+        if (in_use(p)) {
+            return _backing->allocate(
+                size,
+                align,
+                __FILE__,
+                __FUNCTION__,
+                __LINE__);
+        }
 
         fill(h, data, p - (uint8_t*)h);
         _allocate = p;
+
+        auto header_size = h->size & 0x7fffffffu;
+        _total_allocated += header_size;
         return data;
     }
 
-    void scratch_allocator_t::deallocate(void* p) {
+    void scratch_allocator_t::deallocate(
+            void* p,
+            const char* file_name,
+            const char* function_name,
+            int line_number) {
         if (!p)
             return;
 
         if (p < _begin || p >= _end) {
-            _backing->deallocate(p);
+            _backing->deallocate(p, __FILE__, __FUNCTION__, __LINE__);
             return;
         }
 
@@ -85,6 +110,9 @@ namespace basecode::compiler::memory {
         auto h = header(p);
         assert((h->size & 0x80000000u) == 0);
         h->size = h->size | 0x80000000u;
+
+        auto header_size = h->size & 0x7fffffffu;
+        _total_allocated -= header_size;
 
         // advance the free pointer past all free slots
         while (_free != _allocate) {
@@ -99,7 +127,7 @@ namespace basecode::compiler::memory {
     }
 
     std::optional<uint32_t> scratch_allocator_t::total_allocated() {
-        return _end - _begin;
+        return _total_allocated;
     }
 
     std::optional<uint32_t> scratch_allocator_t::allocated_size(void* p) {

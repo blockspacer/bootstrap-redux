@@ -54,6 +54,7 @@ namespace basecode::compiler::data {
                 memory::allocator_t* allocator) : _pairs(allocator),
                                                   _allocator(allocator),
                                                   _buckets(allocator) {
+            assert(allocator);
             init();
             insert(elements);
         }
@@ -61,6 +62,7 @@ namespace basecode::compiler::data {
         explicit hash_table_t(memory::allocator_t* allocator) : _pairs(allocator),
                                                                 _allocator(allocator),
                                                                 _buckets(allocator) {
+            assert(allocator);
             init();
         }
 
@@ -68,24 +70,6 @@ namespace basecode::compiler::data {
             _size = 0;
             _pairs.reset();
             _buckets.reset();
-        }
-
-        V find(K key) {
-            size_t hash = hash_key(key) & hash_mask;
-            auto bucket_start_index = hash % _buckets.size();
-
-            hash_pair_t* target_pair{};
-            hash_bucket_t* target_bucket{};
-
-            auto found = find_bucket_and_pair_by_matching_key(
-                bucket_start_index,
-                hash,
-                key,
-                &target_bucket,
-                &target_pair);
-
-            if (!found) return {};
-            return target_pair->value;
         }
 
         bool remove(K key) {
@@ -109,6 +93,24 @@ namespace basecode::compiler::data {
             }
 
             return false;
+        }
+
+        std::optional<V> find(K key) {
+            size_t hash = hash_key(key) & hash_mask;
+            auto bucket_start_index = hash % _buckets.size();
+
+            hash_pair_t* target_pair{};
+            hash_bucket_t* target_bucket{};
+
+            auto found = find_bucket_and_pair_by_matching_key(
+                bucket_start_index,
+                hash,
+                key,
+                &target_bucket,
+                &target_pair);
+
+            if (!found) return {};
+            return target_pair->value;
         }
 
         void insert(K key, V value) {

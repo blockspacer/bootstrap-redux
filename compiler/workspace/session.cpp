@@ -24,7 +24,10 @@ namespace basecode::compiler::workspace {
             const session_options_t& options) : _intern_pool(
                                                     &_intern_allocator,
                                                     options.intern_string_block_size),
-                                                _options(options) {
+                                                _allocator(options.allocator),
+                                                _options(options),
+                                                _intern_allocator(options.allocator) {
+        assert(_allocator);
     }
 
 }

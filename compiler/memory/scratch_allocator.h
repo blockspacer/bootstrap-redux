@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <string_view>
 #include "system_allocator.h"
 
 namespace basecode::compiler::memory {
@@ -34,9 +35,16 @@ namespace basecode::compiler::memory {
 
         void* allocate(
             uint32_t size,
-            uint32_t align) override;
+            uint32_t align,
+            const char* file_name,
+            const char* function_name,
+            int line_number) override;
 
-        void deallocate(void* p) override;
+        void deallocate(
+            void* p,
+            const char* file_name,
+            const char* function_name,
+            int line_number) override;
 
         std::optional<uint32_t> total_allocated() override;
 
@@ -47,6 +55,7 @@ namespace basecode::compiler::memory {
         uint8_t* _free{};
         uint8_t* _begin{};
         uint8_t* _allocate{};
+        uint32_t _total_allocated{};
         allocator_t* _backing = nullptr;
     };
 

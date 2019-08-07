@@ -33,7 +33,7 @@ namespace basecode::compiler::memory {
 
         ~block_allocator_t() override {
             for (size_t i = 0; i < _block_index; i++) {
-                _backing->deallocate(_blocks[i]);
+                _backing->deallocate(_blocks[i], __FILE__, __FUNCTION__, __LINE__);
                 _total_allocated -= _block_size;
             }
             assert(_total_allocated == 0);
@@ -41,16 +41,29 @@ namespace basecode::compiler::memory {
 
         void* allocate(
                 uint32_t size,
-                uint32_t align) override {
+                uint32_t align,
+                const char* file_name,
+                const char* function_name,
+                int line_number) override {
             assert(_block_index + 1 < MaxBlocks);
 
-            auto block = _backing->allocate(_block_size);
+            auto block = _backing->allocate(
+                _block_size,
+                default_align,
+                __FILE__,
+                __FUNCTION__,
+                __LINE__);
             _total_allocated += _block_size;
             _blocks[_block_index++] = block;
             return block;
         }
 
-        void deallocate(void* p) override {}
+        void deallocate(
+                void* p,
+                const char* file_name = {},
+                const char* function_name = {},
+                int line_number = {}) override {
+        }
 
         std::optional <uint32_t> total_allocated() override {
             return _total_allocated;

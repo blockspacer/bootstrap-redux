@@ -21,6 +21,7 @@
 #include <utility>
 #include <compiler/types.h>
 #include <compiler/memory/pool.h>
+#include <compiler/data/hash_table.h>
 #include <compiler/workspace/session.h>
 #include "token.h"
 
@@ -46,12 +47,15 @@ namespace basecode::compiler::language::core::lexer {
     };
 
     struct trie_tree_node_t final {
-        std::unordered_map<utf8::rune_t, trie_node_t*, utf8::rune_hash_t> children{};
+        explicit trie_tree_node_t(memory::allocator_t* allocator) : children(allocator) {}
+        data::hash_table_t<utf8::rune_t, trie_node_t*> children;
     };
 
     class trie_t final {
     public:
-        trie_t(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
+        trie_t(
+            memory::allocator_t* allocator,
+            std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
 
         void insert(std::string_view key, lexeme_t* value);
 
@@ -66,8 +70,11 @@ namespace basecode::compiler::language::core::lexer {
         void insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
 
     private:
-        trie_tree_node_t _tree_root{};
+        trie_tree_node_t _tree_root;
+        memory::allocator_t* _allocator{};
         trie_node_t _root{nullptr, &_tree_root};
+
+        // XXX: need to refactor pool_t into new allocator model
         memory::pool_t<lexeme_t> _lexeme_storage{256};
         memory::pool_t<trie_node_t> _node_storage{256};
         memory::pool_t<trie_tree_node_t> _tree_node_storage{256};
@@ -86,6 +93,10 @@ namespace basecode::compiler::language::core::lexer {
         lexer_t(
             workspace::session_t& workspace,
             utf8::source_buffer_t& buffer);
+
+        ~lexer_t();
+
+        trie_t* lexemes();
 
         bool tokenize(result_t& r, entity_list_t& entities);
 
@@ -131,8 +142,7 @@ namespace basecode::compiler::language::core::lexer {
         bool scan_dec_digits(result_t& r, size_t start_pos, number_type_t& type);
 
     private:
-        static trie_t s_lexemes;
-
+        trie_t* _lexemes{};
         utf8::source_buffer_t& _buffer;
         workspace::session_t& _session;
     };

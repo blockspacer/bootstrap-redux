@@ -17,6 +17,8 @@ TASKS
 
         what is result here?
 - FIX: directed_graph_t requires more refactoring to use new collections
+- FIX: need to deprecate memory::pool_t and replace it with a series of better
+        allocators.
 
 DONE
 ------------

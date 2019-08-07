@@ -34,7 +34,12 @@ namespace basecode::compiler::strings {
 
         if (_block == nullptr
         ||  _block_offset > _block_size) {
-            _block = (char*)_allocator->allocate(_block_size);
+            _block = (char*)_allocator->allocate(
+                _block_size,
+                memory::allocator_t::default_align,
+                __FILE__,
+                __FUNCTION__,
+                __LINE__);
             _block_offset = 0;
         }
 
@@ -46,13 +51,13 @@ namespace basecode::compiler::strings {
             return value;
 
         auto data = _index.find(value);
-        if (data == nullptr) {
+        if (!data) {
             auto data_ptr = next_data_pointer(value.length());
             std::memcpy(data_ptr, value.data(), value.length());
             _index.insert(value, data_ptr);
             return data_ptr;
         }
-        return data;
+        return *data;
     }
 
     std::string_view pool_t::intern(const std::string& value) {
