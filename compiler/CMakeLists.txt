@@ -19,6 +19,8 @@ add_library(
 
         data/set.h
         data/array.h
+        data/stack.h
+        data/queue.h
         data/hash_table.h
         data/directed_graph.h
         data/hashable.cpp data/hashable.h

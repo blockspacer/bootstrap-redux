@@ -34,26 +34,27 @@ namespace basecode::compiler::data {
 
         explicit array_t(
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
-            assert(allocator);
+            assert(_allocator);
         }
 
         array_t(
                 std::initializer_list<T> elements,
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
-            assert(allocator);
+            assert(_allocator);
             insert(elements);
+        }
+
+        array_t(const array_t& other) : _allocator(other._allocator) {
+            assert(_allocator);
+            const auto n = other._size;
+            set_capacity(n);
+            std::memcpy(_data, other._data, n * sizeof(T));
+            _size = n;
         }
 
         ~array_t() {
             if (!_moved)
                 _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
-        }
-
-        array_t(const array_t& other) : _size(other._size),
-                                        _capacity(other._capacity),
-                                        _allocator(other._allocator) {
-            adjust_capacity(_capacity);
-            std::memcpy(_data, other._data, _capacity * sizeof(T));
         }
 
         T* end() {
@@ -64,20 +65,20 @@ namespace basecode::compiler::data {
             return _data;
         }
 
-        void reset() {
-            std::memset(_data, 0, _capacity * sizeof(T));
-            _size = 0;
+        void pop() {
+            --_size;
         }
 
-        void add(const T& value) {
-            if (_size + 1 > _capacity)
-                adjust_capacity();
-            _data[_size++] = value;
+        void trim() {
+            set_capacity(_size);
+        }
+
+        void clear() {
+            resize(0);
         }
 
         void add(T&& value) {
-            if (_size + 1 > _capacity)
-                adjust_capacity();
+            if (_size + 1 > _capacity) grow();
             _data[_size++] = value;
         }
 
@@ -89,31 +90,31 @@ namespace basecode::compiler::data {
             return _data;
         }
 
+        void add(const T& value) {
+            if (_size + 1 > _capacity) grow();
+            _data[_size++] = value;
+        }
+
         T& operator[](size_t index) {
             return _data[index];
+        }
+
+        void resize(uint32_t new_size) {
+            if (new_size > _capacity) grow(new_size);
+            _size = new_size;
         }
 
         [[nodiscard]] bool empty() const {
             return _size == 0;
         }
 
-        void resize(uint32_t element_count) {
-            reserve(element_count);
-            for (size_t i = 0; i < element_count; i++)
-                _data[i] = T{};
-            _size = element_count;
-        }
-
         [[nodiscard]] uint32_t size() const {
             return _size;
         }
 
-        void reserve(uint32_t element_count) {
-            if (element_count == 0
-            ||  element_count == _capacity) {
-                return;
-            }
-            adjust_capacity(element_count);
+        void reserve(uint32_t new_capacity) {
+            if (new_capacity > _capacity)
+                set_capacity(new_capacity);
         }
 
         [[nodiscard]] uint32_t capacity() const {
@@ -125,9 +126,9 @@ namespace basecode::compiler::data {
         }
 
         array_t& operator=(const array_t& other) {
-            adjust_capacity(other._capacity);
-            std::memcpy(_data, other._data, _capacity * sizeof(T));
-            _size = other._size;
+            auto n = other._size;
+            resize(n);
+            std::memcpy(_data, other._data, n * sizeof(T));
             return *this;
         }
 
@@ -140,6 +141,7 @@ namespace basecode::compiler::data {
             _data = other._data;
             _size = other._size;
             _capacity = other._capacity;
+            _allocator = other._allocator;
 
             // mark donor as being moved so it doesn't deallocate
             other._moved = true;
@@ -148,41 +150,36 @@ namespace basecode::compiler::data {
         }
 
     private:
+        void set_capacity(uint32_t new_capacity) {
+            if (new_capacity == _capacity) return;
+
+            if (new_capacity < _size)
+                resize(new_capacity);
+
+            T* new_data{};
+            if (new_capacity > 0) {
+                new_data = (T*)_allocator->allocate(
+                    new_capacity * sizeof(T),
+                    alignof(T),
+                    __FILE__,
+                    __FUNCTION__,
+                    __LINE__);
+                if (_data)
+                    std::memcpy(new_data, _data, _size * sizeof(T));
+            }
+            _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
+            _data = new_data;
+            _capacity = new_capacity;
+        }
+
         void insert(std::initializer_list<T> elements) {
             reserve(elements.size());
             for (const auto& e : elements)
                 _data[_size++] = e;
         }
 
-        void adjust_capacity(std::optional<uint32_t> target_capacity = {}) {
-            if (!_data) {
-                _size = 0;
-                _capacity = numbers::next_power_of_two(target_capacity ?
-                    *target_capacity :
-                    Initial_Capacity);
-                auto new_size = _capacity * sizeof(T);
-                _data = static_cast<T*>(_allocator->allocate(
-                    new_size,
-                    alignof(T),
-                    fmt::format("{}<no data yet>", __FILE__).c_str(),
-                    __FUNCTION__,
-                    __LINE__));
-            } else {
-                auto old_size = _capacity * sizeof(T);
-                _capacity = numbers::next_power_of_two(target_capacity ?
-                    *target_capacity :
-                    _capacity + 1);
-                auto new_size = _capacity * sizeof(T);
-                auto new_data = _allocator->allocate(
-                    new_size,
-                    alignof(T),
-                    fmt::format("{}<existing data>", __FILE__).c_str(),
-                    __FUNCTION__,
-                    __LINE__);
-                std::memcpy(new_data, _data, std::min(old_size, new_size));
-                _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
-                _data = static_cast<T*>(new_data);
-            }
+        void grow(uint32_t min_capacity = Initial_Capacity) {
+            set_capacity(std::max(_capacity * 2 + 8, min_capacity));
         }
 
     private:

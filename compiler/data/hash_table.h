@@ -28,7 +28,7 @@
 
 namespace basecode::compiler::data {
 
-    template <typename K, typename V, std::uint32_t InitialSize = 16>
+    template <typename K, typename V, std::uint32_t Initial_Size = 16>
     class hash_table_t final {
         static constexpr uint64_t hash_mask = 0b0011111111111111111111111111111111111111111111111111111111111111;
 
@@ -51,18 +51,25 @@ namespace basecode::compiler::data {
     public:
         hash_table_t(
                 std::initializer_list<std::pair<K, V>> elements,
-                memory::allocator_t* allocator) : _pairs(allocator),
-                                                  _allocator(allocator),
+                memory::allocator_t* allocator) : _allocator(allocator),
+                                                  _pairs(allocator),
                                                   _buckets(allocator) {
-            assert(allocator);
+            assert(_allocator);
             init();
             insert(elements);
         }
 
-        explicit hash_table_t(memory::allocator_t* allocator) : _pairs(allocator),
-                                                                _allocator(allocator),
+        hash_table_t(const hash_table_t& other) : _allocator(other._allocator),
+                                                  _size(other._size),
+                                                  _pairs(std::move(other._pairs)),
+                                                  _buckets(std::move(other._buckets)) {
+            assert(_allocator);
+        }
+
+        explicit hash_table_t(memory::allocator_t* allocator) : _allocator(allocator),
+                                                                _pairs(allocator),
                                                                 _buckets(allocator) {
-            assert(allocator);
+            assert(_allocator);
             init();
         }
 
@@ -153,20 +160,22 @@ namespace basecode::compiler::data {
 
     private:
         void init() {
-            _pairs.resize(InitialSize);
-            _buckets.resize(InitialSize);
+            _pairs.resize(Initial_Size);
+            _buckets.resize(Initial_Size);
+            reset_bucket_state(_buckets);
         }
 
         void rehash(uint32_t new_bucket_count) {
             new_bucket_count = std::max<uint32_t>(
                 std::max<uint32_t>(new_bucket_count, _size),
-                InitialSize);
+                Initial_Size);
 
             array_t<hash_pair_t> new_pairs(_allocator);
             new_pairs.resize(new_bucket_count);
 
             array_t<hash_bucket_t> new_buckets(_allocator);
             new_buckets.resize(new_bucket_count);
+            reset_bucket_state(new_buckets);
 
             auto i = 0;
             for (auto& bucket : _buckets) {
@@ -280,6 +289,11 @@ namespace basecode::compiler::data {
             return false;
         }
 
+        void reset_bucket_state(array_t<hash_bucket_t>& buckets) {
+            for (size_t i = 0; i < buckets.size(); i++)
+                buckets[i].state = 0;
+        }
+
         void insert(std::initializer_list<std::pair<K, V>> elements) {
             reserve(elements.size());
             for (auto e : elements)
@@ -288,9 +302,9 @@ namespace basecode::compiler::data {
 
     private:
         size_t _size{};
-        array_t<hash_pair_t> _pairs;
         memory::allocator_t* _allocator;
-        array_t<hash_bucket_t> _buckets;
+        array_t<hash_pair_t, Initial_Size> _pairs;
+        array_t<hash_bucket_t, Initial_Size> _buckets;
     };
 
 }

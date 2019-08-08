@@ -45,8 +45,8 @@ namespace basecode::compiler::memory {
             ->color(terminal::colors_t::default_color, terminal::colors_t::green)
             ->append(fmt::format(
                 "{}: {}@{} allocate: size = {}, align = {}, p = {}, _backing->total_allocated() = {}\n",
-                file_name,
-                function_name,
+                file_name ? file_name : __FILE__,
+                function_name ? function_name : __FUNCTION__,
                 line_number,
                 size,
                 align,
@@ -66,8 +66,8 @@ namespace basecode::compiler::memory {
             ->color(terminal::colors_t::default_color, terminal::colors_t::yellow)
             ->append(fmt::format(
                 "{}: {}@{} deallocate: p = {}, backing->total_allocated() = {}\n",
-                file_name,
-                function_name,
+                file_name ? file_name : __FILE__,
+                function_name ? function_name : __FUNCTION__,
                 line_number,
                 p,
                 *_backing->total_allocated()

@@ -29,7 +29,7 @@
 
 namespace basecode::compiler::data {
 
-    template <typename T, std::uint32_t InitialSize = 16>
+    template <typename T, std::uint32_t Initial_Size = 16>
     class set_t final {
         static constexpr uint64_t hash_mask = 0b0011111111111111111111111111111111111111111111111111111111111111;
 
@@ -54,14 +54,21 @@ namespace basecode::compiler::data {
         set_t(
                 std::initializer_list<T> elements,
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
-            assert(allocator);
+            assert(_allocator);
             init();
             insert(elements);
         }
 
+        set_t(const set_t& other) : _size(other._size),
+                                    _allocator(other._allocator),
+                                    _values(std::move(other._values)),
+                                    _buckets(std::move(other._buckets)) {
+            assert(_allocator);
+        }
+
         explicit set_t(
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
-            assert(allocator);
+            assert(_allocator);
             init();
         }
 
@@ -187,20 +194,22 @@ namespace basecode::compiler::data {
 
     private:
         void init() {
-            _values.resize(InitialSize);
-            _buckets.resize(InitialSize);
+            _values.resize(Initial_Size);
+            _buckets.resize(Initial_Size);
+            reset_bucket_state(_buckets);
         }
 
         void rehash(uint32_t new_bucket_count) {
             new_bucket_count = std::max(
                 std::max(new_bucket_count, _size),
-                InitialSize);
+                Initial_Size);
 
             array_t<hash_value_t> new_values(_allocator);
             new_values.resize(new_bucket_count);
 
             array_t<hash_bucket_t> new_buckets(_allocator);
             new_buckets.resize(new_bucket_count);
+            reset_bucket_state(new_buckets);
 
             auto i = 0;
             for (auto& bucket : _buckets) {
@@ -320,11 +329,16 @@ namespace basecode::compiler::data {
                 insert(const_cast<T&&>(e));
         }
 
+        void reset_bucket_state(array_t<hash_bucket_t>& buckets) {
+            for (size_t i = 0; i < buckets.size(); i++)
+                buckets[i].state = 0;
+        }
+
     private:
         uint32_t _size{};
-        array_t<hash_value_t> _values{};
         memory::allocator_t* _allocator;
-        array_t<hash_bucket_t> _buckets{};
+        array_t<hash_value_t, Initial_Size> _values{};
+        array_t<hash_bucket_t, Initial_Size> _buckets{};
     };
 
 }
