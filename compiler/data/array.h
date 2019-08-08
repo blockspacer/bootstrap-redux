@@ -86,6 +86,16 @@ namespace basecode::compiler::data {
             return _data + _size;
         }
 
+        T* erase(const T* it) {
+            const auto offset = it - _data;
+            std::memmove(
+                _data + offset,
+                _data + offset + 1,
+                (_size - offset - 1) * sizeof(T));
+            _size--;
+            return _data + offset;
+        }
+
         const T* begin() const {
             return _data;
         }
@@ -106,6 +116,21 @@ namespace basecode::compiler::data {
 
         [[nodiscard]] bool empty() const {
             return _size == 0;
+        }
+
+        T* insert(const T* it, const T& v) {
+            const auto offset = it - _data;
+            if (_size == _capacity)
+                reserve(_size + 1);
+            if (offset < _size) {
+                std::memmove(
+                    _data + offset + 1,
+                    _data + offset,
+                    (_size - offset) * sizeof(T));
+            }
+            std::memcpy(&_data[offset], &v, sizeof(v));
+            _size++;
+            return _data + offset;
         }
 
         [[nodiscard]] uint32_t size() const {
@@ -130,6 +155,24 @@ namespace basecode::compiler::data {
             resize(n);
             std::memcpy(_data, other._data, n * sizeof(T));
             return *this;
+        }
+
+        T* erase(const T* it_begin, const T* it_end) {
+            const auto count = it_end - it_begin;
+            const auto offset = it_begin - _data;
+            std::memmove(
+                _data + offset,
+                _data + offset + count,
+                (_size - offset - count) * sizeof(T));
+            _size -= count;
+            return _data + offset;
+        }
+
+        [[nodiscard]] bool contains(const T& v) const {
+            const T* data = _data;
+            const T* data_end = _data + _size;
+            while (data < data_end) if (*data++ == v) return true;
+            return false;
         }
 
         array_t& operator = (array_t&& other) noexcept {

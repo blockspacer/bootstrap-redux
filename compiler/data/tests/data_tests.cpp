@@ -68,6 +68,53 @@ namespace basecode {
             REQUIRE(n == k++);
     }
 
+    TEST_CASE("array_t insert") {
+        array_t<int32_t> numbers{0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+        REQUIRE(!numbers.empty());
+        REQUIRE(numbers.size() == 9);
+
+        auto v = *numbers.insert(std::begin(numbers) + 3, 30);
+        REQUIRE(v == 30);
+
+        REQUIRE(numbers.size() == 10);
+
+        int32_t k = 0;
+        int32_t j = 0;
+        for (auto n : numbers) {
+            if (j == 3) {
+                REQUIRE(n == 30);
+            } else {
+                REQUIRE(n == k++);
+            }
+            ++j;
+        }
+    }
+
+    TEST_CASE("array_t erase") {
+        array_t<int32_t> numbers{0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+        REQUIRE(!numbers.empty());
+        REQUIRE(numbers.size() == 9);
+
+        auto v = *numbers.erase(std::begin(numbers) + 3);
+        REQUIRE(v == 4);
+
+        REQUIRE(numbers.size() == 8);
+
+        int32_t k = 0;
+        int32_t j = 0;
+        for (auto n : numbers) {
+            if (j == 3) {
+                REQUIRE(n == 4);
+                k = n + 1;
+            } else {
+                REQUIRE(n == k++);
+            }
+            ++j;
+        }
+    }
+
     TEST_CASE("array_t reserve space; fill") {
         array_t<int32_t> numbers;
         numbers.reserve(4096);
