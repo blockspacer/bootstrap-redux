@@ -55,12 +55,15 @@ namespace basecode::compiler::data {
         }
 
         void dequeue_back() {
-            --_size;
+            if (_size > 0)
+                --_size;
         }
 
         void dequeue_front() {
-            _offset = (_offset + 1) % _data.size();
-            --_size;
+            if (_size > 0) {
+                _offset = (_offset + 1) % _data.size();
+                --_size;
+            }
         }
 
         const T* end() const {
@@ -78,8 +81,10 @@ namespace basecode::compiler::data {
         }
 
         void consume(uint32_t count) {
-            _offset = (_offset + count) % _data.size();
-            _size -= count;
+            if (_size >= count) {
+                _offset = (_offset + count) % _data.size();
+                _size -= count;
+            }
         }
 
         T& operator[](uint32_t index) {

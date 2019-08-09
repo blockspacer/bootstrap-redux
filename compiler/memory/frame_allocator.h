@@ -22,19 +22,24 @@
 
 namespace basecode::compiler::memory {
 
-    template <std::size_t BlockSize, std::size_t MaxBlocks>
+    template <std::size_t Frame_Size>
     class frame_allocator_t : public allocator_t {
     public:
         explicit frame_allocator_t(
                 allocator_t* backing = default_allocator(),
-                uint32_t block_size = BlockSize) : _block_size(block_size),
-                                                   _backing(backing) {
+                uint32_t block_size = Frame_Size) : _block_size(block_size),
+                                                    _backing(backing) {
         }
 
         ~frame_allocator_t() override {
-            for (size_t i = 0; i < _block_index; i++) {
-                _backing->deallocate(_blocks[i]);
-                _total_allocated -= _block_size;
+            if (_block != nullptr) {
+                auto current_block = _block;
+                while (current_block != nullptr) {
+                    _backing->deallocate(current_block);
+                    _total_allocated -= _block_size;
+                    auto prev_ptr = static_cast<uint64_t*>(_block);
+                    current_block = reinterpret_cast<void*>(*prev_ptr);
+                }
             }
             assert(_total_allocated == 0);
         }
@@ -42,12 +47,22 @@ namespace basecode::compiler::memory {
         void* allocate(
                 uint32_t size,
                 uint32_t align) override {
-            assert(_block_index + 1 < MaxBlocks);
+            if (_block == nullptr || _offset + size > _block_size) {
+                auto old_block = _block;
+                _block = _backing->allocate(_block_size, align);
+                _total_allocated += _block_size;
+                _offset = 8;
 
-            auto block = _backing->allocate(_block_size, align);
-            _total_allocated += _block_size;
-            _blocks[_block_index++] = block;
-            return block;
+                if (old_block != nullptr) {
+                    auto prev_ptr = static_cast<uint64_t*>(_block);
+                    *prev_ptr = reinterpret_cast<uint64_t>(old_block);
+                }
+            } else {
+                _offset += size;
+                _offset = numbers::align(_offset, align);
+            }
+
+            return static_cast<char*>(_block) + _offset;
         }
 
         void deallocate(void* p) override {
@@ -62,10 +77,10 @@ namespace basecode::compiler::memory {
         }
 
     private:
+        void* _block{};
+        uint32_t _offset{};
         uint32_t _block_size;
-        size_t _block_index{};
-        allocator_t* _backing{};
-        void* _blocks[MaxBlocks]{};
+        allocator_t* _backing;
         uint32_t _total_allocated{};
     };
 

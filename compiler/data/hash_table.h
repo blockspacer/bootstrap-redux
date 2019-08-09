@@ -73,10 +73,10 @@ namespace basecode::compiler::data {
             init();
         }
 
-        void reset() {
+        void clear() {
             _size = 0;
-            _pairs.reset();
-            _buckets.reset();
+            _pairs.clear();
+            _buckets.clear();
         }
 
         bool remove(K key) {

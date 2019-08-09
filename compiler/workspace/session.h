@@ -51,7 +51,7 @@ namespace basecode::compiler::workspace {
         strings::pool_t _intern_pool;
         memory::allocator_t* _allocator;
         const session_options_t& _options;
-        memory::frame_allocator_t<64 * 1024, 32> _intern_allocator;
+        memory::frame_allocator_t<64 * 1024> _intern_allocator;
     };
 
 }

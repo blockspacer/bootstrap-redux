@@ -29,30 +29,18 @@ namespace basecode::compiler::strings {
                                    _index(memory::default_allocator()) {
     }
 
-    char* pool_t::next_data_pointer(uint32_t length) {
-        _block_offset += length;
-
-        if (_block == nullptr
-        ||  _block_offset > _block_size) {
-            _block = (char*)_allocator->allocate(_block_size);
-            _block_offset = 0;
-        }
-
-        return reinterpret_cast<char*>(_block + _block_offset);
-    }
-
     std::string_view pool_t::intern(std::string_view value) {
         if (value.empty())
             return value;
 
         auto data = _index.find(value);
         if (!data) {
-            auto data_ptr = next_data_pointer(value.length());
+            auto data_ptr = _allocator->allocate(value.length());
             std::memcpy(data_ptr, value.data(), value.length());
             _index.insert(value, data_ptr);
-            return data_ptr;
+            return static_cast<char*>(data_ptr);
         }
-        return *data;
+        return static_cast<char*>(*data);
     }
 
     std::string_view pool_t::intern(const std::string& value) {

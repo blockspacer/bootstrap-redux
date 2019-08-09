@@ -30,8 +30,6 @@ namespace basecode::compiler::data {
     template <typename T, std::uint32_t Initial_Capacity = 16>
     class array_t final {
     public:
-        using item_type_t = T;
-
         explicit array_t(
                 memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
             assert(_allocator);
@@ -168,14 +166,7 @@ namespace basecode::compiler::data {
             return _data + offset;
         }
 
-        [[nodiscard]] bool contains(const T& v) const {
-            const T* data = _data;
-            const T* data_end = _data + _size;
-            while (data < data_end) if (*data++ == v) return true;
-            return false;
-        }
-
-        array_t& operator = (array_t&& other) noexcept {
+        array_t& operator=(array_t&& other) noexcept {
             assert(_allocator == other._allocator);
 
             // free any memory we're already using
@@ -190,6 +181,13 @@ namespace basecode::compiler::data {
             other._moved = true;
 
             return *this;
+        }
+
+        [[nodiscard]] bool contains(const T& v) const {
+            const T* data = _data;
+            const T* data_end = _data + _size;
+            while (data < data_end) if (*data++ == v) return true;
+            return false;
         }
 
     private:

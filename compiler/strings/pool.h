@@ -37,14 +37,9 @@ namespace basecode::compiler::strings {
         std::string_view intern(const std::string& value);
 
     private:
-        char* next_data_pointer(uint32_t length);
-
-    private:
-        char* _block{};
         uint32_t _block_size;
-        uint32_t _block_offset{};
         memory::allocator_t* _allocator;
-        data::hash_table_t<std::string_view, char*> _index;
+        data::hash_table_t<std::string_view, void*> _index;
     };
 
 }
