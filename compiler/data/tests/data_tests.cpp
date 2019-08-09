@@ -20,6 +20,7 @@
 #include <catch2/catch.hpp>
 #include <compiler/data/set.h>
 #include <compiler/data/array.h>
+#include <compiler/data/stack.h>
 
 namespace basecode {
 
@@ -139,6 +140,37 @@ namespace basecode {
 
         for (size_t i = 0; i < 4096; i++)
             REQUIRE(numbers[i] == 4095 - i);
+    }
+
+    TEST_CASE("stack_t basics") {
+        stack_t<int32_t> numbers{0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+        REQUIRE(!numbers.empty());
+        REQUIRE(numbers.depth() == 9);
+
+        auto n = 8;
+        while (!numbers.empty()) {
+            auto top = *numbers.top();
+            REQUIRE(top == n--);
+            numbers.pop();
+        }
+
+        numbers.push(100);
+        numbers.push(200);
+        numbers.push(300);
+        REQUIRE(numbers.depth() == 3);
+
+        n = 300;
+        while (!numbers.empty()) {
+            auto top = *numbers.top();
+            REQUIRE(top == n);
+            n -= 100;
+            numbers.pop();
+        }
+
+        numbers.clear();
+        REQUIRE(numbers.empty());
+        REQUIRE(numbers.depth() == 0);
     }
 
 }
