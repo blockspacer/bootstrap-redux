@@ -23,15 +23,15 @@
 namespace basecode::compiler::memory {
 
     template <std::size_t BlockSize, std::size_t MaxBlocks>
-    class block_allocator_t : public allocator_t {
+    class frame_allocator_t : public allocator_t {
     public:
-        explicit block_allocator_t(
+        explicit frame_allocator_t(
                 allocator_t* backing = default_allocator(),
                 uint32_t block_size = BlockSize) : _block_size(block_size),
                                                    _backing(backing) {
         }
 
-        ~block_allocator_t() override {
+        ~frame_allocator_t() override {
             for (size_t i = 0; i < _block_index; i++) {
                 _backing->deallocate(_blocks[i], __FILE__, __FUNCTION__, __LINE__);
                 _total_allocated -= _block_size;

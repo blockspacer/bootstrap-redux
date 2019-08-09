@@ -23,11 +23,11 @@
 
 namespace basecode::compiler::memory {
 
-    class debug_allocator_t : public allocator_t {
+    class trace_allocator_t : public allocator_t {
     public:
-        explicit debug_allocator_t(allocator_t* backing);
+        explicit trace_allocator_t(allocator_t* backing);
 
-        ~debug_allocator_t() override;
+        ~trace_allocator_t() override;
 
         void* allocate(
             uint32_t size,

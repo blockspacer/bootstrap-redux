@@ -16,20 +16,20 @@
 //
 // ----------------------------------------------------------------------------
 
-#include "debug_allocator.h"
+#include "trace_allocator.h"
 
 namespace basecode::compiler::memory {
 
-    debug_allocator_t::debug_allocator_t(allocator_t* backing) : _backing(backing) {
+    trace_allocator_t::trace_allocator_t(allocator_t* backing) : _backing(backing) {
         _stream_factory.enabled(true);
         _stream = _stream_factory.use_memory_buffer(_buffer);
     }
 
-    debug_allocator_t::~debug_allocator_t() {
+    trace_allocator_t::~trace_allocator_t() {
         fmt::print("{}\n", _stream->format());
     }
 
-    void* debug_allocator_t::allocate(
+    void* trace_allocator_t::allocate(
             uint32_t size,
             uint32_t align,
             const char* file_name,
@@ -56,7 +56,7 @@ namespace basecode::compiler::memory {
         return p;
     }
 
-    void debug_allocator_t::deallocate(
+    void trace_allocator_t::deallocate(
             void* p,
             const char* file_name,
             const char* function_name,
@@ -75,11 +75,11 @@ namespace basecode::compiler::memory {
             ->color_reset();
     }
 
-    std::optional<uint32_t> debug_allocator_t::total_allocated() {
+    std::optional<uint32_t> trace_allocator_t::total_allocated() {
         return _backing->total_allocated();
     }
 
-    std::optional<uint32_t> debug_allocator_t::allocated_size(void* p) {
+    std::optional<uint32_t> trace_allocator_t::allocated_size(void* p) {
         return _backing->allocated_size(p);
     }
 

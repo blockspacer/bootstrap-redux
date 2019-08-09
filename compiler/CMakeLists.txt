@@ -30,9 +30,9 @@ add_library(
         memory/pool.h
         memory/allocator.h
         memory/temp_allocator.h
-        memory/block_allocator.h
+        memory/frame_allocator.h
         memory/system.cpp memory/system.h
-        memory/debug_allocator.cpp memory/debug_allocator.h
+        memory/trace_allocator.cpp memory/trace_allocator.h
         memory/system_allocator.cpp memory/system_allocator.h
         memory/scratch_allocator.cpp memory/scratch_allocator.h
 

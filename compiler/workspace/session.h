@@ -21,7 +21,7 @@
 #include <compiler/types.h>
 #include <compiler/strings/pool.h>
 #include <compiler/utf8/source_buffer.h>
-#include <compiler/memory/block_allocator.h>
+#include <compiler/memory/frame_allocator.h>
 
 namespace basecode::compiler::workspace {
 
@@ -51,7 +51,7 @@ namespace basecode::compiler::workspace {
         strings::pool_t _intern_pool;
         memory::allocator_t* _allocator;
         const session_options_t& _options;
-        memory::block_allocator_t<64*1024, 32> _intern_allocator;
+        memory::frame_allocator_t<64 * 1024, 32> _intern_allocator;
     };
 
 }
