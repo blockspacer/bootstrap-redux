@@ -120,7 +120,7 @@ namespace basecode::compiler::data {
             return target_pair->value;
         }
 
-        void insert(K key, V value) {
+        V& insert(K key, V value) {
             if (_size * 3 > _buckets.size() * 2)
                 rehash(_buckets.size() * 2);
 
@@ -144,6 +144,8 @@ namespace basecode::compiler::data {
             target_pair->value = value;
 
             ++_size;
+
+            return target_pair->value;
         }
 
         void reserve(uint32_t new_size) {

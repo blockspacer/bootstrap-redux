@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <functional>
 #include <compiler/memory/allocator.h>
+#include "set.h"
 #include "array.h"
 #include "hash_table.h"
 
@@ -38,7 +39,7 @@ namespace basecode::compiler::data {
     class directed_graph_t {
     public:
         using vertex_t = V*;
-        using vertex_set_t = std::set<vertex_t>;
+        using vertex_set_t = set_t<vertex_t>;
         using vertex_list_t = array_t<vertex_t>;
         using directed_edge_t = directed_edge_t<V>;
         using edge_list_t = array_t<directed_edge_t>;
@@ -58,44 +59,39 @@ namespace basecode::compiler::data {
         }
 
         bool add_vertex(vertex_t vertex) {
-            auto it = _graph.find(vertex);
-            if (it == std::end(_graph)) {
-                auto result = _graph.insert(std::make_pair(
-                    vertex,
-                    edge_list_t{}));
-                return result.second;
+            auto edge_list = _graph.find(vertex);
+            if (!edge_list) {
+                _graph.insert(vertex, edge_list_t{});
+                return true;
             }
             return false;
         }
 
         void add_edge(const directed_edge_t& edge) {
             edge_list_t* edges = nullptr;
-            auto it = _graph.find(edge.source);
-            if (it == std::end(_graph)) {
-                auto result = _graph.insert(std::make_pair(
-                    edge.source,
-                    edge_list_t{}));
-                edges = &result.first->second;
+            auto& edge_list = _graph.find(edge.source);
+            if (!edge_list) {
+                edges = &_graph.insert(edge.source, edge_list_t{});
             } else {
-                edges = &it->second;
+                edges = &(*edge_list);
             }
             edges->push_back(edge);
         }
 
         edge_list_t outgoing_edges(vertex_t source) const {
-            auto it = _graph.find(source);
-            if (it == std::end(_graph))
+            auto edge_list = _graph.find(source);
+            if (!edge_list)
                 return edge_list_t{};
-            return it->second;
+            return edge_list;
         }
 
         directed_graph_t<V> transpose(const transpose_callback_t& reverse_edge) {
             directed_graph_t<V> t(_allocator);
-            for (const auto& kvp : _graph) {
-                t.add_vertex(kvp.first);
-                for (const auto& e : kvp.second)
-                    t.add_edge(reverse_edge(e));
-            }
+//            for (const auto& kvp : _graph) {
+//                t.add_vertex(kvp.first);
+//                for (const auto& e : kvp.second)
+//                    t.add_edge(reverse_edge(e));
+//            }
             return t;
         }
 

@@ -59,8 +59,16 @@ namespace basecode::compiler::data {
             return _data + _size;
         }
 
+        T* rend() {
+            return _data;
+        }
+
         T* begin() {
             return _data;
+        }
+
+        T* rbegin() {
+            return _data + _size;
         }
 
         void pop() {
@@ -84,6 +92,10 @@ namespace basecode::compiler::data {
             return _data + _size;
         }
 
+        const T* rend() const {
+            return _data;
+        }
+
         T* erase(const T* it) {
             const auto offset = it - _data;
             std::memmove(
@@ -96,6 +108,10 @@ namespace basecode::compiler::data {
 
         const T* begin() const {
             return _data;
+        }
+
+        const T* rbegin() const {
+            return _data + _size;
         }
 
         void add(const T& value) {
