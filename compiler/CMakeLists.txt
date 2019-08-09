@@ -32,6 +32,7 @@ add_library(
         memory/temp_allocator.h
         memory/frame_allocator.h
         memory/system.cpp memory/system.h
+        memory/dlmalloc.c memory/dlmalloc.h
         memory/proxy_allocator.cpp memory/proxy_allocator.h
         memory/trace_allocator.cpp memory/trace_allocator.h
         memory/system_allocator.cpp memory/system_allocator.h
