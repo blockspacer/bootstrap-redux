@@ -88,22 +88,13 @@ namespace basecode::compiler::language::core::lexer {
     lexer_t::~lexer_t() {
         if (_lexemes != nullptr) {
             _lexemes->~trie_t();
-            _session.allocator()->deallocate(
-                _lexemes,
-                __FILE__,
-                __FUNCTION__,
-                __LINE__);
+            _session.allocator()->deallocate(_lexemes);
         }
     }
 
     trie_t* lexer_t::lexemes() {
         if (_lexemes == nullptr) {
-            _lexemes = (trie_t*)_session.allocator()->allocate(
-                sizeof(trie_t),
-                alignof(trie_t),
-                __FILE__,
-                __FUNCTION__,
-                __LINE__);
+            _lexemes = (trie_t*)_session.allocator()->allocate(sizeof(trie_t), alignof(trie_t));
             new (_lexemes) trie_t(
                 _session.allocator(),
                 {

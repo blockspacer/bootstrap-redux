@@ -54,7 +54,7 @@ namespace basecode::compiler::data {
 
         ~array_t() {
             if (!_moved)
-                _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
+                _allocator->deallocate(_data);
         }
 
         T* end() {
@@ -179,7 +179,7 @@ namespace basecode::compiler::data {
             assert(_allocator == other._allocator);
 
             // free any memory we're already using
-            _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
+            _allocator->deallocate(_data);
 
             _data = other._data;
             _size = other._size;
@@ -203,14 +203,11 @@ namespace basecode::compiler::data {
             if (new_capacity > 0) {
                 new_data = (T*)_allocator->allocate(
                     new_capacity * sizeof(T),
-                    alignof(T),
-                    __FILE__,
-                    __FUNCTION__,
-                    __LINE__);
+                    alignof(T));
                 if (_data)
                     std::memcpy(new_data, _data, _size * sizeof(T));
             }
-            _allocator->deallocate(_data, __FILE__, __FUNCTION__, __LINE__);
+            _allocator->deallocate(_data);
             _data = new_data;
             _capacity = new_capacity;
         }

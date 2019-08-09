@@ -38,29 +38,21 @@ namespace basecode::compiler::memory {
             void* p = *(void**)_buffer;
             while (p) {
                 void* next = *(void**)p;
-                _backing->deallocate(p, __FILE__, __FUNCTION__, __LINE__);
+                _backing->deallocate(p);
                 p = next;
             }
         }
 
         void* allocate(
                 uint32_t size,
-                uint32_t align,
-                const char* file_name,
-                const char* function_name,
-                int line_number) override {
+                uint32_t align) override {
             _p = (uint8_t*)memory::align_forward(_p, align);
             if ((int)size > _end - _p) {
                 uint32_t to_allocate = sizeof(void*) + size + align;
                 if (to_allocate < _chunk_size)
                     to_allocate = _chunk_size;
                 _chunk_size *= 2;
-                auto p = _backing->allocate(
-                    to_allocate,
-                    default_align,
-                    __FILE__,
-                    __FUNCTION__,
-                    __LINE__);
+                auto p = _backing->allocate(to_allocate);
                 *(void **)_start = p;
                 _p = _start = (char *)p;
                 _end = _start + to_allocate;
@@ -73,11 +65,7 @@ namespace basecode::compiler::memory {
             return result;
         }
 
-        void deallocate(
-                void*,
-                const char* file_name = {},
-                const char* function_name = {},
-                int line_number = {}) override {
+        void deallocate(void*) override {
         }
 
         std::optional<uint32_t> total_allocated() override {

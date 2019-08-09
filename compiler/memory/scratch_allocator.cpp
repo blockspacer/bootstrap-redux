@@ -23,12 +23,7 @@ namespace basecode::compiler::memory {
     scratch_allocator_t::scratch_allocator_t(
             allocator_t* backing,
             uint32_t size) : _backing(backing) {
-        _begin = (uint8_t*)_backing->allocate(
-            size,
-            default_align,
-            __FILE__,
-            __FUNCTION__,
-            __LINE__);
+        _begin = (uint8_t*)_backing->allocate(size);
         _end = _begin + size;
         _allocate = _begin;
         _free = _begin;
@@ -36,11 +31,7 @@ namespace basecode::compiler::memory {
 
     scratch_allocator_t::~scratch_allocator_t() {
         assert(_free == _allocate);
-        _backing->deallocate(
-            _begin,
-            __FILE__,
-            __FUNCTION__,
-            __LINE__);
+        _backing->deallocate(_begin);
     }
 
     bool scratch_allocator_t::in_use(void* p) {
@@ -53,10 +44,7 @@ namespace basecode::compiler::memory {
 
     void* scratch_allocator_t::allocate(
             uint32_t size,
-            uint32_t align,
-            const char* file_name,
-            const char* function_name,
-            int line_number) {
+            uint32_t align) {
         assert(align % 4 == 0);
         size = ((size + 3)/4)*4;
 
@@ -77,12 +65,7 @@ namespace basecode::compiler::memory {
 
         // if the buffer is exhausted use the backing allocator instead
         if (in_use(p)) {
-            return _backing->allocate(
-                size,
-                align,
-                __FILE__,
-                __FUNCTION__,
-                __LINE__);
+            return _backing->allocate(size, align);
         }
 
         fill(h, data, p - (uint8_t*)h);
@@ -93,16 +76,12 @@ namespace basecode::compiler::memory {
         return data;
     }
 
-    void scratch_allocator_t::deallocate(
-            void* p,
-            const char* file_name,
-            const char* function_name,
-            int line_number) {
+    void scratch_allocator_t::deallocate(void* p) {
         if (!p)
             return;
 
         if (p < _begin || p >= _end) {
-            _backing->deallocate(p, __FILE__, __FUNCTION__, __LINE__);
+            _backing->deallocate(p);
             return;
         }
 

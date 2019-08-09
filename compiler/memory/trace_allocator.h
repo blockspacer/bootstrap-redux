@@ -31,16 +31,9 @@ namespace basecode::compiler::memory {
 
         void* allocate(
             uint32_t size,
-            uint32_t align,
-            const char* file_name,
-            const char* function_name,
-            int line_number) override;
+            uint32_t align) override;
 
-        void deallocate(
-            void* p,
-            const char* file_name,
-            const char* function_name,
-            int line_number) override;
+        void deallocate(void* p) override;
 
         std::optional<uint32_t> total_allocated() override;
 

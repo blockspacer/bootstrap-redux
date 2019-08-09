@@ -16,7 +16,11 @@
 //
 // ----------------------------------------------------------------------------
 
+#define BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED
+#include <boost/stacktrace.hpp>
 #include "trace_allocator.h"
+
+using namespace std::literals;
 
 namespace basecode::compiler::memory {
 
@@ -31,48 +35,35 @@ namespace basecode::compiler::memory {
 
     void* trace_allocator_t::allocate(
             uint32_t size,
-            uint32_t align,
-            const char* file_name,
-            const char* function_name,
-            int line_number) {
-        auto p = _backing->allocate(
-            size,
-            align,
-            __FILE__,
-            __FUNCTION__,
-            __LINE__);
-        _stream
-            ->color(terminal::colors_t::default_color, terminal::colors_t::green)
-            ->append(fmt::format(
-                "{}: {}@{} allocate: size = {}, align = {}, p = {}, _backing->total_allocated() = {}\n",
-                file_name ? file_name : __FILE__,
-                function_name ? function_name : __FUNCTION__,
-                line_number,
-                size,
-                align,
-                p,
-                *_backing->total_allocated()))
-            ->color_reset();
+            uint32_t align) {
+        boost::stacktrace::stacktrace trace(2, 2);
+        _stream->color(
+            terminal::colors_t::default_color,
+            terminal::colors_t::yellow);
+        for (int32_t i = trace.size() - 1; i >= 0; --i) {
+            if (i != trace.size() - 1) _stream->append(" -> "sv);
+            const auto& frame = trace[i];
+            _stream->append(frame.name());
+        }
+        _stream->append("\n"sv)->color_reset();
+
+        auto p = _backing->allocate(size, align);
         return p;
     }
 
-    void trace_allocator_t::deallocate(
-            void* p,
-            const char* file_name,
-            const char* function_name,
-            int line_number) {
-        _backing->deallocate(p, __FILE__, __FUNCTION__, __LINE__);
-        _stream
-            ->color(terminal::colors_t::default_color, terminal::colors_t::yellow)
-            ->append(fmt::format(
-                "{}: {}@{} deallocate: p = {}, backing->total_allocated() = {}\n",
-                file_name ? file_name : __FILE__,
-                function_name ? function_name : __FUNCTION__,
-                line_number,
-                p,
-                *_backing->total_allocated()
-            ))
-            ->color_reset();
+    void trace_allocator_t::deallocate(void* p) {
+        boost::stacktrace::stacktrace trace(2, 2);
+        _stream->color(
+            terminal::colors_t::default_color,
+            terminal::colors_t::green);
+        for (int32_t i = trace.size() - 1; i >= 0; --i) {
+            if (i != trace.size() - 1) _stream->append(" -> "sv);
+            const auto& frame = trace[i];
+            _stream->append(frame.name());
+        }
+        _stream->append("\n"sv)->color_reset();
+
+        _backing->deallocate(p);
     }
 
     std::optional<uint32_t> trace_allocator_t::total_allocated() {
