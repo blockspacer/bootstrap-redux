@@ -20,6 +20,7 @@
 
 #include <string_view>
 #include "allocator.h"
+#include "dlmalloc_config.h"
 
 namespace basecode::compiler::memory {
 

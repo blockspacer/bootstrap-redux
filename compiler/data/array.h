@@ -168,6 +168,7 @@ namespace basecode::compiler::data {
             auto n = other._size;
             resize(n);
             std::memcpy(_data, other._data, n * sizeof(T));
+            _allocator = other._allocator;
             return *this;
         }
 

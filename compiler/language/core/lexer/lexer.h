@@ -75,6 +75,17 @@ namespace basecode::compiler::language::core::lexer {
         trie_node_t _root{nullptr, &_tree_root};
 
         // XXX: need to refactor pool_t into new allocator model
+        //
+        // pool_t
+        // +--------+
+        // | ****** | <---- first slot "32 bytes"
+        // |        |
+        // /  ~~~   /
+        // |        |
+        // | arena  | <---- current slot
+        // |   8k   |
+        // |        |
+        // +--------+
         memory::pool_t<lexeme_t> _lexeme_storage{256};
         memory::pool_t<trie_node_t> _node_storage{256};
         memory::pool_t<trie_tree_node_t> _tree_node_storage{256};

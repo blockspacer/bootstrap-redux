@@ -29,6 +29,7 @@ add_library(
 
         memory/pool.h
         memory/allocator.h
+        memory/slab_allocator.h
         memory/temp_allocator.h
         memory/frame_allocator.h
         memory/system.cpp memory/system.h
@@ -85,5 +86,6 @@ target_link_libraries(
 )
 
 add_subdirectory(data/tests)
+add_subdirectory(memory/tests)
 add_subdirectory(language/core/lexer/tests)
 add_subdirectory(language/core/parser/tests)
