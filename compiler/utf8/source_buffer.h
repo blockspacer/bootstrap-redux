@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <string_view>
 #include <compiler/types.h>
+#include <compiler/data/hash_table.h>
 #include <compiler/terminal/stream_factory.h>
 #include "reader.h"
 
@@ -32,8 +33,8 @@ namespace basecode::compiler::utf8 {
 
     struct source_buffer_range_compare_t {
         bool operator()(
-            const source_buffer_range_t& lhs,
-            const source_buffer_range_t& rhs) const {
+                const source_buffer_range_t& lhs,
+                const source_buffer_range_t& rhs) const {
             return lhs.second < rhs.first;
         }
     };
@@ -120,7 +121,7 @@ namespace basecode::compiler::utf8 {
         reader_t* _reader{};
         size_t _buffer_size{};
         memory::allocator_t* _allocator;
-        std::map<size_t, source_buffer_line_t*> _lines_by_number {};
+        data::hash_table_t<size_t, source_buffer_line_t*> _lines_by_number;
         std::map<
             source_buffer_range_t,
             source_buffer_line_t,

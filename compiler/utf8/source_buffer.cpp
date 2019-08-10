@@ -23,7 +23,8 @@
 namespace basecode::compiler::utf8 {
 
     source_buffer_t::source_buffer_t(
-            memory::allocator_t* allocator) : _allocator(allocator) {
+            memory::allocator_t* allocator) : _allocator(allocator),
+                                              _lines_by_number(allocator) {
         assert(_allocator);
     }
 
@@ -43,10 +44,10 @@ namespace basecode::compiler::utf8 {
         if (_buffer) {
             _allocator->deallocate(_buffer);
             _buffer_size = 0;
-        }
 
-        _lines_by_number.clear();
-        _lines_by_index_range.clear();
+            _lines_by_number.clear();
+            _lines_by_index_range.clear();
+        }
 
         _buffer_size = buffer.size() + 1;
         _buffer = (char*)_allocator->allocate(_buffer_size);
@@ -181,9 +182,7 @@ namespace basecode::compiler::utf8 {
                         .line = line,
                         .columns = columns
                     }));
-                _lines_by_number.insert(std::make_pair(
-                    line,
-                    &it.first->second));
+                _lines_by_number.insert(line, &it.first->second);
                 line_start = _reader->pos();
                 line++;
                 columns = 0;
@@ -223,10 +222,11 @@ namespace basecode::compiler::utf8 {
     }
 
     const source_buffer_line_t* source_buffer_t::line_by_number(size_t line) const {
-        auto it = _lines_by_number.find(line);
-        if (it == _lines_by_number.end())
+        const auto self = const_cast<source_buffer_t*>(this);
+        auto source_line = self->_lines_by_number.find(line);
+        if (!source_line)
             return nullptr;
-        return it->second;
+        return *source_line;
     }
 
     const source_buffer_line_t* source_buffer_t::line_by_index(size_t index) const {

@@ -75,8 +75,7 @@ namespace basecode::compiler::data {
 
         void clear() {
             _size = 0;
-            _pairs.clear();
-            _buckets.clear();
+            reset_bucket_state(_buckets);
         }
 
         bool remove(K key) {
