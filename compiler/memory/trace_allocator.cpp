@@ -43,6 +43,7 @@ namespace basecode::compiler::memory {
         for (int32_t i = trace.size() - 1; i >= 0; --i) {
             if (i != trace.size() - 1) _stream->append(" -> "sv);
             const auto& frame = trace[i];
+            if (frame.empty()) continue;
             _stream->append(frame.name());
         }
         _stream->append("\n"sv)->color_reset();
@@ -59,6 +60,7 @@ namespace basecode::compiler::memory {
         for (int32_t i = trace.size() - 1; i >= 0; --i) {
             if (i != trace.size() - 1) _stream->append(" -> "sv);
             const auto& frame = trace[i];
+            if (frame.empty()) continue;
             _stream->append(frame.name());
         }
         _stream->append("\n"sv)->color_reset();

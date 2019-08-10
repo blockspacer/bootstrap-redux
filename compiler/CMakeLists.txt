@@ -29,11 +29,11 @@ add_library(
 
         memory/pool.h
         memory/allocator.h
-        memory/slab_allocator.h
         memory/temp_allocator.h
         memory/frame_allocator.h
         memory/system.cpp memory/system.h
         memory/dlmalloc.c memory/dlmalloc.h
+        memory/slab_allocator.cpp memory/slab_allocator.h
         memory/proxy_allocator.cpp memory/proxy_allocator.h
         memory/trace_allocator.cpp memory/trace_allocator.h
         memory/system_allocator.cpp memory/system_allocator.h

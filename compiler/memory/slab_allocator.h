@@ -48,87 +48,28 @@ namespace basecode::compiler::memory {
         };
 
     public:
-        static inline uint32_t make_size(
+        static uint32_t make_size(
                 uint8_t cache_id,
-                uint32_t size) {
-            auto bottom_24_bits = (size & 0b00000000111111111111111111111111);
-            auto shifted_id = (cache_id << 24);
-            return shifted_id | bottom_24_bits;
-        }
+                uint32_t size);
 
         explicit slab_allocator_t(
                 allocator_t* backing,
-                uint32_t slab_size = 4096) : _slab_size(slab_size),
-                                             _backing(backing),
-                                             _caches(backing) {
-        }
+                uint32_t slab_size = 4096);
 
-        ~slab_allocator_t() override {
-        }
-
-        cache_t* find_cache(uint8_t id) {
-            for (auto& cache : _caches) {
-                if (cache.id == id)
-                    return &cache;
-            }
-            return nullptr;
-        }
+        ~slab_allocator_t() override;
 
         void* allocate(
                 uint32_t size,
-                uint32_t align = default_align) override {
-            auto cache_id = (size & 0b11111111000000000000000000000000) >> 24;
-            auto actual_size = size & 0b00000000111111111111111111111111;
+                uint32_t align = default_align) override;
 
-            auto cache = find_cache(cache_id);
-            if (cache == nullptr) {
-                _caches.add(cache_t(_backing, cache_id));
-                cache = &_caches[0];
-            }
+        void deallocate(void* p) override;
 
-            if (cache->slabs.empty()) {
-                slab_t slab{};
-                slab.size = actual_size;
-                slab.state = slab_state_t::partial;
-                slab.chunk = (char*)_backing->allocate(_slab_size);
-                _total_allocated += _slab_size;
-                cache->slabs.add(slab);
-                return slab.chunk;
-            } else {
-                for (auto& slab : cache->slabs) {
-                    if (slab.size != actual_size
-                    ||  slab.state == slab_state_t::full) {
-                        continue;
-                    }
-                    if (slab.offset + actual_size > _slab_size) {
-                        slab.state = slab_state_t::full;
+        std::optional<uint32_t> total_allocated() override;
 
-                        slab_t new_slab{};
-                        new_slab.chunk = (char*)_backing->allocate(_slab_size);
-                        _total_allocated += _slab_size;
-                        cache->slabs.add(new_slab);
+        std::optional<uint32_t> allocated_size(void *p) override;
 
-                        return new_slab.chunk;
-                    } else {
-                        slab.offset += numbers::align(actual_size, align);
-                        return slab.chunk + slab.offset;
-                    }
-                }
-            }
-
-            assert(false);
-        }
-
-        void deallocate(void* p) override {
-        }
-
-        std::optional<uint32_t> total_allocated() override {
-            return _total_allocated;
-        }
-
-        std::optional<uint32_t> allocated_size(void *p) override {
-            return {};
-        }
+    private:
+        cache_t* find_cache(uint8_t id);
 
     private:
         uint32_t _slab_size;

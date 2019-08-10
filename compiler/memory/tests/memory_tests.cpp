@@ -20,6 +20,7 @@
 #include <catch2/catch.hpp>
 #include <compiler/memory/system.h>
 #include <compiler/memory/slab_allocator.h>
+#include <compiler/memory/trace_allocator.h>
 
 namespace basecode {
 
@@ -28,13 +29,20 @@ namespace basecode {
     using namespace compiler::memory;
 
     TEST_CASE("slab_allocator_t") {
-        slab_allocator_t slabbers(memory::default_scratch_allocator());
+        trace_allocator_t tracer(memory::default_scratch_allocator());
+        slab_allocator_t slabbers(&tracer);
 
-        auto data1 = slabbers.allocate(slab_allocator_t::make_size(1, 32));
-        REQUIRE(data1);
+        void* blocks[32];
+        for (size_t i = 0; i < 16; i++) {
+            blocks[i] = slabbers.allocate(slab_allocator_t::make_size(1, 256));
+        }
 
-        auto data2 = slabbers.allocate(slab_allocator_t::make_size(1, 32));
-        REQUIRE(data2);
+        for (size_t i = 16; i < 32; i++) {
+            blocks[i] = slabbers.allocate(slab_allocator_t::make_size(1, 256));
+        }
+
+        for (auto p : blocks)
+            REQUIRE(p);
     }
 
 }

@@ -59,6 +59,10 @@ namespace basecode::compiler::data {
             return _data + _size;
         }
 
+        T& back() {
+            return _data[_size - 1];
+        }
+
         T* rend() {
             return _data;
         }
@@ -94,6 +98,10 @@ namespace basecode::compiler::data {
 
         const T* rend() const {
             return _data;
+        }
+
+        const T& back() const {
+            return _data[_size - 1];
         }
 
         T* erase(const T* it) {
