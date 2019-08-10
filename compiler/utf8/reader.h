@@ -21,13 +21,16 @@
 #include <stack>
 #include <string_view>
 #include <compiler/types.h>
+#include <compiler/data/stack.h>
 #include "rune.h"
 
 namespace basecode::compiler::utf8 {
 
     class reader_t final {
     public:
-        explicit reader_t(std::string_view slice);
+        reader_t(
+            memory::allocator_t* allocator,
+            std::string_view slice);
 
         void push_mark();
 
@@ -53,18 +56,23 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] size_t pos() const;
 
-        [[nodiscard]] uint8_t width() const;
+        [[nodiscard]] uint32_t width() const;
 
-        [[nodiscard]] std::string_view make_slice(size_t offset, size_t length) const;
+        [[nodiscard]] std::string_view make_slice(
+            size_t offset,
+            size_t length) const;
+
+        [[nodiscard]] std::string_view slice() const;
 
     private:
-        rune_t read(result_t& r, uint8_t& width) const;
+        rune_t read(result_t& r, uint32_t& width) const;
 
     private:
         size_t _index{};
         std::string_view _slice;
-        std::stack<size_t> _mark_stack{};
-        std::stack<uint8_t> _width_stack{};
+        memory::allocator_t* _allocator;
+        data::stack_t<size_t> _mark_stack;
+        data::stack_t<uint32_t> _width_stack;
     };
 
 }

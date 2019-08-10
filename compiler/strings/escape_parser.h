@@ -27,7 +27,7 @@ namespace basecode::compiler::strings {
 
     class escape_parser_t final {
     public:
-        explicit escape_parser_t(std::string_view slice);
+        explicit escape_parser_t(utf8::reader_t& reader);
 
         bool parse(result_t& r, std::stringstream& stream);
 
@@ -41,7 +41,7 @@ namespace basecode::compiler::strings {
             std::string_view& value);
 
     private:
-        utf8::reader_t _reader;
+        utf8::reader_t& _reader;
     };
 
 }

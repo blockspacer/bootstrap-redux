@@ -20,7 +20,13 @@
 
 namespace basecode::compiler::utf8 {
 
-    reader_t::reader_t(std::string_view slice) : _slice(slice) {
+    reader_t::reader_t(
+            memory::allocator_t* allocator,
+            std::string_view slice) : _slice(slice),
+                                      _allocator(allocator),
+                                      _mark_stack(allocator),
+                                      _width_stack(allocator) {
+        assert(_allocator);
     }
 
     void reader_t::push_mark() {
@@ -32,11 +38,9 @@ namespace basecode::compiler::utf8 {
     }
 
     size_t reader_t::pop_mark() {
-        if (_mark_stack.empty())
-            return _index;
         const auto mark = _mark_stack.top();
         _mark_stack.pop();
-        return mark;
+        return mark ? *mark : _index;
     }
 
     size_t reader_t::pos() const {
@@ -44,14 +48,13 @@ namespace basecode::compiler::utf8 {
     }
 
     size_t reader_t::current_mark() {
-        if (_mark_stack.empty())
-            return _index;
-        return _mark_stack.top();
+        auto mark = _mark_stack.top();
+        return mark ? *mark : _index;
     }
 
-    uint8_t reader_t::width() const {
+    uint32_t reader_t::width() const {
         result_t r{};
-        uint8_t width;
+        uint32_t width;
         read(r, width);
         return width;
     }
@@ -70,14 +73,14 @@ namespace basecode::compiler::utf8 {
     rune_t reader_t::curr(result_t& r) {
         if (eof()) return rune_eof;
 
-        uint8_t width;
+        uint32_t width;
         return read(r, width);
     }
 
     rune_t reader_t::next(result_t& r) {
         if (eof()) return rune_eof;
 
-        uint8_t width;
+        uint32_t width;
         auto rune = read(r, width);
         _index += width;
         _width_stack.push(width);
@@ -87,7 +90,7 @@ namespace basecode::compiler::utf8 {
     void reader_t::restore_top_mark() {
         if (_mark_stack.empty())
             return;
-        _index = _mark_stack.top();
+        _index = *_mark_stack.top();
     }
 
     rune_t reader_t::prev(result_t& r) {
@@ -95,9 +98,9 @@ namespace basecode::compiler::utf8 {
             r.error("S003", "at beginning of buffer");
             return rune_invalid;
         }
-        _index = _width_stack.top();
+        _index = *_width_stack.top();
         _width_stack.pop();
-        uint8_t width;
+        uint32_t width;
         return read(r, width);
     }
 
@@ -107,7 +110,7 @@ namespace basecode::compiler::utf8 {
             return false;
         }
 
-        _index = _width_stack.top();
+        _index = *_width_stack.top();
         _width_stack.pop();
 
         return true;
@@ -119,14 +122,18 @@ namespace basecode::compiler::utf8 {
             return false;
         }
 
-        uint8_t width;
+        uint32_t width;
         read(r, width);
         _index += width;
         _width_stack.push(width);
         return true;
     }
 
-    rune_t reader_t::read(result_t& r, uint8_t& width) const {
+    std::string_view reader_t::slice() const {
+        return _slice;
+    }
+
+    rune_t reader_t::read(result_t& r, uint32_t& width) const {
         width = 1;
         uint8_t ch = _slice[_index];
         auto rune = rune_t(ch);
@@ -151,9 +158,7 @@ namespace basecode::compiler::utf8 {
     }
 
     std::string_view reader_t::make_slice(size_t offset, size_t length) const {
-        return std::string_view(
-            reinterpret_cast<const char*>(_slice.data() + offset),
-            length);
+        return std::string_view(_slice.data() + offset, length);
     }
 
 }

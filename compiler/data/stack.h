@@ -47,7 +47,8 @@ namespace basecode::compiler::data {
         }
 
         void pop() {
-            _values.pop();
+            if (!_values.empty())
+                _values.pop();
         }
 
         void clear() {

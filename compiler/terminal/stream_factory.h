@@ -25,6 +25,7 @@
 #include <sstream>
 #include <iomanip>
 #include <fmt/format.h>
+#include <compiler/utf8/reader.h>
 
 namespace basecode::compiler::terminal {
 
@@ -264,7 +265,7 @@ namespace basecode::compiler::terminal {
             colors_t bg_color = colors_t::default_color) const;
 
         [[nodiscard]] std::string colorize_range(
-            std::string_view text,
+            utf8::reader_t& reader,
             size_t begin,
             size_t end,
             colors_t fg_color,

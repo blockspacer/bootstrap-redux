@@ -23,8 +23,6 @@
 #include <cstdint>
 #include <string_view>
 #include <compiler/types.h>
-#include <compiler/id/pool.h>
-#include <boost/filesystem.hpp>
 #include <compiler/terminal/stream_factory.h>
 #include "reader.h"
 
@@ -49,7 +47,9 @@ namespace basecode::compiler::utf8 {
 
     class source_buffer_t {
     public:
-        explicit source_buffer_t(id::type_t id);
+        explicit source_buffer_t(memory::allocator_t* allocator);
+
+        ~source_buffer_t();
 
         bool load(
             result_t& r,
@@ -83,17 +83,17 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] bool eof() const;
 
+        memory::allocator_t* allocator();
+
         uint8_t operator[](size_t index);
 
         [[nodiscard]] size_t pos() const;
 
         [[nodiscard]] bool empty() const;
 
-        [[nodiscard]] uint8_t width() const;
-
-        [[nodiscard]] id::type_t id() const;
-
         [[nodiscard]] size_t length() const;
+
+        [[nodiscard]] uint32_t width() const;
 
         [[nodiscard]] const path_t& path() const;
 
@@ -116,9 +116,10 @@ namespace basecode::compiler::utf8 {
 
     private:
         path_t _path{};
-        id::type_t _id{};
-        std::vector<uint8_t> _buffer{};
-        std::unique_ptr<reader_t> _reader;
+        char* _buffer{};
+        reader_t* _reader{};
+        size_t _buffer_size{};
+        memory::allocator_t* _allocator;
         std::map<size_t, source_buffer_line_t*> _lines_by_number {};
         std::map<
             source_buffer_range_t,

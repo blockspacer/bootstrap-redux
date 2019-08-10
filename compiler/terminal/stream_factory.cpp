@@ -16,7 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <compiler/utf8/reader.h>
+#include <compiler/formatters/formatters.h>
 #include "stream_factory.h"
 
 namespace basecode::compiler::terminal {
@@ -31,9 +31,9 @@ namespace basecode::compiler::terminal {
     ///////////////////////////////////////////////////////////////////////////
 
     std::string stream_factory_t::colorize(
-        std::string_view text,
-        colors_t fg_color,
-        colors_t bg_color) const {
+            std::string_view text,
+            colors_t fg_color,
+            colors_t bg_color) const {
         if (!_enabled)
             return std::string(text);
         return fmt::format(
@@ -52,47 +52,52 @@ namespace basecode::compiler::terminal {
     }
 
     std::string stream_factory_t::colorize_range(
-            std::string_view text,
+            utf8::reader_t& reader,
             size_t begin,
             size_t end,
             colors_t fg_color,
             colors_t bg_color) const {
-        if (!_enabled)
-            return std::string(text);
+        fmt::memory_buffer buffer{};
+
+        if (!_enabled) {
+            fmt::format_to(buffer, "{}", reader.slice());
+            return fmt::to_string(buffer);
+        }
 
         auto j = 0;
         result_t r{};
-        utf8::reader_t reader(text);
         auto in_colored_range = false;
-        std::stringstream colored_source;
         while (true) {
             auto rune = reader.next(r);
             if (rune == utf8::rune_eof)
                 break;
 
             if (begin == end && j == begin) {
-                colored_source << color_code(fg_color, bg_color);
-                colored_source << rune;
-                colored_source << color_code_reset();
+                fmt::format_to(
+                    buffer,
+                    "{}{}{}",
+                    color_code(fg_color, bg_color),
+                    rune,
+                    color_code_reset());
             } else {
                 if (j == begin) {
-                    colored_source << color_code(fg_color, bg_color);
+                    fmt::format_to(buffer, "{}", color_code(fg_color, bg_color));
                     in_colored_range = true;
                 } else if (j == end) {
-                    colored_source << color_code_reset();
+                    fmt::format_to(buffer, "{}", color_code_reset());
                     in_colored_range = false;
                 }
-                colored_source << rune;
+                fmt::format_to(buffer, "{}", rune);
             }
 
             j++;
         }
 
         if (in_colored_range) {
-            colored_source << color_code_reset();
+            fmt::format_to(buffer, "{}", color_code_reset());
         }
 
-        return colored_source.str();
+        return fmt::to_string(buffer);
     }
 
     stream_unique_ptr_t stream_factory_t::use_memory_buffer(fmt::memory_buffer& buffer) const {

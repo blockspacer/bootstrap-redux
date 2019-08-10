@@ -32,7 +32,7 @@ namespace basecode {
         result_t r{};
         workspace::session_options_t options{};
         workspace::session_t session(options);
-        utf8::source_buffer_t buffer(0);
+        utf8::source_buffer_t buffer(options.allocator);
 
         defer(fmt::print("{}", r));
 

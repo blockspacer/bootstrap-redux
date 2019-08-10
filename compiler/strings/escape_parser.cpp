@@ -22,7 +22,8 @@
 
 namespace basecode::compiler::strings {
 
-    escape_parser_t::escape_parser_t(std::string_view slice) : _reader(slice) {
+    escape_parser_t::escape_parser_t(
+            utf8::reader_t& reader) : _reader(reader) {
     }
 
     bool escape_parser_t::read_digits(
@@ -98,6 +99,10 @@ namespace basecode::compiler::strings {
                     }
                     case '\'': {
                         stream << "'";
+                        break;
+                    }
+                    case '\"': {
+                        stream << "\"";
                         break;
                     }
                     case 'x': {

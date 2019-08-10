@@ -16,35 +16,49 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/io/text.h>
 #include <compiler/errors/errors.h>
 #include "source_buffer.h"
 
 namespace basecode::compiler::utf8 {
 
-    source_buffer_t::source_buffer_t(id::type_t id) : _id(id) {
+    source_buffer_t::source_buffer_t(
+            memory::allocator_t* allocator) : _allocator(allocator) {
+        assert(_allocator);
+    }
+
+    source_buffer_t::~source_buffer_t() {
+        if (_buffer)
+            _allocator->deallocate(_buffer);
+        if (_reader) {
+            _reader->~reader_t();
+            _allocator->deallocate(_reader);
+        }
     }
 
     bool source_buffer_t::load(
             result_t& r,
             strings::pool_t& pool,
             const std::string& buffer) {
-        _buffer.clear();
+        if (_buffer) {
+            _allocator->deallocate(_buffer);
+            _buffer_size = 0;
+        }
+
         _lines_by_number.clear();
         _lines_by_index_range.clear();
 
-        std::stringstream stream;
-        stream.unsetf(std::ios::skipws);
-        stream << buffer << "\n";
-        stream.seekg(0, std::ios::beg);
+        _buffer_size = buffer.size() + 1;
+        _buffer = (char*)_allocator->allocate(_buffer_size);
+        std::memcpy(_buffer, buffer.data(), buffer.size());
+        _buffer[_buffer_size - 1] = '\n';
 
-        _buffer.reserve(buffer.length() + 1);
-        _buffer.insert(_buffer.begin(),
-                       std::istream_iterator<uint8_t>(stream),
-                       std::istream_iterator<uint8_t>());
-
-        _reader = std::make_unique<reader_t>(std::string_view(
-            reinterpret_cast<const char*>(_buffer.data()),
-            _buffer.size()));
+        auto mem = _allocator->allocate(
+            sizeof(reader_t),
+            alignof(reader_t));
+        _reader = new (mem) reader_t(
+            _allocator,
+            std::string_view(_buffer, _buffer_size));
 
         index_lines(r);
 
@@ -56,37 +70,18 @@ namespace basecode::compiler::utf8 {
             strings::pool_t& pool,
             const path_t& path) {
         _path = path;
-        _buffer.clear();
-        _lines_by_number.clear();
-        _lines_by_index_range.clear();
 
-        std::ifstream file(
-            _path.string(),
-            std::ios::in | std::ios::binary);
-        if (file.is_open()) {
-            file.unsetf(std::ios::skipws);
-            file.seekg(0, std::ios::end);
-            const auto file_size = file.tellg();
-            file.seekg(0, std::ios::beg);
-            _buffer.reserve(static_cast<size_t>(file_size) + 1);
-            _buffer.insert(_buffer.begin(),
-                           std::istream_iterator<uint8_t>(file),
-                           std::istream_iterator<uint8_t>());
-            _buffer.push_back('\n');
-
-            _reader = std::make_unique<reader_t>(std::string_view(
-                reinterpret_cast<const char*>(_buffer.data()),
-                _buffer.size()));
-
-            index_lines(r);
-        } else {
+        std::stringstream stream{};
+        if (!io::text::read(r, _path.string(), stream)) {
             errors::add_error(
                 r,
                 pool,
                 errors::source_buffer::unable_to_open_file,
                 _path.string());
+            return false;
         }
-        return !r.is_failed();
+
+        return load(r, pool, stream.str());
     }
 
     void source_buffer_t::push_mark() {
@@ -113,23 +108,19 @@ namespace basecode::compiler::utf8 {
     }
 
     bool source_buffer_t::empty() const {
-        return _buffer.empty();
+        return _buffer_size == 0;
     }
 
     size_t source_buffer_t::current_mark() {
         return _reader->current_mark();
     }
 
-    uint8_t source_buffer_t::width() const {
-        return _reader->width();
-    }
-
     size_t source_buffer_t::length() const {
-        return _buffer.size();
+        return _buffer_size;
     }
 
-    id::type_t source_buffer_t::id() const {
-        return _id;
+    uint32_t source_buffer_t::width() const {
+        return _reader->width();
     }
 
     void source_buffer_t::restore_top_mark() {
@@ -181,7 +172,7 @@ namespace basecode::compiler::utf8 {
             const auto unix_new_line = rune == '\n';
 
             if (unix_new_line || end_of_buffer) {
-                const auto end = end_of_buffer ? _buffer.size() : _reader->pos() - 1;
+                const auto end = end_of_buffer ? _buffer_size : _reader->pos() - 1;
                 const auto it = _lines_by_index_range.insert(std::make_pair(
                     std::make_pair(line_start, end),
                     source_buffer_line_t {
@@ -213,6 +204,10 @@ namespace basecode::compiler::utf8 {
 
     uint8_t source_buffer_t::operator[](size_t index) {
         return _buffer[index];
+    }
+
+    memory::allocator_t* source_buffer_t::allocator() {
+        return _allocator;
     }
 
     int32_t source_buffer_t::column_by_index(size_t index) const {

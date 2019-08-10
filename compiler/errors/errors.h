@@ -222,19 +222,17 @@ namespace basecode::compiler::errors {
                 source_line->end);
             if (!source_text.empty()) {
                 if (i == target_line) {
-                    fmt::format_to(stream, "{:8d}: ", i + 1);
+                    utf8::reader_t reader(buffer.allocator(), source_text);
                     fmt::format_to(
                         stream,
-                        "{}\n",
+                        "{:8d}: {}\n{}{}",
+                        i + 1,
                         term.colorize_range(
-                            source_text,
+                            reader,
                             loc.start.column,
                             loc.end.column,
                             terminal::colors_t::yellow,
-                            terminal::colors_t::blue));
-                    fmt::format_to(
-                        stream,
-                        "{}{}",
+                            terminal::colors_t::blue),
                         std::string(10 + loc.start.column, ' '),
                         message_indicator);
                 } else {
