@@ -51,6 +51,10 @@ namespace basecode::compiler::memory {
 
     class system_allocator_t : public allocator_t {
     public:
+        system_allocator_t() = default;
+
+        explicit system_allocator_t(mspace* space);
+
         ~system_allocator_t() override;
 
         void* allocate(
@@ -69,6 +73,7 @@ namespace basecode::compiler::memory {
         }
 
     private:
+        mspace* _space{};
         uint32_t _total_allocated = 0;
     };
 

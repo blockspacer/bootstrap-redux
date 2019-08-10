@@ -22,6 +22,7 @@
 #define HAVE_MMAP 1
 #define USE_LOCKS 0
 #define HAVE_MORECORE 0
+#define USE_DL_PREFIX 1
 
 #ifndef DLMALLOC_IMPL_UNIT
 #include "dlmalloc.h"
