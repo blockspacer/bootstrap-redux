@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/errors/errors.h>
 #include "source_buffer.h"
 
 namespace basecode::compiler::utf8 {
@@ -25,6 +26,7 @@ namespace basecode::compiler::utf8 {
 
     bool source_buffer_t::load(
             result_t& r,
+            strings::pool_t& pool,
             const std::string& buffer) {
         _buffer.clear();
         _lines_by_number.clear();
@@ -51,6 +53,7 @@ namespace basecode::compiler::utf8 {
 
     bool source_buffer_t::load(
             result_t& r,
+            strings::pool_t& pool,
             const path_t& path) {
         _path = path;
         _buffer.clear();
@@ -77,9 +80,11 @@ namespace basecode::compiler::utf8 {
 
             index_lines(r);
         } else {
-            r.error(
-                "S001",
-                fmt::format("unable to open source file: {}", _path.string()));
+            errors::add_error(
+                r,
+                pool,
+                errors::source_buffer::unable_to_open_file,
+                _path.string());
         }
         return !r.is_failed();
     }

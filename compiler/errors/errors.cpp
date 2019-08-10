@@ -22,7 +22,7 @@ namespace basecode::compiler::errors {
 
     static std::unordered_map<error_decl_key_t, error_decl_t> s_error_decls{
         // ----------------------
-        // lexer
+        // lexer_t
         // ----------------------
 
         {
@@ -125,13 +125,27 @@ namespace basecode::compiler::errors {
             {.code = "L020", .message = "expected }} but found: {}"}
         },
 
+        {
+            {.code = lexer::unescaped_quote, .locale = "en_US"},
+            {.code = "L021", .message = "an unescaped quote was detected"}
+        },
+
         // ----------------------
-        // parser
+        // parser_t
         // ----------------------
 
         {
             {.code = parser::invalid_token, .locale = "en_US"},
             {.code = "P001", .message = "a token has not been properly configured for parsing"}
+        },
+
+        // ----------------------
+        // source_buffer_t
+        // ----------------------
+
+        {
+            {.code = source_buffer::unable_to_open_file, .locale = "en_US"},
+            {.code = "S001", .message = "unable to open source file: {}"}
         },
     };
 

@@ -38,9 +38,9 @@ namespace basecode::compiler::strings {
             auto data_ptr = _allocator->allocate(value.length());
             std::memcpy(data_ptr, value.data(), value.length());
             _index.insert(value, data_ptr);
-            return static_cast<char*>(data_ptr);
+            return std::string_view(static_cast<char*>(data_ptr), value.length());
         }
-        return static_cast<char*>(*data);
+        return std::string_view(static_cast<char*>(*data), value.length());
     }
 
     std::string_view pool_t::intern(const std::string& value) {

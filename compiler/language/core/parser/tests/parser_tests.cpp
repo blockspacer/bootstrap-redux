@@ -44,7 +44,7 @@ namespace basecode {
             "#type foo;\n"
         ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);

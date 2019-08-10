@@ -98,6 +98,7 @@ namespace basecode::compiler::language::core::lexer {
             new (_lexemes) trie_t(
                 _session.allocator(),
                 {
+                    {"0"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
                     {"1"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
                     {"2"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
                     {"3"sv,           lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::dec_number_literal}},
@@ -129,11 +130,17 @@ namespace basecode::compiler::language::core::lexer {
                     {"$8"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$9"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$a"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$A"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$b"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$B"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$c"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$C"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$d"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$D"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$e"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$E"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
                     {"$f"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
+                    {"$F"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::hex_number_literal}},
 
                     {"%0"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
                     {"%1"sv,          lexeme_t{.type = token_type_t::literal, .tokenizer = &lexer_t::binary_number_literal}},
@@ -171,6 +178,7 @@ namespace basecode::compiler::language::core::lexer {
                     {"&"sv,           lexeme_t{.type = token_type_t::operator_}},
                     {"|"sv,           lexeme_t{.type = token_type_t::operator_}},
                     {"~"sv,           lexeme_t{.type = token_type_t::operator_}},
+                    {"!"sv,           lexeme_t{.type = token_type_t::operator_}},
                     {"**"sv,          lexeme_t{.type = token_type_t::operator_}},
                     {"+"sv,           lexeme_t{.type = token_type_t::operator_}},
                     {"-"sv,           lexeme_t{.type = token_type_t::operator_}},
@@ -197,6 +205,8 @@ namespace basecode::compiler::language::core::lexer {
                     {"|:="sv,         lexeme_t{.type = token_type_t::operator_}},
                     {"~:="sv,         lexeme_t{.type = token_type_t::operator_}},
 
+                    {"^"sv,           lexeme_t{.type = token_type_t::operator_}},
+                    {"."sv,           lexeme_t{.type = token_type_t::operator_}}, // member select operator
                     {"::"sv,          lexeme_t{.type = token_type_t::operator_}}, // bind operator
                     {"=>"sv,          lexeme_t{.type = token_type_t::operator_}}, // association operator
                     {"->"sv,          lexeme_t{.type = token_type_t::operator_}}, // placeholder
@@ -609,9 +619,73 @@ namespace basecode::compiler::language::core::lexer {
             auto rune = _buffer.curr(r);
             if (rune.is_errored())
                 return false;
-            if (rune == '\"') should_exit = true;
+            if (rune == '\\') {
+                if (!_buffer.move_next(r))
+                    return false;
+
+                rune = _buffer.curr(r);
+                if (rune.is_errored())
+                    return false;
+
+                auto extra_chars = 0;
+
+                switch ((int32_t)rune) {
+                    case 'a':
+                    case 'b':
+                    case 'e':
+                    case 'n':
+                    case 'r':
+                    case 't':
+                    case 'v':
+                    case '\\':
+                    case '\"':
+                    case '\'':
+                        if (!_buffer.move_next(r))
+                            return false;
+                        break;
+                    case 'x':
+                        if (!_buffer.move_next(r))
+                            return false;
+                        extra_chars = 2;
+                        break;
+                    case 'u':
+                        if (!_buffer.move_next(r))
+                            return false;
+                        extra_chars = 4;
+                        break;
+                    case 'U':
+                        if (!_buffer.move_next(r))
+                            return false;
+                        extra_chars = 8;
+                        break;
+                    default:
+                        extra_chars = 3;
+                        break;
+                }
+
+                for (size_t i = 0; i < extra_chars; i++)
+                    if (!_buffer.move_next(r))
+                        return false;
+
+                continue;
+            } else if (rune == '\"') {
+                should_exit = true;
+            }
             if (!_buffer.move_next(r))
                 return false;
+        }
+
+        auto rune = _buffer.curr(r);
+        if (rune.is_errored())
+            return false;
+        if (rune == '\"') {
+            errors::add_source_highlighted_error(
+                r,
+                _session.intern_pool(),
+                errors::lexer::unescaped_quote,
+                _buffer,
+                make_location(start_pos, _buffer.pos()));
+            return false;
         }
 
         auto end_pos = _buffer.pos() - 1;

@@ -47,7 +47,8 @@ namespace basecode::compiler::memory {
         void* allocate(
                 uint32_t size,
                 uint32_t align) override {
-            if (_block == nullptr || _offset + size > _block_size) {
+            if (_block == nullptr
+            ||  _offset + size > _block_size) {
                 auto old_block = _block;
                 _block = _backing->allocate(_block_size, align);
                 _total_allocated += _block_size;
@@ -57,12 +58,13 @@ namespace basecode::compiler::memory {
                     auto prev_ptr = static_cast<uint64_t*>(_block);
                     *prev_ptr = reinterpret_cast<uint64_t>(old_block);
                 }
-            } else {
-                _offset += size;
-                _offset = numbers::align(_offset, align);
             }
 
-            return static_cast<char*>(_block) + _offset;
+            auto new_data = static_cast<char*>(_block) + _offset;
+            _offset += size;
+            _offset = numbers::align(_offset, align);
+
+            return new_data;
         }
 
         void deallocate(void* p) override {

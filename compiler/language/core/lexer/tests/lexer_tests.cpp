@@ -72,7 +72,7 @@ namespace basecode {
             "1.6e-35;\n"
             "1.6e-35i;\n";
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -106,7 +106,7 @@ namespace basecode {
             "*/\n"
             ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -147,7 +147,7 @@ namespace basecode {
             "#rune \"\\777\";\n"
         ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -177,7 +177,7 @@ namespace basecode {
             "#eval 6 * 6 + 32;\n"
         ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -204,7 +204,7 @@ namespace basecode {
             "@coroutine j :: proc();\n"
         ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -233,7 +233,7 @@ namespace basecode {
             "#type foo;\n"
             ;
 
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -261,7 +261,7 @@ namespace basecode {
             "if_unexpected := if continueif break true;\n"
             ;
             
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -286,13 +286,34 @@ namespace basecode {
             "123myVar: u8 := 1;\n"
             ;
             
-        REQUIRE(buffer.load(r, source));
+        REQUIRE(buffer.load(r, session.intern_pool(), source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
         REQUIRE(!lexer.tokenize(r, tokens));
         REQUIRE(r.is_failed());
         REQUIRE(r.messages()[0].message() == "((anonymous source)@1:1) unexpected letter immediately after decimal number");
+    }
+
+    TEST_CASE("lexer_t::tokenize large sample source") {
+        result_t r{};
+//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
+//        workspace::session_options_t options{
+//            .allocator = &debug_allocator
+//        };
+        workspace::session_options_t options{};
+        workspace::session_t session(options);
+        utf8::source_buffer_t buffer(0);
+
+        defer(fmt::print("{}", r));
+
+        path_t file("../tests/sdl.bc");
+        REQUIRE(buffer.load(r, session.intern_pool(), file));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(session, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
     }
 
 }

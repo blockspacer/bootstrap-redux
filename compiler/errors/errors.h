@@ -70,10 +70,15 @@ namespace basecode::compiler::errors {
         static constexpr error_code_t expected_binary_literal_prefix = 18;
         static constexpr error_code_t unexpected_letter_after_binary_number_literal = 19;
         static constexpr error_code_t expected_closing_block_literal = 20;
+        static constexpr error_code_t unescaped_quote = 22;
     }
 
     namespace parser {
         static constexpr error_code_t invalid_token = 21;
+    }
+
+    namespace source_buffer {
+        static constexpr error_code_t unable_to_open_file = 23;
     }
 
     ///////////////////////////////////////////////////////////////////////////

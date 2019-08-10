@@ -156,7 +156,7 @@ add_subdirectory(bc)
 add_subdirectory(compiler)
 
 # post build
-add_custom_target(basecode-configured DEPENDS dummy-target compiler bc tinycc)
+add_custom_target(basecode-configured DEPENDS dummy-target compiler bc tinycc test-core-lexer test-core-parser)
 add_custom_command(
         TARGET basecode-configured
 

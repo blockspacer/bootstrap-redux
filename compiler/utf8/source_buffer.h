@@ -53,10 +53,12 @@ namespace basecode::compiler::utf8 {
 
         bool load(
             result_t& r,
+            strings::pool_t& pool,
             const std::string& buffer);
 
         bool load(
             result_t& r,
+            strings::pool_t& pool,
             const path_t& path);
 
         void push_mark();
