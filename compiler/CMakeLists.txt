@@ -17,6 +17,7 @@ add_library(
 
         defer.h
 
+        data/bst.h
         data/set.h
         data/array.h
         data/stack.h

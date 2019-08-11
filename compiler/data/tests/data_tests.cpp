@@ -19,6 +19,7 @@
 #include <fmt/format.h>
 #include <catch2/catch.hpp>
 #include <compiler/data/set.h>
+#include <compiler/data/bst.h>
 #include <compiler/data/array.h>
 #include <compiler/data/stack.h>
 
@@ -171,6 +172,50 @@ namespace basecode {
         numbers.clear();
         REQUIRE(numbers.empty());
         REQUIRE(numbers.depth() == 0);
+    }
+
+    TEST_CASE("bst_t basics") {
+        bst_t tree{50, 30, 20, 40, 70, 60, 80};
+
+        REQUIRE(!tree.empty());
+        REQUIRE(tree.size() == 7);
+
+        auto node = tree.search(40);
+        REQUIRE(node);
+        REQUIRE(node->key == 40);
+
+        tree.walk(
+            tree.root(),
+            [](auto node) {
+                fmt::print("{}\n", node->key);
+            });
+    }
+
+    TEST_CASE("bst_t with pairs") {
+        struct pair_compare_t {
+            bool operator()(
+                    const std::pair<int, int>& lhs,
+                    const std::pair<int, int>& rhs) const {
+                return lhs.first < rhs.first;
+            }
+        };
+
+        bst_t<std::pair<int, int>, pair_compare_t> tree;
+
+        tree.insert(std::pair(1, 10));
+        tree.insert(std::pair(20, 33));
+        tree.insert(std::pair(34, 61));
+        tree.insert(std::pair(62, 110));
+        tree.insert(std::pair(111, 186));
+        tree.insert(std::pair(187, 222));
+        tree.insert(std::pair(11, 19));
+
+        tree.walk(
+            tree.root(),
+            [](node_t<std::pair<int, int>>* node) {
+                if (12 >= node->key.first && 12 <= node->key.second)
+                    fmt::print("position found! {}-{}\n", node->key.first, node->key.second);
+            });
     }
 
 }
