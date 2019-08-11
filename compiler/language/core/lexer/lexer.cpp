@@ -1002,12 +1002,12 @@ namespace basecode::compiler::language::core::lexer {
 
     source_location_t lexer_t::make_location(size_t start_pos, size_t end_pos) {
         auto start_line = _buffer.line_by_index(start_pos);
-        auto start_column = _buffer.column_by_index(start_pos);
-
         auto end_line = _buffer.line_by_index(end_pos);
-        auto end_column = _buffer.column_by_index(end_pos);
 
-        return {{end_line->line, end_column}, {start_line->line, start_column}};
+        return {
+            {end_line->line, end_line->column(end_pos)},
+            {start_line->line, start_line->column(start_pos)}
+        };
     }
 
     bool lexer_t::scan_dec_digits(result_t& r, size_t start_pos, number_type_t& type) {

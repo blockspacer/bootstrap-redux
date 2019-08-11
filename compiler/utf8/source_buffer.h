@@ -40,6 +40,10 @@ namespace basecode::compiler::utf8 {
     };
 
     struct source_buffer_line_t {
+        [[nodiscard]] inline int32_t column(size_t index) const {
+            return index - begin;
+        }
+
         size_t end{};
         size_t begin{};
         int32_t line{};
@@ -100,8 +104,6 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] size_t number_of_lines() const;
 
-        [[nodiscard]] int32_t column_by_index(size_t index) const;
-
         [[nodiscard]] std::string_view substring(size_t start, size_t end) const;
 
         [[nodiscard]] const source_buffer_line_t* line_by_number(size_t line) const;
@@ -121,11 +123,11 @@ namespace basecode::compiler::utf8 {
         reader_t* _reader{};
         size_t _buffer_size{};
         memory::allocator_t* _allocator;
-        data::hash_table_t<size_t, source_buffer_line_t*> _lines_by_number;
         std::map<
             source_buffer_range_t,
             source_buffer_line_t,
-            source_buffer_range_compare_t> _lines_by_index_range {};
+            source_buffer_range_compare_t> _lines_by_index_range{};
+        data::hash_table_t<size_t, source_buffer_line_t*> _lines_by_number;
     };
 
 }

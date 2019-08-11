@@ -209,13 +209,6 @@ namespace basecode::compiler::utf8 {
         return _allocator;
     }
 
-    int32_t source_buffer_t::column_by_index(size_t index) const {
-        auto line = line_by_index(index);
-        if (line == nullptr)
-            return 0;
-        return index - line->begin;
-    }
-
     std::string_view source_buffer_t::substring(size_t start, size_t end) const {
         const auto length = end - start;
         return _reader->make_slice(start, length);
