@@ -64,14 +64,10 @@ namespace basecode::compiler {
         location_t start{};
     };
 
-    using source_location_stack_t = std::stack<source_location_t>;
-
     ///////////////////////////////////////////////////////////////////////////
 
     class result_message_t final {
     public:
-        using list_t = std::vector<result_message_t>;
-
         enum types {
             info,
             error,
@@ -118,9 +114,9 @@ namespace basecode::compiler {
     private:
         types _type;
         std::string_view _code{};
-        std::string_view _message {};
-        std::string_view _details {};
-        source_location_t _location {};
+        std::string_view _message{};
+        std::string_view _details{};
+        source_location_t _location{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -128,6 +124,9 @@ namespace basecode::compiler {
     class result_t final {
     public:
         result_t() = default;
+
+        explicit result_t(memory::allocator_t* allocator) : _messages(allocator) {
+        }
 
         inline void fail() {
             _success = false;
@@ -142,12 +141,12 @@ namespace basecode::compiler {
                 std::string_view message,
                 const source_location_t& loc = {},
                 std::string_view details = {}) {
-            _messages.emplace_back(
+            _messages.add(result_message_t{
                 code,
                 message,
                 loc,
                 details,
-                result_message_t::types::info);
+                result_message_t::types::info});
         }
 
         inline void error(
@@ -155,12 +154,12 @@ namespace basecode::compiler {
                 std::string_view message,
                 const source_location_t& loc = {},
                 std::string_view details = {}) {
-            _messages.emplace_back(
+            _messages.add(result_message_t{
                 code,
                 message,
                 loc,
                 details,
-                result_message_t::types::error);
+                result_message_t::types::error});
             fail();
         }
 
@@ -169,12 +168,12 @@ namespace basecode::compiler {
                 std::string_view message,
                 const source_location_t& loc = {},
                 std::string_view details = {}) {
-            _messages.emplace_back(
+            _messages.add(result_message_t{
                 code,
                 message,
                 loc,
                 details,
-                result_message_t::types::warning);
+                result_message_t::types::warning});
         }
 
         void remove_code(std::string_view code) {
@@ -195,7 +194,7 @@ namespace basecode::compiler {
             return false;
         }
 
-        [[nodiscard]] inline const result_message_t::list_t& messages() const {
+        [[nodiscard]] inline const data::array_t<result_message_t>& messages() const {
             return _messages;
         }
 
@@ -209,7 +208,7 @@ namespace basecode::compiler {
 
     private:
         bool _success = true;
-        result_message_t::list_t _messages {};
+        data::array_t<result_message_t> _messages{};
     };
 
 }

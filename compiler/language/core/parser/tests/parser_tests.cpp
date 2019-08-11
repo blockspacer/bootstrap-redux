@@ -29,10 +29,10 @@ namespace basecode {
     using namespace compiler::language::core;
 
     TEST_CASE("lexer_t::tokenize identifiers") {
-        result_t r{};
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 

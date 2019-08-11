@@ -45,7 +45,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize number literals") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -53,6 +52,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -82,7 +82,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize comment literals") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -90,6 +89,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -116,7 +116,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize string literals") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -124,6 +123,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -157,7 +157,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize directives") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -165,6 +164,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -187,7 +187,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize attributes") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -195,6 +194,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -214,7 +214,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize identifiers") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -222,6 +221,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -245,7 +245,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize keywords don't match inside identifiers") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -253,6 +252,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -271,7 +271,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize identifiers can't start with numbers") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -279,6 +278,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
@@ -296,7 +296,6 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize large sample source") {
-        result_t r{};
 //        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
@@ -304,6 +303,7 @@ namespace basecode {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
 
         defer(fmt::print("{}", r));
 
