@@ -24,28 +24,37 @@
 #include <string_view>
 #include <compiler/types.h>
 #include <compiler/data/hash_table.h>
+#include <compiler/data/red_black_tree.h>
 #include <compiler/terminal/stream_factory.h>
 #include "reader.h"
 
 namespace basecode::compiler::utf8 {
 
-    using source_buffer_range_t = std::pair<size_t, size_t>;
+    struct source_buffer_range_t final {
+        int32_t end;
+        int32_t line;
+        int32_t begin;
 
-    struct source_buffer_range_compare_t {
-        bool operator()(
-                const source_buffer_range_t& lhs,
-                const source_buffer_range_t& rhs) const {
-            return lhs.second < rhs.first;
+        bool operator<(const source_buffer_range_t& rhs) const {
+            return rhs.end < begin;
+        }
+
+        bool operator>(const source_buffer_range_t& rhs) const {
+            return rhs.end > begin;
+        }
+
+        bool operator==(const source_buffer_range_t& rhs) const {
+            return rhs.begin >= begin && rhs.end <= end;
         }
     };
 
-    struct source_buffer_line_t {
+    struct source_buffer_line_t final {
         [[nodiscard]] inline int32_t column(size_t index) const {
             return index - begin;
         }
 
-        size_t end{};
-        size_t begin{};
+        int32_t end{};
+        int32_t begin{};
         int32_t line{};
         int32_t columns{};
     };
@@ -108,7 +117,7 @@ namespace basecode::compiler::utf8 {
 
         [[nodiscard]] const source_buffer_line_t* line_by_number(size_t line) const;
 
-        [[nodiscard]] const source_buffer_line_t* line_by_index(size_t index) const;
+        [[nodiscard]] const source_buffer_line_t* line_by_index(int32_t index) const;
 
         [[nodiscard]] std::string_view make_slice(size_t offset, size_t length) const;
 
@@ -123,11 +132,8 @@ namespace basecode::compiler::utf8 {
         reader_t* _reader{};
         size_t _buffer_size{};
         memory::allocator_t* _allocator;
-        std::map<
-            source_buffer_range_t,
-            source_buffer_line_t,
-            source_buffer_range_compare_t> _lines_by_index_range{};
-        data::hash_table_t<size_t, source_buffer_line_t*> _lines_by_number;
+        data::array_t<source_buffer_line_t> _lines;
+        data::red_black_tree_t<source_buffer_range_t> _lines_by_index_range;
     };
 
 }

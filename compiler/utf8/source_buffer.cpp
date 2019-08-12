@@ -24,7 +24,8 @@ namespace basecode::compiler::utf8 {
 
     source_buffer_t::source_buffer_t(
             memory::allocator_t* allocator) : _allocator(allocator),
-                                              _lines_by_number(allocator) {
+                                              _lines(allocator),
+                                              _lines_by_index_range(allocator) {
         assert(_allocator);
     }
 
@@ -45,7 +46,7 @@ namespace basecode::compiler::utf8 {
             _allocator->deallocate(_buffer);
             _buffer_size = 0;
 
-            _lines_by_number.clear();
+            _lines.clear();
             _lines_by_index_range.clear();
         }
 
@@ -159,7 +160,7 @@ namespace basecode::compiler::utf8 {
     void source_buffer_t::index_lines(result_t& r) {
         int32_t line = 0;
         int32_t columns = 0;
-        size_t line_start = 0;
+        int32_t line_start = 0;
 
         while (true) {
             auto rune = next(r);
@@ -173,16 +174,14 @@ namespace basecode::compiler::utf8 {
             const auto unix_new_line = rune == '\n';
 
             if (unix_new_line || end_of_buffer) {
-                const auto end = end_of_buffer ? _buffer_size : _reader->pos() - 1;
-                const auto it = _lines_by_index_range.insert(std::make_pair(
-                    std::make_pair(line_start, end),
-                    source_buffer_line_t {
-                        .end = end,
-                        .begin = line_start,
-                        .line = line,
-                        .columns = columns
-                    }));
-                _lines_by_number.insert(line, &it.first->second);
+                const int32_t end = end_of_buffer ? _buffer_size : _reader->pos() - 1;
+                _lines.add(source_buffer_line_t {
+                    .end = end,
+                    .begin = line_start,
+                    .line = line,
+                    .columns = columns
+                });
+                _lines_by_index_range.insert(source_buffer_range_t{end, line, line_start});
                 line_start = _reader->pos();
                 line++;
                 columns = 0;
@@ -198,7 +197,7 @@ namespace basecode::compiler::utf8 {
     }
 
     size_t source_buffer_t::number_of_lines() const {
-        return _lines_by_number.size();
+        return _lines.size();
     }
 
     uint8_t source_buffer_t::operator[](size_t index) {
@@ -215,18 +214,13 @@ namespace basecode::compiler::utf8 {
     }
 
     const source_buffer_line_t* source_buffer_t::line_by_number(size_t line) const {
-        const auto self = const_cast<source_buffer_t*>(this);
-        auto source_line = self->_lines_by_number.find(line);
-        if (!source_line)
-            return nullptr;
-        return *source_line;
+        return &_lines[line];
     }
 
-    const source_buffer_line_t* source_buffer_t::line_by_index(size_t index) const {
-        auto it = _lines_by_index_range.find(std::make_pair(index, index));
-        if (it == _lines_by_index_range.end())
-            return nullptr;
-        return &it->second;
+    const source_buffer_line_t* source_buffer_t::line_by_index(int32_t index) const {
+        const auto self = const_cast<source_buffer_t*>(this);
+        auto node = self->_lines_by_index_range.search(source_buffer_range_t{index, 0, index});
+        return node ? &_lines[node->key.line] : nullptr;
     }
 
     std::string_view source_buffer_t::make_slice(size_t offset, size_t length) const {

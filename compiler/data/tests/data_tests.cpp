@@ -22,8 +22,26 @@
 #include <compiler/data/bst.h>
 #include <compiler/data/array.h>
 #include <compiler/data/stack.h>
+#include <compiler/data/red_black_tree.h>
 
 namespace basecode {
+
+    struct range_t final {
+        int32_t begin;
+        int32_t end;
+
+        bool operator<(const range_t& rhs) const {
+            return rhs.end < begin;
+        }
+
+        bool operator>(const range_t& rhs) const {
+            return rhs.end > begin;
+        }
+
+        bool operator==(const range_t& rhs) const {
+            return rhs.begin >= begin && rhs.end <= end;
+        }
+    };
 
     using namespace std::literals;
     using namespace compiler;
@@ -183,39 +201,41 @@ namespace basecode {
         auto node = tree.search(40);
         REQUIRE(node);
         REQUIRE(node->key == 40);
-
-        tree.walk(
-            tree.root(),
-            [](auto node) {
-                fmt::print("{}\n", node->key);
-            });
     }
 
-    TEST_CASE("bst_t with pairs") {
-        struct pair_compare_t {
-            bool operator()(
-                    const std::pair<int, int>& lhs,
-                    const std::pair<int, int>& rhs) const {
-                return lhs.first < rhs.first;
-            }
-        };
+    TEST_CASE("bst_t with custom range") {
+        bst_t<range_t> tree;
 
-        bst_t<std::pair<int, int>, pair_compare_t> tree;
+        tree.insert(range_t{1, 10});
+        tree.insert(range_t{20, 33});
+        tree.insert(range_t{34, 61});
+        tree.insert(range_t{62, 110});
+        tree.insert(range_t{111, 186});
+        tree.insert(range_t{187, 222});
+        tree.insert(range_t{11, 19});
 
-        tree.insert(std::pair(1, 10));
-        tree.insert(std::pair(20, 33));
-        tree.insert(std::pair(34, 61));
-        tree.insert(std::pair(62, 110));
-        tree.insert(std::pair(111, 186));
-        tree.insert(std::pair(187, 222));
-        tree.insert(std::pair(11, 19));
+        auto found1 = tree.search(range_t{12, 12});
+        REQUIRE(found1);
+        REQUIRE(found1->key.begin == 11);
+        REQUIRE(found1->key.end == 19);
 
-        tree.walk(
-            tree.root(),
-            [](node_t<std::pair<int, int>>* node) {
-                if (12 >= node->key.first && 12 <= node->key.second)
-                    fmt::print("position found! {}-{}\n", node->key.first, node->key.second);
-            });
+    }
+
+    TEST_CASE("red_black_tree_t with custom range") {
+        red_black_tree_t<range_t> tree;
+
+        tree.insert(range_t{1, 10});
+        tree.insert(range_t{20, 33});
+        tree.insert(range_t{34, 61});
+        tree.insert(range_t{62, 110});
+        tree.insert(range_t{111, 186});
+        tree.insert(range_t{187, 222});
+        tree.insert(range_t{11, 19});
+
+        auto found1 = tree.search(range_t{202, 202});
+        REQUIRE(found1);
+        REQUIRE(found1->key.begin == 187);
+        REQUIRE(found1->key.end == 222);
     }
 
 }

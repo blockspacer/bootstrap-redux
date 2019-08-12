@@ -23,6 +23,7 @@ add_library(
         data/stack.h
         data/queue.h
         data/hash_table.h
+        data/red_black_tree.h
         data/directed_graph.h
         data/hashable.cpp data/hashable.h
 

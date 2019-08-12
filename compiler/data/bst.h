@@ -20,21 +20,21 @@
 
 #include <functional>
 #include <initializer_list>
+#include <compiler/memory/system.h>
 #include <compiler/memory/allocator.h>
 
 namespace basecode::compiler::data {
 
     template <typename K>
-    struct node_t final {
-        K key;
-        node_t* left{};
-        node_t* right{};
-    };
-
-    template <typename K, typename Comparator = std::less<K>>
     class bst_t final {
     public:
-        using bst_walk_callback_t = std::function<void (node_t<K>*)>;
+        struct node_t final {
+            K key;
+            node_t* left{};
+            node_t* right{};
+        };
+
+        using walk_callback_t = std::function<bool (node_t*)>;
 
         explicit bst_t(memory::allocator_t* allocator = memory::default_scratch_allocator()) : _allocator(allocator) {
             assert(_allocator);
@@ -49,9 +49,10 @@ namespace basecode::compiler::data {
 
         ~bst_t() {
             auto i = 0;
-            node_t<K>* to_free[_size];
+            node_t* to_free[_size];
             walk(_root, [&](auto node) {
                 to_free[i++] = node;
+                return true;
             });
             to_free[i] = _root;
 
@@ -59,24 +60,26 @@ namespace basecode::compiler::data {
                 _allocator->deallocate(node);
         }
 
-        void walk(
-                node_t<K>* root,
-                const bst_walk_callback_t& callback) {
-            if (root == nullptr) return;
+        bool walk(
+                node_t* root,
+                const walk_callback_t& callback) {
+            if (root == nullptr) return false;
             walk(root->left, callback);
-            callback(root);
+            if (!callback(root))
+                return true;
             walk(root->right, callback);
+            return false;
         }
 
-        node_t<K>* root() {
+        node_t* root() {
             return _root;
         }
 
-        node_t<K>* insert(K key) {
+        node_t* insert(const K& key) {
             return insert(_root, key);
         }
 
-        node_t<K>* search(K key) {
+        node_t* search(const K& key) {
             return search(_root, key);
         }
 
@@ -84,24 +87,24 @@ namespace basecode::compiler::data {
             return _size == 0;
         }
 
-        node_t<K>* search(node_t<K>* root, K key) {
+        node_t* search(node_t* root, const K& key) {
             if (root == nullptr || root->key == key)
                 return root;
 
-            if (_comparator(root->key, key))
+            if (root->key < key)
                 return search(root->right, key);
 
             return search(root->left, key);
         }
 
-        node_t<K>* remove(node_t<K>* root, K key) {
+        node_t* remove(node_t* root, const K& key) {
             if (root == nullptr)
                 return nullptr;
 
             if (root->key > key) {
                 root->left = remove(root->left, key);
                 return root;
-            } else if (_comparator(root->key, key)) {
+            } else if (root->key < key) {
                 root->right = remove(root->right, key);
                 return root;
             }
@@ -128,11 +131,11 @@ namespace basecode::compiler::data {
             }
         }
 
-        node_t<K>* insert(node_t<K>* node, K key) {
+        node_t* insert(node_t* node, const K& key) {
             if (node == nullptr)
                 return make_node(key);
 
-            if (_comparator(key, node->key))
+            if (key < node->key)
                 node->left = insert(node->left, key);
             else if (key > node->key)
                 node->right = insert(node->right, key);
@@ -143,14 +146,14 @@ namespace basecode::compiler::data {
         [[nodiscard]] uint32_t size() const {
             return _size;
         }
+
     private:
-
-        node_t<K>* make_node(K key) {
+        node_t* make_node(const K& key) {
             auto mem = _allocator->allocate(
-                sizeof(node_t<K>),
-                alignof(node_t<K>));
+                sizeof(node_t),
+                alignof(node_t));
 
-            auto node = new (mem) node_t<K>();
+            auto node = new (mem) node_t();
             node->key = key;
 
             _size++;
@@ -162,15 +165,14 @@ namespace basecode::compiler::data {
         }
 
         void insert(std::initializer_list<K> elements) {
-            node_t<K>* root = nullptr;
+            node_t* root = nullptr;
             for (const auto& k : elements)
                 root = insert(root, k);
         }
 
     private:
+        node_t* _root{};
         uint32_t _size{};
-        node_t<K>* _root{};
-        Comparator _comparator{};
         memory::allocator_t* _allocator;
     };
 
