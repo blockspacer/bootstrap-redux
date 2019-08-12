@@ -50,9 +50,22 @@ namespace basecode::compiler::data {
             _size = n;
         }
 
+        array_t(array_t&& other) noexcept : _data(other._data),
+                                            _size(other._size),
+                                            _capacity(other._capacity),
+                                            _allocator(other._allocator) {
+            other._moved = true;
+        }
+
         ~array_t() {
-            if (!_moved)
+            if (_moved) return;
+            if (_data) {
+                for (size_t i = 0; i < _size; i++) {
+                    auto p = &_data[i];
+                    p->~T();
+                }
                 _allocator->deallocate(_data);
+            }
         }
 
         T* end() {
@@ -84,12 +97,24 @@ namespace basecode::compiler::data {
         }
 
         void clear() {
+            for (size_t i = 0; i < _size; i++) {
+                auto p = &_data[i];
+                p->~T();
+            }
             resize(0);
         }
 
         void add(T&& value) {
             if (_size + 1 > _capacity) grow();
             _data[_size++] = value;
+        }
+
+        template <typename... Args>
+        T& emplace(Args&&... args) {
+            if (_size + 1 > _capacity) grow();
+            auto& value = *(new (_data + _size) T(std::forward<Args>(args)...));
+            _size++;
+            return value;
         }
 
         const T* end() const {

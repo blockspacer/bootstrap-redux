@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <compiler/data/stack.h>
 #include <compiler/errors/errors.h>
 #include <compiler/numbers/bytes.h>
 #include <compiler/numbers/parse.h>
@@ -531,12 +532,12 @@ namespace basecode::compiler::language::core::lexer {
         auto block_count = 1;
         auto start_pos = _buffer.pos();
 
-        std::stack<size_t> block_starts{};
+        data::stack_t<size_t> block_starts(_session.allocator());
         block_starts.push(start_pos);
 
-        std::stack<block_comment_token_t*> blocks{};
+        data::stack_t<block_comment_token_t*> blocks(_session.allocator());
 
-        block_comment_token_t root{};
+        block_comment_token_t root(_session.allocator());
         auto* current_block = &root;
 
         while (true) {
@@ -555,7 +556,7 @@ namespace basecode::compiler::language::core::lexer {
                     block_starts.push(_buffer.pos() + 1);
                     blocks.push(current_block);
 
-                    current_block = &current_block->children.emplace_back();
+                    current_block = &current_block->children.emplace(_session.allocator());
                 } else {
                     continue;
                 }
@@ -568,7 +569,7 @@ namespace basecode::compiler::language::core::lexer {
                     if (block_count > 0) {
                         --block_count;
 
-                        auto block_start = block_starts.top();
+                        auto block_start = *block_starts.top();
                         block_starts.pop();
 
                         current_block->capture = _buffer.make_slice(
@@ -576,7 +577,7 @@ namespace basecode::compiler::language::core::lexer {
                             _buffer.pos() - block_start - 1);
 
                         if (!blocks.empty()) {
-                            current_block = blocks.top();
+                            current_block = *blocks.top();
                             blocks.pop();
                         }
                     }
@@ -600,7 +601,9 @@ namespace basecode::compiler::language::core::lexer {
         auto& registry = _session.registry();
         auto token = registry.create();
         registry.assign<token_t>(token, token_type_t::comment, capture);
-        registry.assign<block_comment_token_t>(token, root.capture, root.children);
+        auto& comment_token = registry.assign<block_comment_token_t>(token, _session.allocator());
+        comment_token.capture = root.capture;
+        comment_token.children = std::move(root.children);
         registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));

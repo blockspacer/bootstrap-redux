@@ -19,6 +19,7 @@
 #pragma once
 
 #include <compiler/types.h>
+#include <compiler/data/array.h>
 
 namespace basecode::compiler::language::core::lexer {
 
@@ -129,8 +130,9 @@ namespace basecode::compiler::language::core::lexer {
     struct line_comment_token_t final {};
 
     struct block_comment_token_t final {
+        explicit block_comment_token_t(memory::allocator_t* allocator) : children(allocator) {}
         std::string_view capture{};
-        std::vector<block_comment_token_t> children{};
+        data::array_t<block_comment_token_t> children;
     };
 
     ///////////////////////////////////////////////////////////////////////////
