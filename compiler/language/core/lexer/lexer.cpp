@@ -1004,12 +1004,18 @@ namespace basecode::compiler::language::core::lexer {
     }
 
     source_location_t lexer_t::make_location(size_t start_pos, size_t end_pos) {
-        auto start_line = _buffer.line_by_index(start_pos);
-        auto end_line = _buffer.line_by_index(end_pos);
+        if (_source_line == nullptr
+        ||  start_pos > _source_line->end) {
+            _source_line = _buffer.line_by_index(start_pos);
+        }
+        auto end_line = _source_line;
+        if (end_pos > end_line->end) {
+            end_line = _buffer.line_by_index(end_pos);
+        }
 
         return {
             {end_line->line, end_line->column(end_pos)},
-            {start_line->line, start_line->column(start_pos)}
+            {_source_line->line, _source_line->column(start_pos)}
         };
     }
 

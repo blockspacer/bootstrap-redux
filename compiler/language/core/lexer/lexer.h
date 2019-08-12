@@ -157,6 +157,7 @@ namespace basecode::compiler::language::core::lexer {
         trie_t* _lexemes{};
         utf8::source_buffer_t& _buffer;
         workspace::session_t& _session;
+        const utf8::source_buffer_line_t* _source_line{};
     };
 
 }
