@@ -41,7 +41,6 @@ namespace basecode::compiler::memory {
                 _backing->deallocate(slab.chunk);
                 _total_allocated -= _slab_size;
             }
-            cache.~cache_t();
         }
         assert(_total_allocated == 0);
     }
@@ -53,19 +52,15 @@ namespace basecode::compiler::memory {
         auto actual_size = size & 0b00000000111111111111111111111111;
 
         auto cache = find_cache(cache_id);
-        if (cache == nullptr) {
-            _caches.add(cache_t(_backing, cache_id));
-            cache = &_caches.back();
-        }
+        if (cache == nullptr)
+            cache = &_caches.emplace(_backing, cache_id);
 
         void* new_chunk = nullptr;
         if (cache->slabs.empty()) {
-            slab_t slab{};
+            auto& slab = cache->slabs.emplace();
             slab.size = actual_size;
             slab.state = slab_state_t::partial;
-
             slab.chunk = (char*)_backing->allocate(_slab_size);
-            cache->slabs.add(slab);
 
             new_chunk = slab.chunk;
             _total_allocated += _slab_size;
@@ -87,17 +82,16 @@ namespace basecode::compiler::memory {
                 if (slab)
                     slab->state = slab_state_t::full;
 
-                slab_t new_slab{};
+                auto& new_slab = cache->slabs.emplace();
                 new_slab.size = actual_size;
                 new_slab.state = slab_state_t::partial;
                 new_slab.chunk = (char*)_backing->allocate(_slab_size);
-                cache->slabs.add(new_slab);
 
                 new_chunk = new_slab.chunk;
                 _total_allocated += _slab_size;
             } else {
-                slab->offset += numbers::align(actual_size, align);
                 new_chunk = slab->chunk + slab->offset;
+                slab->offset += numbers::align(actual_size, align);
             }
         }
 
