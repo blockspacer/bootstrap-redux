@@ -26,28 +26,111 @@ namespace basecode::compiler::language::core::lexer {
     using namespace std::literals;
 
     enum class token_type_t {
-        literal,
-        comment,
-        keyword,
-        directive,
+        colon,
+        comma,
+        backslash,
+        semicolon,
         operator_,
-        identifier,
+        directive,
         annotation,
-        punctuation,
+        left_paren,
+        value_sink,
+        ns_keyword,
+        if_keyword,
+        identifier,
+        use_keyword,
+        nil_keyword,
+        right_paren,
+        for_keyword,
+        goto_keyword,
+        with_keyword,
+        else_keyword,
+        enum_keyword,
+        left_bracket,
+        single_quote,
+        line_comment,
+        cast_keyword,
+        case_keyword,
+        true_keyword,
+        proc_keyword,
         end_of_input,
+        yield_keyword,
+        union_keyword,
+        break_keyword,
+        defer_keyword,
+        right_bracket,
+        block_comment,
+        block_literal,
+        false_keyword,
+        return_keyword,
+        switch_keyword,
+        string_literal,
+        number_literal,
+        family_keyword,
+        struct_keyword,
+        module_keyword,
+        import_keyword,
+        else_if_keyword,
+        continue_keyword,
+        left_curly_brace,
+        transmute_keyword,
+        right_curly_brace,
+        fallthrough_keyword,
     };
 
     static inline std::string_view token_type_to_name(token_type_t type) {
         switch (type) {
-            case token_type_t::literal:         return "literal"sv;
-            case token_type_t::comment:         return "comment"sv;
-            case token_type_t::keyword:         return "keyword"sv;
-            case token_type_t::directive:       return "directive"sv;
-            case token_type_t::operator_:       return "operator"sv;
-            case token_type_t::identifier:      return "identifier"sv;
-            case token_type_t::annotation:      return "annotation"sv;
-            case token_type_t::punctuation:     return "punctuation"sv;
-            case token_type_t::end_of_input:    return "end_of_input"sv;
+            case token_type_t::colon: return "colon"sv;
+            case token_type_t::comma: return "comma"sv;
+            case token_type_t::backslash: return "backslash"sv;
+            case token_type_t::semicolon: return "semicolon"sv;
+            case token_type_t::operator_: return "operator"sv;
+            case token_type_t::directive: return "directive"sv;
+            case token_type_t::annotation: return "annotation"sv;
+            case token_type_t::left_paren: return "left_paren"sv;
+            case token_type_t::value_sink: return "value_sink"sv;
+            case token_type_t::ns_keyword: return "ns_keyword"sv;
+            case token_type_t::if_keyword: return "if_keyword"sv;
+            case token_type_t::identifier: return "identifier"sv;
+            case token_type_t::use_keyword: return "use_keyword"sv;
+            case token_type_t::nil_keyword: return "nil_keyword"sv;
+            case token_type_t::right_paren: return "right_paren"sv;
+            case token_type_t::for_keyword: return "for_keyword"sv;
+            case token_type_t::goto_keyword: return "goto_keyword"sv;
+            case token_type_t::with_keyword: return "with_keyword"sv;
+            case token_type_t::else_keyword: return "else_keyword"sv;
+            case token_type_t::enum_keyword: return "enum_keyword"sv;
+            case token_type_t::left_bracket: return "left_bracket"sv;
+            case token_type_t::single_quote: return "single_quote"sv;
+            case token_type_t::line_comment: return "line_comment"sv;
+            case token_type_t::cast_keyword: return "cast_keyword"sv;
+            case token_type_t::case_keyword: return "case_keyword"sv;
+            case token_type_t::true_keyword: return "true_keyword"sv;
+            case token_type_t::proc_keyword: return "proc_keyword"sv;
+            case token_type_t::end_of_input: return "end_of_input"sv;
+            case token_type_t::yield_keyword: return "yield_keyword"sv;
+            case token_type_t::union_keyword: return "union_keyword"sv;
+            case token_type_t::break_keyword: return "break_keyword"sv;
+            case token_type_t::defer_keyword: return "defer_keyword"sv;
+            case token_type_t::right_bracket: return "right_bracket"sv;
+            case token_type_t::block_comment: return "block_comment"sv;
+            case token_type_t::block_literal: return "block_literal"sv;
+            case token_type_t::false_keyword: return "false_keyword"sv;
+            case token_type_t::return_keyword: return "return_keyword"sv;
+            case token_type_t::switch_keyword: return "switch_keyword"sv;
+            case token_type_t::string_literal: return "string_literal"sv;
+            case token_type_t::number_literal: return "number_literal"sv;
+            case token_type_t::family_keyword: return "family_keyword"sv;
+            case token_type_t::struct_keyword: return "struct_keyword"sv;
+            case token_type_t::module_keyword: return "module_keyword"sv;
+            case token_type_t::import_keyword: return "import_keyword"sv;
+            case token_type_t::else_if_keyword: return "else_if_keyword"sv;
+            case token_type_t::continue_keyword: return "continue_keyword"sv;
+            case token_type_t::left_curly_brace: return "left_curly_brace"sv;
+            case token_type_t::transmute_keyword: return "transmute_keyword"sv;
+            case token_type_t::right_curly_brace: return "right_curly_brace"sv;
+            case token_type_t::fallthrough_keyword: return "fallthrough_keyword"sv;
+            default: return "unknown"sv;
         }
     }
 

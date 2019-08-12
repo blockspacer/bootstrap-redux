@@ -35,6 +35,7 @@ namespace basecode::compiler::language::core::lexer {
         entity_list_t&)>;
 
     struct lexeme_t final {
+        bool keyword{};
         token_type_t type{};
         lexeme_tokenizer_t tokenizer{};
     };

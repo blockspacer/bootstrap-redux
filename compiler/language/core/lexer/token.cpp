@@ -33,7 +33,7 @@ namespace basecode::compiler::language::core::lexer {
             case number_size_t::word:
                 break;
             case number_size_t::dword: 
-                token.value.f32 = value;
+                token.value.f32 = (float)value;
                 token.is_signed = token.value.f32 < 0;
                 break;
             case number_size_t::qword: 

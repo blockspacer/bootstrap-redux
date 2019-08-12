@@ -144,6 +144,7 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     enum class literal_type_t {
+        block,
         number,
         string,
         boolean
