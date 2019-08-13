@@ -40,7 +40,7 @@ namespace basecode::compiler::strings {
             _index.insert(value, data_ptr);
             return std::string_view(static_cast<char*>(data_ptr), value.length());
         }
-        return std::string_view(static_cast<char*>(*data), value.length());
+        return std::string_view(static_cast<char*>(data), value.length());
     }
 
     std::string_view pool_t::intern(const std::string& value) {

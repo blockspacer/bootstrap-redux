@@ -83,6 +83,14 @@ namespace basecode::compiler::errors {
 
     ///////////////////////////////////////////////////////////////////////////
 
+    bool initialize(
+        result_t& r,
+        memory::allocator_t* allocator = memory::default_allocator());
+
+    bool shutdown(result_t& r);
+
+    ///////////////////////////////////////////////////////////////////////////
+
     template <typename... Args>
     void add_error(
             result_t& r,

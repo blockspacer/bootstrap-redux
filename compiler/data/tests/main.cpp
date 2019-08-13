@@ -20,12 +20,21 @@
 #include <catch2/catch.hpp>
 #include <compiler/defer.h>
 #include <compiler/memory/system.h>
+#include <compiler/errors/errors.h>
 
 using namespace basecode::compiler;
 
 int main(int argc, char** argv) {
     memory::initialize();
-    defer(memory::shutdown());
+
+    result_t r{};
+    if (!errors::initialize(r))
+        return 1;
+
+    defer({
+        errors::shutdown(r);
+        memory::shutdown();
+    });
 
     auto result = Catch::Session().run(argc, argv);
     return (result < 0xff ? result : 0xff);

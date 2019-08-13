@@ -101,7 +101,7 @@ namespace basecode::compiler::data {
             return false;
         }
 
-        std::optional<V> find(K key) {
+        decltype(auto) find(K key) {
             size_t hash = hash_key(key) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
@@ -115,8 +115,13 @@ namespace basecode::compiler::data {
                 &target_bucket,
                 &target_pair);
 
-            if (!found) return {};
-            return target_pair->value;
+            if constexpr (std::is_pointer<V>::value) {
+                V r = !found ? nullptr : target_pair->value;
+                return r;
+            } else {
+                V* r = !found ? nullptr : &target_pair->value;
+                return r;
+            }
         }
 
         V& insert(K key, V value) {

@@ -52,7 +52,7 @@ namespace basecode::compiler::language::core::lexer {
                     current_node->tree = _tree_node_storage.alloc(_allocator);
                 children.insert(rune, current_node);
             } else {
-                current_node = *node;
+                current_node = node;
             }
             ++i;
         }
@@ -66,7 +66,7 @@ namespace basecode::compiler::language::core::lexer {
         auto child_node = children.find(rune);
         if (!child_node)
             return nullptr;
-        return *child_node;
+        return child_node;
     }
 
     void trie_t::insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {

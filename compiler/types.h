@@ -123,9 +123,9 @@ namespace basecode::compiler {
 
     class result_t final {
     public:
-        result_t() = default;
-
-        explicit result_t(memory::allocator_t* allocator) : _messages(allocator) {
+        explicit result_t(
+                memory::allocator_t* allocator = memory::default_allocator()) : _messages(allocator) {
+            assert(allocator);
         }
 
         inline void fail() {
@@ -208,7 +208,7 @@ namespace basecode::compiler {
 
     private:
         bool _success = true;
-        data::array_t<result_message_t> _messages{};
+        data::array_t<result_message_t> _messages;
     };
 
 }
