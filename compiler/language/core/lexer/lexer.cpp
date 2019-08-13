@@ -192,8 +192,8 @@ namespace basecode::compiler::language::core::lexer {
                     {"module"sv,      lexeme_t{.keyword = true, .type = token_type_t::module_keyword}},
                     {"import"sv,      lexeme_t{.keyword = true, .type = token_type_t::import_keyword}},
                     {"else if"sv,     lexeme_t{.keyword = true, .type = token_type_t::else_if_keyword}},
+                    {"bitcast"sv,     lexeme_t{.keyword = true, .type = token_type_t::bitcast_keyword}},
                     {"continue"sv,    lexeme_t{.keyword = true, .type = token_type_t::continue_keyword}},
-                    {"transmute"sv,   lexeme_t{.keyword = true, .type = token_type_t::transmute_keyword}},
                     {"fallthrough"sv, lexeme_t{.keyword = true, .type = token_type_t::fallthrough_keyword}},
                 });
         }
