@@ -23,12 +23,37 @@
 
 namespace basecode::compiler::memory {
 
+    struct header_t final {
+        uint32_t size;
+    };
+
+    const uint32_t header_pad_value = 0xffffffffu;
+
+    inline header_t* header(void* data) {
+        auto p = static_cast<uint32_t*>(data);
+        while (p[-1] == header_pad_value)
+            --p;
+        return reinterpret_cast<header_t*>(p - 1);
+    }
+
     inline void* align_forward(void* p, uint32_t align) {
         auto pi = uintptr_t(p);
         const uint32_t mod = pi % align;
         if (mod)
             pi += (align - mod);
         return (void*) pi;
+    }
+
+    inline void* data_pointer(header_t* header, uint32_t align) {
+        void* p = header + 1;
+        return align_forward(p, align);
+    }
+
+    inline void fill(header_t* header, void* data, uint32_t size) {
+        header->size = size;
+        auto p = reinterpret_cast<uint32_t*>(header + 1);
+        while (p < data)
+            *p++ = header_pad_value;
     }
 
     ///////////////////////////////////////////////////////////////////////////

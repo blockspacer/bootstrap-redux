@@ -16,39 +16,49 @@
 //
 // ----------------------------------------------------------------------------
 
-#include "system_allocator.h"
+#include "dl_allocator.h"
 
 namespace basecode::compiler::memory {
 
-    system_allocator_t::~system_allocator_t() {
+    dl_allocator_t::dl_allocator_t(mspace* space) : _space(space) {
+    }
+
+    dl_allocator_t::~dl_allocator_t() {
         assert(_total_allocated == 0);
     }
 
-    void* system_allocator_t::allocate(
+    void* dl_allocator_t::allocate(
             uint32_t size,
             uint32_t align) {
         const uint32_t ts = size_with_padding(size, align);
-        auto h = (header_t*) malloc(ts);
+        header_t* h = nullptr;
+        if (_space)
+            h = (header_t*) mspace_malloc(_space, ts);
+        else
+            h = (header_t*) dlmalloc(ts);
         void *p = data_pointer(h, align);
         fill(h, p, ts);
         _total_allocated += ts;
         return p;
     }
 
-    void system_allocator_t::deallocate(void* p) {
+    void dl_allocator_t::deallocate(void* p) {
         if (!p)
             return;
 
         auto h = header(p);
         _total_allocated -= h->size;
-        free(h);
+        if (_space)
+            mspace_free(_space, h);
+        else
+            dlfree(h);
     }
 
-    std::optional<uint32_t> system_allocator_t::total_allocated() {
+    std::optional<uint32_t> dl_allocator_t::total_allocated() {
         return _total_allocated;
     }
 
-    std::optional<uint32_t> system_allocator_t::allocated_size(void* p) {
+    std::optional<uint32_t> dl_allocator_t::allocated_size(void* p) {
         return header(p)->size;
     }
 

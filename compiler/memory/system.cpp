@@ -17,19 +17,18 @@
 // ----------------------------------------------------------------------------
 
 #include "system.h"
-#include "system_allocator.h"
+#include "dl_allocator.h"
 #include "scratch_allocator.h"
 
 namespace basecode::compiler::memory {
 
     struct globals_t final {
         static const int allocator_memory_size =
-            sizeof(system_allocator_t)
-            + sizeof(scratch_allocator_t);
+            sizeof(dl_allocator_t) + sizeof(scratch_allocator_t);
 
         uint8_t buffer[allocator_memory_size]{};
 
-        system_allocator_t* default_allocator = nullptr;
+        dl_allocator_t* default_allocator = nullptr;
         scratch_allocator_t* default_scratch_allocator = nullptr;
     };
 
@@ -37,7 +36,7 @@ namespace basecode::compiler::memory {
 
     void shutdown() {
         g_globals.default_scratch_allocator->~scratch_allocator_t();
-        g_globals.default_allocator->~system_allocator_t();
+        g_globals.default_allocator->~dl_allocator_t();
         g_globals = globals_t();
     }
 
@@ -51,8 +50,8 @@ namespace basecode::compiler::memory {
 
     void initialize(uint32_t scratch_buffer_size) {
         uint8_t* p = g_globals.buffer;
-        g_globals.default_allocator = new (p) system_allocator_t();
-        p += sizeof(system_allocator_t);
+        g_globals.default_allocator = new (p) dl_allocator_t();
+        p += sizeof(dl_allocator_t);
         g_globals.default_scratch_allocator = new (p) scratch_allocator_t(
             g_globals.default_allocator,
             scratch_buffer_size);
