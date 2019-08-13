@@ -23,6 +23,7 @@
 #include <compiler/memory/pool.h>
 #include <compiler/data/hash_table.h>
 #include <compiler/workspace/session.h>
+#include <compiler/language/lexeme_trie.h>
 #include "token.h"
 
 namespace basecode::compiler::language::core::lexer {
@@ -40,59 +41,7 @@ namespace basecode::compiler::language::core::lexer {
         lexeme_tokenizer_t tokenizer{};
     };
 
-    struct trie_tree_node_t;
-
-    struct trie_node_t final {
-        lexeme_t* data{};
-        trie_tree_node_t* tree{};
-    };
-
-    struct trie_tree_node_t final {
-        explicit trie_tree_node_t(memory::allocator_t* allocator) : children(allocator) {}
-        data::hash_table_t<utf8::rune_t, trie_node_t*> children;
-    };
-
-    class trie_t final {
-    public:
-        trie_t(
-            memory::allocator_t* allocator,
-            std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
-
-        void insert(std::string_view key, lexeme_t* value);
-
-        trie_node_t* find(trie_node_t* node, const utf8::rune_t& rune);
-
-        trie_t& operator =(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
-            insert(elements);
-            return *this;
-        }
-
-    private:
-        void insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements);
-
-    private:
-        trie_tree_node_t _tree_root;
-        memory::allocator_t* _allocator{};
-        trie_node_t _root{nullptr, &_tree_root};
-
-        // XXX: need to refactor pool_t into new allocator model
-        //
-        // pool_t
-        // +--------+
-        // | ****** | <---- first slot "32 bytes"
-        // |        |
-        // /  ~~~   /
-        // |        |
-        // | arena  | <---- current slot
-        // |   8k   |
-        // |        |
-        // +--------+
-        memory::pool_t<lexeme_t> _lexeme_storage{256};
-        memory::pool_t<trie_node_t> _node_storage{256};
-        memory::pool_t<trie_tree_node_t> _tree_node_storage{256};
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
+    using lexer_trie_t = lexeme_trie_t<lexeme_t>;
 
     using entity_maker_t = std::function<entt::entity (
         token_type_t type,
@@ -108,7 +57,7 @@ namespace basecode::compiler::language::core::lexer {
 
         ~lexer_t();
 
-        trie_t* lexemes();
+        lexer_trie_t* lexemes();
 
         bool tokenize(result_t& r, entity_list_t& entities);
 
@@ -154,7 +103,7 @@ namespace basecode::compiler::language::core::lexer {
         bool scan_dec_digits(result_t& r, size_t start_pos, number_type_t& type);
 
     private:
-        trie_t* _lexemes{};
+        lexer_trie_t* _lexemes{};
         utf8::source_buffer_t& _buffer;
         workspace::session_t& _session;
         const utf8::source_buffer_line_t* _source_line{};

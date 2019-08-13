@@ -25,61 +25,6 @@
 
 namespace basecode::compiler::language::core::lexer {
 
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    trie_t::trie_t(
-            memory::allocator_t* allocator,
-            std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) : _tree_root(allocator),
-                                                                                     _allocator(allocator) {
-        insert(elements);
-    }
-
-    void trie_t::insert(std::string_view key, lexeme_t* value) {
-        auto current_node = &_root;
-
-        size_t i = 0;
-        const auto key_length = key.length() - 1;
-        for (const char c : key) {
-            utf8::rune_t rune(c);
-            auto& children = current_node->tree->children;
-            auto node = children.find(rune);
-            if (!node) {
-                current_node = _node_storage.alloc();
-                current_node->data = nullptr;
-                current_node->tree = nullptr;
-                if (i <= key_length)
-                    current_node->tree = _tree_node_storage.alloc(_allocator);
-                children.insert(rune, current_node);
-            } else {
-                current_node = node;
-            }
-            ++i;
-        }
-
-        current_node->data = value;
-    }
-
-    trie_node_t* trie_t::find(trie_node_t* node, const utf8::rune_t& rune) {
-        auto current_node = node ? node : &_root;
-        auto& children = current_node->tree->children;
-        auto child_node = children.find(rune);
-        if (!child_node)
-            return nullptr;
-        return child_node;
-    }
-
-    void trie_t::insert(std::initializer_list<std::pair<std::string_view, lexeme_t>> elements) {
-        for (const auto& e : elements) {
-            auto lexeme = _lexeme_storage.alloc();
-            lexeme->type = e.second.type;
-            lexeme->tokenizer = e.second.tokenizer;
-            insert(e.first, lexeme);
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-
     lexer_t::lexer_t(
             workspace::session_t& session,
             utf8::source_buffer_t& buffer) : _buffer(buffer),
@@ -88,15 +33,17 @@ namespace basecode::compiler::language::core::lexer {
 
     lexer_t::~lexer_t() {
         if (_lexemes != nullptr) {
-            _lexemes->~trie_t();
+            _lexemes->~lexeme_trie_t();
             _session.allocator()->deallocate(_lexemes);
         }
     }
 
-    trie_t* lexer_t::lexemes() {
+    lexer_trie_t* lexer_t::lexemes() {
         if (_lexemes == nullptr) {
-            _lexemes = (trie_t*)_session.allocator()->allocate(sizeof(trie_t), alignof(trie_t));
-            new (_lexemes) trie_t(
+            _lexemes = (lexer_trie_t*)_session.allocator()->allocate(
+                sizeof(lexer_trie_t),
+                alignof(lexer_trie_t));
+            new (_lexemes) lexer_trie_t(
                 _session.allocator(),
                 {
                     {"0"sv,           lexeme_t{.type = token_type_t::number_literal, .tokenizer = &lexer_t::dec_number_literal}},
@@ -394,7 +341,7 @@ namespace basecode::compiler::language::core::lexer {
         auto& registry = _session.registry();
         auto local_lexemes = lexemes();
         while (!_buffer.eof()) {
-            trie_node_t* current_node = nullptr;
+            lexer_trie_t::node_t* current_node = nullptr;
             lexeme_t* matched_lexeme = nullptr;
 
             auto rune = _buffer.curr(r);
