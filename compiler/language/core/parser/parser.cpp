@@ -45,8 +45,8 @@ namespace basecode::compiler::language::core::parser {
     }
 
     bool parser_t::apply(result_t& r) {
-        for (auto entity : _tokens) {
-        }
+//        for (auto entity : _tokens) {
+//        }
         return true;
     }
 

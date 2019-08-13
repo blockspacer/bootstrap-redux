@@ -66,6 +66,7 @@ namespace basecode::compiler::language::core::ast {
         family_expression,
         switch_expression,
         bitcast_expression,
+        type_decl_operator,
         value_sink_operator,
         assignment_operator,
         continue_expression,
@@ -115,6 +116,7 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::family_expression:        return "family_expression"sv;
             case node_type_t::switch_expression:        return "switch_expression"sv;
             case node_type_t::bitcast_expression:       return "bitcast_expression"sv;
+            case node_type_t::type_decl_operator:       return "type_decl_operator"sv;
             case node_type_t::value_sink_operator:      return "value_sink_operator"sv;
             case node_type_t::assignment_operator:      return "assignment_operator"sv;
             case node_type_t::continue_expression:      return "continue_expression"sv;
@@ -188,6 +190,52 @@ namespace basecode::compiler::language::core::ast {
         entity_t lhs{};
         entity_t rhs{};
         binary_operator_op_t op{};
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    //
+    // foo : ^[]Any;
+    //
+    //
+    //
+    //        type_decl_operator_t
+    //          /          \
+    //    (lhs)/            \ (rhs)
+    //        /              \
+    //     foo              pointer_type_decl_t
+    //                        /
+    //                 (type)/
+    //                array_type_decl_t
+    //                   /        \
+    //                  /          \
+    //      (subscript)/            \
+    //      array_subscript_decl_t   \
+    //       size = {}  next = {}     \ (type)
+    //                                Any
+    //
+    struct type_decl_t final {
+        entity_t identifier{};
+    };
+
+    struct pointer_type_decl_t final {
+        entity_t type{};
+        entity_t next{};
+    };
+
+    struct array_subscript_decl_t final {
+        entity_t size{};
+        entity_t next{};
+    };
+
+    struct array_type_decl_t final {
+        entity_t type{};
+        entity_t subscript{};
+    };
+
+    struct type_decl_operator_t final {
+        entity_t lhs{};
+        entity_t rhs{};
     };
 
     ///////////////////////////////////////////////////////////////////////////

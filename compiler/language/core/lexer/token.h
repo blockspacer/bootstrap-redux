@@ -26,7 +26,6 @@ namespace basecode::compiler::language::core::lexer {
     using namespace std::literals;
 
     enum class token_type_t {
-        colon,
         comma,
         backslash,
         semicolon,
@@ -80,7 +79,6 @@ namespace basecode::compiler::language::core::lexer {
 
     static inline std::string_view token_type_to_name(token_type_t type) {
         switch (type) {
-            case token_type_t::colon:                   return "colon"sv;
             case token_type_t::comma:                   return "comma"sv;
             case token_type_t::backslash:               return "backslash"sv;
             case token_type_t::semicolon:               return "semicolon"sv;

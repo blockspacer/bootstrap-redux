@@ -112,7 +112,6 @@ namespace basecode::compiler::language::core::lexer {
                     {"#"sv,           lexeme_t{.type = token_type_t::directive}},
                     {"@"sv,           lexeme_t{.type = token_type_t::annotation}},
                     {"'"sv,           lexeme_t{.type = token_type_t::single_quote}},
-                    {":"sv,           lexeme_t{.type = token_type_t::colon}},
                     {";"sv,           lexeme_t{.type = token_type_t::semicolon}},
                     {","sv,           lexeme_t{.type = token_type_t::comma}},
                     {"{"sv,           lexeme_t{.type = token_type_t::left_curly_brace}},
@@ -155,6 +154,7 @@ namespace basecode::compiler::language::core::lexer {
 
                     {"^"sv,           lexeme_t{.type = token_type_t::operator_}},
                     {"."sv,           lexeme_t{.type = token_type_t::operator_}}, // member select operator
+                    {":"sv,           lexeme_t{.type = token_type_t::operator_}}, // type decl operator
                     {"::"sv,          lexeme_t{.type = token_type_t::operator_}}, // bind operator
                     {"=>"sv,          lexeme_t{.type = token_type_t::operator_}}, // association operator
                     {"->"sv,          lexeme_t{.type = token_type_t::operator_}}, // placeholder
