@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <boost/any.hpp>
 #include <compiler/types.h>
 #include <compiler/errors/errors.h>
 #include <compiler/workspace/session.h>

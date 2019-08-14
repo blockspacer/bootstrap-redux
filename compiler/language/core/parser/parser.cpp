@@ -49,7 +49,6 @@ namespace basecode::compiler::language::core::parser {
             int32_t bp,
             const led_callback_t& led) {
         auto s = symbol(selector.type, bp, selector.value);
-        s->nud = {};
         if (led) {
             s->led = led;
         } else {
