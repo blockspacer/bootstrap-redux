@@ -35,6 +35,7 @@ namespace basecode::compiler::language::core::ast {
         annotation,
         identifier,
         expression,
+        nil_literal,
         line_comment,
         block_comment,
         block_literal,
@@ -54,6 +55,7 @@ namespace basecode::compiler::language::core::ast {
         enum_expression,
         with_expression,
         goto_expression,
+        boolean_literal,
         while_expression,
         defer_expression,
         break_expression,
@@ -70,6 +72,7 @@ namespace basecode::compiler::language::core::ast {
         value_sink_operator,
         assignment_operator,
         continue_expression,
+        variable_declaration,
         fallthrough_expression,
         initializer_expression,
     };
@@ -85,6 +88,7 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::annotation:               return "annotation"sv;
             case node_type_t::identifier:               return "identifier"sv;
             case node_type_t::expression:               return "expression"sv;
+            case node_type_t::nil_literal:              return "nil_literal"sv;
             case node_type_t::line_comment:             return "line_comment"sv;
             case node_type_t::block_comment:            return "block_comment"sv;
             case node_type_t::block_literal:            return "block_literal"sv;
@@ -104,6 +108,7 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::enum_expression:          return "enum_expression"sv;
             case node_type_t::with_expression:          return "with_expression"sv;
             case node_type_t::goto_expression:          return "goto_expression"sv;
+            case node_type_t::boolean_literal:          return "boolean_literal"sv;
             case node_type_t::while_expression:         return "while_expression"sv;
             case node_type_t::defer_expression:         return "defer_expression"sv;
             case node_type_t::break_expression:         return "break_expression"sv;
@@ -120,6 +125,7 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::value_sink_operator:      return "value_sink_operator"sv;
             case node_type_t::assignment_operator:      return "assignment_operator"sv;
             case node_type_t::continue_expression:      return "continue_expression"sv;
+            case node_type_t::variable_declaration:     return "variable_declaration"sv;
             case node_type_t::fallthrough_expression:   return "fallthrough_expression"sv;
             case node_type_t::initializer_expression:   return "initializer_expression"sv;
             default: return "unknown"sv;
@@ -145,51 +151,43 @@ namespace basecode::compiler::language::core::ast {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    enum class unary_operator_op_t {
-        neg,        // foo := -16;
-        bnot,       // foo := ~16;
-        lnot,       // foo := !true;
-    };
-
     struct unary_operator_t final {
         entity_t lhs{};
-        unary_operator_op_t op{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
-    enum class binary_operator_op_t {
-        eq,         // foo := 2 == 2;
-        gt,         // foo := 2 > 1;
-        lt,         // foo := 1 < 2;
-        in,         // for _, v in [3]u8 {1, 2, 3} print("{v}\n");
-        xor_,       // foo := $ff xor $ff;
-        neq,        // foo := 1 != 2;
-        add,        // foo := 10 + 10;
-        sub,        // foo := 10 - 2;
-        mul,        // foo := 2 * 2;
-        div,        // foo := 10 / 2;
-        mod,        // foo := 10 % 2;
-        pow,        // foo := 8 ** 2;
-        bor,        // foo := 16 | 2;
-        lor,        // foo := true || false;
-        shl,        // foo := 16 shl 2;
-        shr,        // foo := 16 shr 2;
-        rol,        // foo := 16 rol 2;
-        ror,        // foo := 16 ror 2;
-        gte,        // foo := 1 >= 1;
-        lte,        // foo := 1 <= 1;
-        sep,        // j, k, l := 1, 2, 3;
-        bind,       // core::utf8 :: ns { };
-        band,       // foo := 16 & 2;
-        land,       // foo := true && false;
-        assoc,      // foo: Pair := 10 => "ten";
-    };
+//    enum class binary_operator_op_t {
+//        eq,         // foo := 2 == 2;
+//        gt,         // foo := 2 > 1;
+//        lt,         // foo := 1 < 2;
+//        in,         // for _, v in [3]u8 {1, 2, 3} print("{v}\n");
+//        xor_,       // foo := $ff xor $ff;
+//        neq,        // foo := 1 != 2;
+//        add,        // foo := 10 + 10;
+//        sub,        // foo := 10 - 2;
+//        mul,        // foo := 2 * 2;
+//        div,        // foo := 10 / 2;
+//        mod,        // foo := 10 % 2;
+//        pow,        // foo := 8 ** 2;
+//        bor,        // foo := 16 | 2;
+//        lor,        // foo := true || false;
+//        shl,        // foo := 16 shl 2;
+//        shr,        // foo := 16 shr 2;
+//        rol,        // foo := 16 rol 2;
+//        ror,        // foo := 16 ror 2;
+//        gte,        // foo := 1 >= 1;
+//        lte,        // foo := 1 <= 1;
+//        sep,        // j, k, l := 1, 2, 3;
+//        bind,       // core::utf8 :: ns { };
+//        band,       // foo := 16 & 2;
+//        land,       // foo := true && false;
+//        assoc,      // foo: Pair := 10 => "ten";
+//    };
 
     struct binary_operator_t final {
         entity_t lhs{};
         entity_t rhs{};
-        binary_operator_op_t op{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -243,7 +241,6 @@ namespace basecode::compiler::language::core::ast {
     struct assignment_operator_t final {
         entity_list_t lhs{};
         entity_list_t rhs{};
-        binary_operator_op_t op{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -261,9 +258,16 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct identifier_t final {
-        entity_t value{};
         entity_t scope{};
         entity_t block{};
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    struct variable_decl_t final {
+        entity_t type{};
+        entity_t identifier{};
+        entity_t initializer{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -305,19 +309,6 @@ namespace basecode::compiler::language::core::ast {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    enum class literal_type_t {
-        block,
-        number,
-        string,
-        boolean
-    };
-
-    struct literal_t final {
-        literal_type_t type{};
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
-
     enum class initializer_type_t {
         scalar,
         aggregate
@@ -339,12 +330,14 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct annotation_t final {
+        entity_t lhs{};
         entity_t rhs{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
     struct directive_t final {
+        entity_t lhs{};
         entity_t rhs{};
     };
 

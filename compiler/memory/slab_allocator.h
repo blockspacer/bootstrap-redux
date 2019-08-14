@@ -19,6 +19,9 @@
 #pragma once
 
 #include <compiler/data/array.h>
+#include <boost/interprocess/mapped_region.hpp>
+
+//boost::interprocess::mapped_region::get_page_size();
 
 namespace basecode::compiler::memory {
 

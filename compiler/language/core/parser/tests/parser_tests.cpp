@@ -37,11 +37,12 @@ namespace basecode {
         defer(fmt::print("{}", r));
 
         const std::string source =
-            "@no_fold\n"
-            "foo: u8 := 33;\n"
-            "bar := foo * 16;\n"
-            "print(\"bar := {bar}\\n\");\n"
-            "#type foo;\n"
+            "@no_fold \"foo\";\n"
+            "true;\n"
+            "false;\n"
+            "nil;\n"
+            "3.145;\n"
+            "a := 6 * 6 + 4;\n"
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -54,6 +55,11 @@ namespace basecode {
 
         parser::parser_t parser(session, buffer, tokens);
         REQUIRE(parser.initialize(r));
+
+        while (true) {
+            auto root = parser.expression(r);
+            if (root == entt::null) break;
+        }
     }
 
 }

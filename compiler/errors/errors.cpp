@@ -159,6 +159,21 @@ namespace basecode::compiler::errors {
                     {.code = "P001", .message = "a token has not been properly configured for parsing"}
                 },
 
+                {
+                    {.code = parser::undefined_symbol, .locale = "en_US"},
+                    {.code = "P002", .message = "undefined symbol"}
+                },
+
+                {
+                    {.code = parser::missing_operator, .locale = "en_US"},
+                    {.code = "P003", .message = "missing operator"}
+                },
+
+                {
+                    {.code = parser::unexpected_token, .locale = "en_US"},
+                    {.code = "P004", .message = "expected token {} but encountered {}"}
+                },
+
                 // ----------------------
                 // source_buffer_t
                 // ----------------------

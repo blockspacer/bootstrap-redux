@@ -50,35 +50,38 @@ namespace basecode::compiler::errors {
     ///////////////////////////////////////////////////////////////////////////
 
     namespace lexer {
-        static constexpr error_code_t unable_to_convert_integer_value = 1;
-        static constexpr error_code_t unable_to_narrow_integer_value = 2;
-        static constexpr error_code_t unable_to_convert_floating_point_value = 3;
-        static constexpr error_code_t unable_to_narrow_floating_point_value = 4;
-        static constexpr error_code_t invalid_identifier_start_character = 5;
-        static constexpr error_code_t expected_identifier = 6;
-        static constexpr error_code_t unexpected_end_of_input = 7;
-        static constexpr error_code_t unexpected_decimal_point = 8;
-        static constexpr error_code_t expected_closing_single_quote = 9;
-        static constexpr error_code_t expected_directive_prefix = 10;
-        static constexpr error_code_t expected_annotation_prefix = 11;
-        static constexpr error_code_t exponent_notation_not_valid_for_integers = 12;
-        static constexpr error_code_t unexpected_letter_after_decimal_number_literal = 13;
-        static constexpr error_code_t expected_hex_literal_prefix = 14;
-        static constexpr error_code_t unexpected_letter_after_hexadecimal_number_literal = 15;
-        static constexpr error_code_t expected_octal_literal_prefix = 16;
-        static constexpr error_code_t unexpected_letter_after_octal_number_literal = 17;
-        static constexpr error_code_t expected_binary_literal_prefix = 18;
-        static constexpr error_code_t unexpected_letter_after_binary_number_literal = 19;
-        static constexpr error_code_t expected_closing_block_literal = 20;
-        static constexpr error_code_t unescaped_quote = 22;
+        static constexpr error_code_t unescaped_quote = 122;
+        static constexpr error_code_t expected_identifier = 106;
+        static constexpr error_code_t unexpected_end_of_input = 107;
+        static constexpr error_code_t unexpected_decimal_point = 108;
+        static constexpr error_code_t expected_directive_prefix = 110;
+        static constexpr error_code_t expected_annotation_prefix = 111;
+        static constexpr error_code_t expected_hex_literal_prefix = 114;
+        static constexpr error_code_t expected_octal_literal_prefix = 116;
+        static constexpr error_code_t expected_closing_single_quote = 109;
+        static constexpr error_code_t unable_to_narrow_integer_value = 102;
+        static constexpr error_code_t expected_binary_literal_prefix = 118;
+        static constexpr error_code_t expected_closing_block_literal = 120;
+        static constexpr error_code_t unable_to_convert_integer_value = 100;
+        static constexpr error_code_t invalid_identifier_start_character = 105;
+        static constexpr error_code_t unable_to_narrow_floating_point_value = 104;
+        static constexpr error_code_t unable_to_convert_floating_point_value = 103;
+        static constexpr error_code_t exponent_notation_not_valid_for_integers = 112;
+        static constexpr error_code_t unexpected_letter_after_octal_number_literal = 117;
+        static constexpr error_code_t unexpected_letter_after_binary_number_literal = 119;
+        static constexpr error_code_t unexpected_letter_after_decimal_number_literal = 113;
+        static constexpr error_code_t unexpected_letter_after_hexadecimal_number_literal = 115;
     }
 
     namespace parser {
-        static constexpr error_code_t invalid_token = 21;
+        static constexpr error_code_t invalid_token = 200;
+        static constexpr error_code_t undefined_symbol = 201;
+        static constexpr error_code_t missing_operator = 202;
+        static constexpr error_code_t unexpected_token = 203;
     }
 
     namespace source_buffer {
-        static constexpr error_code_t unable_to_open_file = 23;
+        static constexpr error_code_t unable_to_open_file = 300;
     }
 
     ///////////////////////////////////////////////////////////////////////////
