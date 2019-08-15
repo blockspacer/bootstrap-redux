@@ -8,9 +8,7 @@ QUESTIONS
 
 TASKS
 ------------
-- FIX: parser_t helper functions should use the same api, e.g. selector, binding&|nud/led
 - FIX: come up with a better approach to storing per production-type data
-- FIX: rename symbol_t to production_t
 - FIX: introduce scope, block, and parent
 - FIX: how to handle accumulating comments/annotations/directives within a statement
 - FIX: add parse entry point method that creates initial scope, block and sets parent
@@ -68,3 +66,5 @@ DONE
         need to refactor to use std::string_view and plumb in strings::pool_t
         to ensure the values are interned.
 - NEW: parser_t helper functions for defining grammar
+- FIX: parser_t helper functions should use the same api, e.g. selector, binding&|nud/led
+- FIX: rename symbol_t to production_t

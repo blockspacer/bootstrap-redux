@@ -21,16 +21,6 @@
 #include <compiler/data/hashable.h>
 #include "parser.h"
 
-namespace basecode::compiler::data {
-
-    template <> uint64_t hash_key(language::core::parser::token_selector_t key) {
-        return hashing::murmur::hash64(
-            &key.type,
-            sizeof(language::core::lexer::token_type_t));
-    }
-
-}
-
 namespace basecode::compiler::language::core::parser {
 
     parser_t::parser_t(
@@ -39,16 +29,16 @@ namespace basecode::compiler::language::core::parser {
             entity_list_t tokens) : _tokens(std::move(tokens)),
                                     _session(session),
                                     _buffer(buffer),
-                                    _symbols(session.allocator()),
+                                    _rules(session.allocator()),
                                     _frame_allocator(session.allocator()),
-                                    _symbol_table(session.allocator()) {
+                                    _rule_table(session.allocator()) {
     }
 
-    symbol_t* parser_t::infix(
-            token_selector_t selector,
+    production_rule_t* parser_t::infix(
+            lexer::token_type_t token_type,
             int32_t bp,
             const led_callback_t& led) {
-        auto s = symbol(selector.type, bp, selector.value);
+        auto s = terminal(token_type, bp);
         if (led) {
             s->led = led;
         } else {
@@ -62,7 +52,7 @@ namespace basecode::compiler::language::core::parser {
 
                 auto& binary_op = ctx.registry->assign<ast::binary_operator_t>(ast_node);
                 binary_op.lhs = lhs;
-                binary_op.rhs = expression(*ctx.r, ctx.symbol->lbp);
+                binary_op.rhs = expression(*ctx.r, ctx.rule->lbp);
 
                 return ast_node;
             };
@@ -70,17 +60,10 @@ namespace basecode::compiler::language::core::parser {
         return s;
     }
 
-    symbol_t* parser_t::prefix(
-            lexer::token_type_t type,
-            std::string_view token) {
-        return prefix(type, {}, token);
-    }
-
-    symbol_t* parser_t::prefix(
-            lexer::token_type_t type,
-            const nud_callback_t& nud,
-            std::string_view token) {
-        auto s = symbol(type, 0, token);
+    production_rule_t* parser_t::prefix(
+            lexer::token_type_t token_type,
+            const nud_callback_t& nud) {
+        auto s = terminal(token_type);
         if (nud) {
             s->nud = nud;
         } else {
@@ -101,11 +84,11 @@ namespace basecode::compiler::language::core::parser {
         return s;
     }
 
-    symbol_t* parser_t::statement(
-            token_selector_t selector,
+    production_rule_t* parser_t::statement(
+            lexer::token_type_t token_type,
             int32_t bp) {
         return infix(
-            selector,
+            token_type,
             bp,
             [&](context_t& ctx, entity_t lhs) {
                 auto ast_node = ctx.registry->create();
@@ -128,7 +111,46 @@ namespace basecode::compiler::language::core::parser {
             });
     }
 
-    symbol_t* parser_t::literal(
+    production_rule_t* parser_t::terminal(
+            lexer::token_type_t token_type,
+            int32_t bp) {
+        auto s = _rule_table.find(token_type);
+
+        if (s) {
+            if (bp >= s->lbp)
+                s->lbp = bp;
+        } else {
+            auto p = _frame_allocator.allocate(
+                sizeof(production_rule_t),
+                alignof(production_rule_t));
+            s = new (p) production_rule_t {
+                .id = token_type,
+                .lbp = bp,
+                .nud = [](context_t& ctx) {
+                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
+                    ctx.parser->add_source_highlighted_error(
+                        *ctx.r,
+                        errors::parser::undefined_production_rule,
+                        loc);
+                    return entt::null;
+                },
+                .led = [](context_t& ctx, entity_t lhs) {
+                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
+                    ctx.parser->add_source_highlighted_error(
+                        *ctx.r,
+                        errors::parser::missing_operator_production_rule,
+                        loc);
+                    return entt::null;
+                },
+            };
+
+            _rule_table.insert(token_type, s);
+        }
+
+        return s;
+    }
+
+    production_rule_t* parser_t::literal(
             lexer::token_type_t token_type,
             ast::node_type_t node_type) {
         auto literal = prefix(
@@ -137,7 +159,7 @@ namespace basecode::compiler::language::core::parser {
                 auto ast_node = ctx.registry->create();
 
                 auto& node = ctx.registry->assign<ast::node_t>(ast_node);
-                node.type = ctx.symbol->node_type;
+                node.type = ctx.rule->node_type;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
@@ -147,52 +169,7 @@ namespace basecode::compiler::language::core::parser {
         return literal;
     }
 
-    symbol_t* parser_t::symbol(
-            lexer::token_type_t type,
-            int32_t bp,
-            std::string_view token) {
-        token_selector_t selector{
-            .type = type,
-            .value = token
-        };
-
-        auto s = _symbol_table.find(selector);
-
-        if (s) {
-            if (bp >= s->lbp)
-                s->lbp = bp;
-        } else {
-            auto p = _frame_allocator.allocate(
-                sizeof(symbol_t),
-                alignof(symbol_t));
-            s = new (p) symbol_t {
-                .id = selector,
-                .lbp = bp,
-                .nud = [](context_t& ctx) {
-                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
-                    ctx.parser->add_source_highlighted_error(
-                        *ctx.r,
-                        errors::parser::undefined_symbol,
-                        loc);
-                    return entt::null;
-                },
-                .led = [](context_t& ctx, entity_t lhs) {
-                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
-                    ctx.parser->add_source_highlighted_error(
-                        *ctx.r,
-                        errors::parser::missing_operator,
-                        loc);
-                    return entt::null;
-                },
-            };
-
-            _symbol_table.insert(selector, s);
-        }
-
-        return s;
-    }
-
-    symbol_t* parser_t::constant(
+    production_rule_t* parser_t::constant(
             lexer::token_type_t token_type,
             ast::node_type_t node_type) {
         auto constant = prefix(
@@ -201,7 +178,7 @@ namespace basecode::compiler::language::core::parser {
                 auto ast_node = ctx.registry->create();
 
                 auto& node = ctx.registry->assign<ast::node_t>(ast_node);
-                node.type = ctx.symbol->node_type;
+                node.type = ctx.rule->node_type;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
@@ -211,18 +188,25 @@ namespace basecode::compiler::language::core::parser {
         return constant;
     }
 
+    production_rule_t* parser_t::infix_right(
+            lexer::token_type_t token_type,
+            int32_t bp,
+            const led_callback_t& led) {
+        return nullptr;
+    }
+
     bool parser_t::has_more() const {
         return _token_index < _tokens.size()
-            && _symbols[_token_index]->id.type != lexer::token_type_t::end_of_input;
+               && _rules[_token_index]->id != lexer::token_type_t::end_of_input;
     }
 
     bool parser_t::apply(result_t& r) {
-        _symbols.reserve(_tokens.size());
+        _rules.reserve(_tokens.size());
 
         auto& registry = _session.registry();
         for (auto entity : _tokens) {
             const lexer::token_t& token = registry.get<lexer::token_t>(entity);
-            auto s = find_symbol(token.type, token.value);
+            auto s = _rule_table.find(token.type);
             if (!s) {
                 const auto& loc = registry.get<source_location_t>(entity);
                 add_source_highlighted_error(
@@ -231,24 +215,24 @@ namespace basecode::compiler::language::core::parser {
                     loc);
                 return false;
             }
-            _symbols.add(s);
+            _rules.add(s);
         }
 
         return true;
     }
 
     bool parser_t::initialize(result_t& r) {
-        symbol(lexer::token_type_t::comma);
-        symbol(lexer::token_type_t::semicolon);
-        symbol(lexer::token_type_t::right_paren);
-        symbol(lexer::token_type_t::right_bracket);
-        symbol(lexer::token_type_t::else_keyword);
-        symbol(lexer::token_type_t::end_of_input);
-        symbol(lexer::token_type_t::right_curly_brace);
+        terminal(lexer::token_type_t::comma);
+        terminal(lexer::token_type_t::semicolon);
+        terminal(lexer::token_type_t::right_paren);
+        terminal(lexer::token_type_t::right_bracket);
+        terminal(lexer::token_type_t::else_keyword);
+        terminal(lexer::token_type_t::end_of_input);
+        terminal(lexer::token_type_t::right_curly_brace);
 
-        prefix(lexer::token_type_t::operator_, "-");
-        prefix(lexer::token_type_t::operator_, "!");
-        prefix(lexer::token_type_t::operator_, "~");
+        prefix(lexer::token_type_t::minus);
+        prefix(lexer::token_type_t::binary_not_operator);
+        prefix(lexer::token_type_t::logical_not_operator);
 
         literal(lexer::token_type_t::block_literal, ast::node_type_t::block_literal);
         literal(lexer::token_type_t::number_literal, ast::node_type_t::number_literal);
@@ -258,24 +242,12 @@ namespace basecode::compiler::language::core::parser {
         constant(lexer::token_type_t::true_keyword, ast::node_type_t::boolean_literal);
         constant(lexer::token_type_t::false_keyword, ast::node_type_t::boolean_literal);
 
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = "+"sv},
-            50);
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = "-"sv},
-            50);
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = "*"sv},
-            60);
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = "/"sv},
-            60);
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = "%"sv},
-            60);
-        infix(
-            token_selector_t{.type = lexer::token_type_t::operator_, .value = ":="sv},
-            90);
+        infix(lexer::token_type_t::minus, 50);
+        infix(lexer::token_type_t::add_operator, 50);
+        infix(lexer::token_type_t::divide_operator, 60);
+        infix(lexer::token_type_t::modulo_operator, 60);
+        infix(lexer::token_type_t::multiply_operator, 60);
+        infix(lexer::token_type_t::assignment_operator, 90);
 
         prefix(
             lexer::token_type_t::identifier,
@@ -328,9 +300,7 @@ namespace basecode::compiler::language::core::parser {
                 return ast_node;
             });
 
-        statement(
-            token_selector_t{.type = lexer::token_type_t::semicolon},
-            80);
+        statement(lexer::token_type_t::semicolon, 100);
 
         return apply(r);
     }
@@ -339,7 +309,7 @@ namespace basecode::compiler::language::core::parser {
         if (!has_more()) return entt::null;
 
         auto current_token = _tokens[_token_index];
-        auto current_symbol = _symbols[_token_index];
+        auto current_symbol = _rules[_token_index];
 
         context_t ctx{
             .r = &r,
@@ -348,7 +318,7 @@ namespace basecode::compiler::language::core::parser {
             .block = entt::null,        // XXX: fix me!
             .parent = entt::null,       // XXX: fix me!
             .token = current_token,
-            .symbol = current_symbol,
+            .rule = current_symbol,
             .registry = &_session.registry(),
         };
 
@@ -357,16 +327,16 @@ namespace basecode::compiler::language::core::parser {
 
         auto lhs = current_symbol->nud(ctx);
 
-        auto next_symbol = _symbols[_token_index];
+        auto next_symbol = _rules[_token_index];
         while (rbp < next_symbol->lbp) {
-            ctx.symbol = next_symbol;
+            ctx.rule = next_symbol;
             ctx.token = _tokens[_token_index];
 
             if (!advance(r)) return entt::null;
 
             lhs = next_symbol->led(ctx, lhs);
 
-            next_symbol = _symbols[_token_index];
+            next_symbol = _rules[_token_index];
         }
 
         return lhs;
@@ -399,17 +369,6 @@ namespace basecode::compiler::language::core::parser {
         } else {
             return false;
         }
-    }
-
-    symbol_t* parser_t::find_symbol(lexer::token_type_t type, std::string_view token) {
-        token_selector_t selector{
-            .type = type,
-            .value = token
-        };
-        return _symbol_table.find(selector);
-    }
-
-    void parser_t::infix_right(std::string_view token, int32_t bp, const led_callback_t& led) {
     }
 
 }

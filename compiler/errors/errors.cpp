@@ -160,13 +160,13 @@ namespace basecode::compiler::errors {
                 },
 
                 {
-                    {.code = parser::undefined_symbol, .locale = "en_US"},
-                    {.code = "P002", .message = "undefined symbol"}
+                    {.code = parser::undefined_production_rule, .locale = "en_US"},
+                    {.code = "P002", .message = "undefined production rule"}
                 },
 
                 {
-                    {.code = parser::missing_operator, .locale = "en_US"},
-                    {.code = "P003", .message = "missing operator"}
+                    {.code = parser::missing_operator_production_rule, .locale = "en_US"},
+                    {.code = "P003", .message = "missing operator production rule"}
                 },
 
                 {

@@ -34,24 +34,11 @@ namespace basecode::compiler::language::core::parser {
     using nud_callback_t = std::function<entity_t (context_t&)>;
     using led_callback_t = std::function<entity_t (context_t&, entity_t)>;
 
-    struct token_selector_t final {
-        std::string_view value{};
-        lexer::token_type_t type{};
-
-        bool operator == (const token_selector_t& other) const {
-            if (value.empty()) {
-                return type == other.type;
-            } else {
-                return type == other.type && value == other.value;
-            }
-        }
-    };
-
-    struct symbol_t final {
+    struct production_rule_t final {
         int32_t lbp{};
         nud_callback_t nud{};
         led_callback_t led{};
-        token_selector_t id{};
+        lexer::token_type_t id{};
 
         // XXX: need to think of a better way to do this
         ast::node_type_t node_type{};
@@ -66,8 +53,8 @@ namespace basecode::compiler::language::core::parser {
         entity_t scope{};
         entity_t token{};
         entity_t parent{};
-        symbol_t* symbol{};
         parser_t* parser{};
+        production_rule_t* rule{};
         entt::registry* registry{};
     };
 
@@ -110,49 +97,44 @@ namespace basecode::compiler::language::core::parser {
         }
 
     private:
-        symbol_t* infix(
-            token_selector_t selector,
+        production_rule_t* infix(
+            lexer::token_type_t token_type,
             int32_t bp,
             const led_callback_t& led = {});
 
-        symbol_t* prefix(
-            lexer::token_type_t type,
-            std::string_view token);
+        production_rule_t* prefix(
+            lexer::token_type_t token_type,
+            const nud_callback_t& nud = {});
 
-        symbol_t* prefix(
-            lexer::token_type_t type,
-            const nud_callback_t& nud,
-            std::string_view token = {});
+        production_rule_t* literal(
+            lexer::token_type_t token_type,
+            ast::node_type_t node_type);
 
-        symbol_t* statement(
-            token_selector_t selector,
+        production_rule_t* terminal(
+            lexer::token_type_t token_type,
+            int32_t bp = 0);
+
+        production_rule_t* constant(
+            lexer::token_type_t token_type,
+            ast::node_type_t node_type);
+
+        production_rule_t* statement(
+            lexer::token_type_t token_type,
             int32_t bp);
 
-        symbol_t* literal(
+        production_rule_t* infix_right(
             lexer::token_type_t token_type,
-            ast::node_type_t node_type);
-
-        symbol_t* symbol(
-            lexer::token_type_t type,
-            int32_t bp = 0,
-            std::string_view token = {});
-
-        symbol_t* constant(
-            lexer::token_type_t token_type,
-            ast::node_type_t node_type);
-
-        symbol_t* find_symbol(lexer::token_type_t type, std::string_view token = {});
-
-        void infix_right(std::string_view token, int32_t bp, const led_callback_t& led = {});
+            int32_t bp,
+            const led_callback_t& led = {});
 
     private:
         size_t _token_index{};
         entity_list_t _tokens;
         workspace::session_t& _session;
         utf8::source_buffer_t& _buffer;
-        data::array_t<symbol_t*> _symbols;
+        data::array_t<production_rule_t*> _rules;
         memory::frame_allocator_t<4096> _frame_allocator;
-        data::hash_table_t<token_selector_t, symbol_t*> _symbol_table;
+        data::hash_table_t<lexer::token_type_t, production_rule_t*> _rule_table;
     };
 
 }

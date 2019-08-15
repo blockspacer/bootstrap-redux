@@ -75,9 +75,9 @@ namespace basecode::compiler::errors {
 
     namespace parser {
         static constexpr error_code_t invalid_token = 200;
-        static constexpr error_code_t undefined_symbol = 201;
-        static constexpr error_code_t missing_operator = 202;
         static constexpr error_code_t unexpected_token = 203;
+        static constexpr error_code_t undefined_production_rule = 201;
+        static constexpr error_code_t missing_operator_production_rule = 202;
     }
 
     namespace source_buffer {
