@@ -91,6 +91,7 @@ namespace basecode::compiler::language::core::lexer {
         right_curly_brace,
         exponent_operator,
         multiply_operator,
+        ellipsis_operator,
         not_equal_operator,
         binary_or_operator,
         type_decl_operator,
@@ -105,6 +106,8 @@ namespace basecode::compiler::language::core::lexer {
         member_select_operator,
         add_assignment_operator,
         less_than_equal_operator,
+        inclusive_range_operator,
+        exclusive_range_operator,
         modulo_assignment_operator,
         divide_assignment_operator,
         greater_than_equal_operator,
@@ -182,6 +185,7 @@ namespace basecode::compiler::language::core::lexer {
             case token_type_t::right_curly_brace:               return "right_curly_brace"sv;
             case token_type_t::exponent_operator:               return "exponent_operator"sv;
             case token_type_t::multiply_operator:               return "multiply_operator"sv;
+            case token_type_t::ellipsis_operator:               return "ellipsis_operator"sv;
             case token_type_t::not_equal_operator:              return "not_equal_operator"sv;
             case token_type_t::binary_or_operator:              return "binary_or_operator"sv;
             case token_type_t::type_decl_operator:              return "type_decl_operator"sv;
@@ -196,6 +200,8 @@ namespace basecode::compiler::language::core::lexer {
             case token_type_t::member_select_operator:          return "member_select_operator"sv;
             case token_type_t::add_assignment_operator:         return "add_assignment_operator"sv;
             case token_type_t::less_than_equal_operator:        return "less_than_equal_operator"sv;
+            case token_type_t::inclusive_range_operator:        return "inclusive_range_operator"sv;
+            case token_type_t::exclusive_range_operator:        return "inclusive_range_operator"sv;
             case token_type_t::modulo_assignment_operator:      return "modulo_assignment_operator"sv;
             case token_type_t::divide_assignment_operator:      return "divide_assignment_operator"sv;
             case token_type_t::greater_than_equal_operator:     return "greater_than_equal_operator"sv;
