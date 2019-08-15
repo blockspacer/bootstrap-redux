@@ -58,6 +58,8 @@ namespace basecode::compiler::language::core::parser {
         // XXX: fix this shit
     };
 
+    class parser_t;
+
     struct context_t final {
         result_t* r{};
         entity_t block{};
@@ -65,8 +67,8 @@ namespace basecode::compiler::language::core::parser {
         entity_t token{};
         entity_t parent{};
         symbol_t* symbol{};
-        workspace::session_t* session{};
-        utf8::source_buffer_t* buffer{};
+        parser_t* parser{};
+        entt::registry* registry{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -90,6 +92,22 @@ namespace basecode::compiler::language::core::parser {
         bool expect(result_t& r, std::string_view token = {});
 
         bool advance(result_t& r, std::string_view token = {});
+
+    private:
+        template <typename... Args>
+        void add_source_highlighted_error(
+                result_t& r,
+                errors::error_code_t code,
+                const source_location_t& loc,
+                Args&&... args) {
+            errors::add_source_highlighted_error(
+                r,
+                _session.intern_pool(),
+                code,
+                _buffer,
+                loc,
+                std::forward<Args>(args)...);
+        }
 
     private:
         symbol_t* infix(

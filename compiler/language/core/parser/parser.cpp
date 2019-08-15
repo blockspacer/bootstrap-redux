@@ -53,16 +53,14 @@ namespace basecode::compiler::language::core::parser {
             s->led = led;
         } else {
             s->led = [&](context_t& ctx, entity_t lhs) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::binary_operator;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& binary_op = registry.assign<ast::binary_operator_t>(ast_node);
+                auto& binary_op = ctx.registry->assign<ast::binary_operator_t>(ast_node);
                 binary_op.lhs = lhs;
                 binary_op.rhs = expression(*ctx.r, ctx.symbol->lbp);
 
@@ -87,16 +85,14 @@ namespace basecode::compiler::language::core::parser {
             s->nud = nud;
         } else {
             s->nud = [&](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::unary_operator;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& unary_op = registry.assign<ast::unary_operator_t>(ast_node);
+                auto& unary_op = ctx.registry->assign<ast::unary_operator_t>(ast_node);
                 unary_op.lhs = expression(*ctx.r, 70);
 
                 return ast_node;
@@ -112,21 +108,19 @@ namespace basecode::compiler::language::core::parser {
             selector,
             bp,
             [&](context_t& ctx, entity_t lhs) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::statement;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& stmt = registry.assign<ast::statement_t>(ast_node);
+                auto& stmt = ctx.registry->assign<ast::statement_t>(ast_node);
                 stmt.expr = lhs;
 
                 // XXX: revisit
                 if (ctx.block != entt::null) {
-                    auto& block = registry.get<ast::block_t>(ctx.block);
+                    auto& block = ctx.registry->get<ast::block_t>(ctx.block);
                     block.children.add(ast_node);
                 }
 
@@ -140,11 +134,9 @@ namespace basecode::compiler::language::core::parser {
         auto literal = prefix(
             token_type,
             [&](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ctx.symbol->node_type;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
@@ -177,26 +169,18 @@ namespace basecode::compiler::language::core::parser {
                 .id = selector,
                 .lbp = bp,
                 .nud = [](context_t& ctx) {
-                    const auto& loc = ctx.session
-                        ->registry()
-                        .get<source_location_t>(ctx.token);
-                    errors::add_source_highlighted_error(
+                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
+                    ctx.parser->add_source_highlighted_error(
                         *ctx.r,
-                        ctx.session->intern_pool(),
                         errors::parser::undefined_symbol,
-                        *ctx.buffer,
                         loc);
                     return entt::null;
                 },
                 .led = [](context_t& ctx, entity_t lhs) {
-                    const auto& loc = ctx.session
-                        ->registry()
-                        .get<source_location_t>(ctx.token);
-                    errors::add_source_highlighted_error(
+                    const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
+                    ctx.parser->add_source_highlighted_error(
                         *ctx.r,
-                        ctx.session->intern_pool(),
                         errors::parser::missing_operator,
-                        *ctx.buffer,
                         loc);
                     return entt::null;
                 },
@@ -214,11 +198,9 @@ namespace basecode::compiler::language::core::parser {
         auto constant = prefix(
             token_type,
             [](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ctx.symbol->node_type;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
@@ -243,11 +225,9 @@ namespace basecode::compiler::language::core::parser {
             auto s = find_symbol(token.type, token.value);
             if (!s) {
                 const auto& loc = registry.get<source_location_t>(entity);
-                errors::add_source_highlighted_error(
+                add_source_highlighted_error(
                     r,
-                    _session.intern_pool(),
                     errors::parser::invalid_token,
-                    _buffer,
                     loc);
                 return false;
             }
@@ -300,16 +280,14 @@ namespace basecode::compiler::language::core::parser {
         prefix(
             lexer::token_type_t::identifier,
             [&](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::identifier;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& identifier = registry.assign<ast::identifier_t>(ast_node);
+                auto& identifier = ctx.registry->assign<ast::identifier_t>(ast_node);
                 identifier.scope = ctx.scope;
                 identifier.block = ctx.block;
 
@@ -319,16 +297,14 @@ namespace basecode::compiler::language::core::parser {
         prefix(
             lexer::token_type_t::annotation,
             [&](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::annotation;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& annotation = registry.assign<ast::annotation_t>(ast_node);
+                auto& annotation = ctx.registry->assign<ast::annotation_t>(ast_node);
                 annotation.lhs = expression(*ctx.r, 0);
                 annotation.rhs = expression(*ctx.r, 0);
 
@@ -338,16 +314,14 @@ namespace basecode::compiler::language::core::parser {
         prefix(
             lexer::token_type_t::directive,
             [&](context_t& ctx) {
-                auto& registry = ctx.session->registry();
+                auto ast_node = ctx.registry->create();
 
-                auto ast_node = registry.create();
-
-                auto& node = registry.assign<ast::node_t>(ast_node);
+                auto& node = ctx.registry->assign<ast::node_t>(ast_node);
                 node.type = ast::node_type_t::directive;
                 node.token = ctx.token;
                 node.parent = ctx.parent;
 
-                auto& directive = registry.assign<ast::directive_t>(ast_node);
+                auto& directive = ctx.registry->assign<ast::directive_t>(ast_node);
                 directive.lhs = expression(*ctx.r, 0);
                 directive.rhs = expression(*ctx.r, 0);
 
@@ -369,13 +343,13 @@ namespace basecode::compiler::language::core::parser {
 
         context_t ctx{
             .r = &r,
+            .parser = this,
             .scope = entt::null,        // XXX: fix me!
             .block = entt::null,        // XXX: fix me!
             .parent = entt::null,       // XXX: fix me!
-            .buffer = &_buffer,
-            .session = &_session,
             .token = current_token,
             .symbol = current_symbol,
+            .registry = &_session.registry(),
         };
 
         if (!advance(r))
@@ -406,11 +380,9 @@ namespace basecode::compiler::language::core::parser {
         const auto& t = registry.get<lexer::token_t>(entity);
         if (token != t.value) {
             const auto& loc = registry.get<source_location_t>(entity);
-            errors::add_source_highlighted_error(
+            add_source_highlighted_error(
                 r,
-                _session.intern_pool(),
                 errors::parser::unexpected_token,
-                _buffer,
                 loc,
                 token,
                 t.value);
