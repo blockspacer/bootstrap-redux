@@ -31,6 +31,7 @@ add_library(
 
         memory/pool.h
         memory/allocator.h
+        memory/object_pool.h
         memory/temp_allocator.h
         memory/frame_allocator.h
         memory/system.cpp memory/system.h

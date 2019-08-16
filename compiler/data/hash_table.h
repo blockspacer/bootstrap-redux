@@ -152,6 +152,20 @@ namespace basecode::compiler::data {
             return target_pair->value;
         }
 
+        array_t<V> values() const {
+            array_t<V> list(_allocator);
+            list.resize(_size);
+
+            size_t i = 0, j = 0;
+            for (const auto& b : _buckets) {
+                if (b.state == hash_bucket_state_t::s_filled)
+                    list[j++] = _pairs[i].value;
+                ++i;
+            }
+
+            return list;
+        }
+
         void reserve(uint32_t new_size) {
             rehash(new_size * 3 / 2);
         }

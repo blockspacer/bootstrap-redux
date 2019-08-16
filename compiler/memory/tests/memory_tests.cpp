@@ -19,6 +19,7 @@
 #include <fmt/format.h>
 #include <catch2/catch.hpp>
 #include <compiler/memory/system.h>
+#include <compiler/memory/object_pool.h>
 #include <compiler/memory/slab_allocator.h>
 #include <compiler/memory/trace_allocator.h>
 
@@ -39,6 +40,32 @@ namespace basecode {
 
         for (auto p : blocks)
             REQUIRE(p);
+    }
+
+    TEST_CASE("object_pool_t") {
+        struct rect_t final {
+            float x{}, y{};
+            float w{}, h{};
+        };
+
+        struct point_t final {
+            float x{}, y{};
+        };
+
+        trace_allocator_t tracer(memory::default_scratch_allocator());
+        object_pool_t pool(&tracer);
+
+        auto r1 = pool.construct<rect_t>();
+        REQUIRE(r1);
+        r1->x = 1.0;
+        r1->y = 1.0;
+        r1->w = .5;
+        r1->h = .5;
+
+        auto p1 = pool.construct<point_t>();
+        REQUIRE(p1);
+        p1->x = 16.5;
+        p1->y = -8.166;
     }
 
 }
