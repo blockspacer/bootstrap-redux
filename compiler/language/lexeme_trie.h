@@ -20,9 +20,9 @@
 
 #include <utility>
 #include <compiler/types.h>
-#include <compiler/memory/pool.h>
 #include <compiler/data/hash_table.h>
 #include <compiler/workspace/session.h>
+#include <compiler/memory/object_pool.h>
 
 namespace basecode::compiler::language {
 
@@ -41,10 +41,18 @@ namespace basecode::compiler::language {
             data::hash_table_t<utf8::rune_t, node_t*> children;
         };
 
+        explicit lexeme_trie_t(memory::allocator_t* allocator) : _tree_root(allocator),
+                                                                 _storage(allocator),
+                                                                 _allocator(allocator) {
+            assert(_allocator);
+        }
+
         lexeme_trie_t(
                 memory::allocator_t* allocator,
                 std::initializer_list<std::pair<std::string_view, V>> elements) : _tree_root(allocator),
+                                                                                  _storage(allocator),
                                                                                   _allocator(allocator) {
+            assert(_allocator);
             insert(elements);
         }
 
@@ -58,11 +66,11 @@ namespace basecode::compiler::language {
                 auto& children = current_node->tree->children;
                 auto node = children.find(rune);
                 if (!node) {
-                    current_node = _node_storage.alloc();
+                    current_node = _storage.construct<node_t>();
                     current_node->data = nullptr;
                     current_node->tree = nullptr;
                     if (i <= key_length)
-                        current_node->tree = _tree_node_storage.alloc(_allocator);
+                        current_node->tree = _storage.construct<tree_node_t>(_allocator);
                     children.insert(rune, current_node);
                 } else {
                     current_node = node;
@@ -90,7 +98,7 @@ namespace basecode::compiler::language {
     private:
         void insert(std::initializer_list<std::pair<std::string_view, V>> elements) {
             for (const auto& e : elements) {
-                auto lexeme = _lexeme_storage.alloc();
+                auto lexeme = _storage.construct<V>();
                 lexeme->type = e.second.type;
                 lexeme->tokenizer = e.second.tokenizer;
                 insert(e.first, lexeme);
@@ -99,11 +107,9 @@ namespace basecode::compiler::language {
 
     private:
         tree_node_t _tree_root;
-        memory::allocator_t* _allocator{};
+        memory::object_pool_t _storage;
+        memory::allocator_t* _allocator;
         node_t _root{nullptr, &_tree_root};
-        memory::pool_t<V> _lexeme_storage{256};
-        memory::pool_t<node_t> _node_storage{256};
-        memory::pool_t<tree_node_t> _tree_node_storage{256};
     };
 
 }

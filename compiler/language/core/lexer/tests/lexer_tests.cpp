@@ -49,6 +49,9 @@ namespace basecode {
 //        workspace::session_options_t options{
 //            .allocator = &debug_allocator
 //        };
+//        workspace::session_options_t options{
+//            .allocator = memory::default_allocator()
+//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);

@@ -20,7 +20,6 @@
 
 #include <utility>
 #include <compiler/types.h>
-#include <compiler/memory/pool.h>
 #include <compiler/data/hash_table.h>
 #include <compiler/workspace/session.h>
 #include <compiler/language/lexeme_trie.h>

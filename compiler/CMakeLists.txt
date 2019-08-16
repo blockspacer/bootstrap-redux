@@ -29,7 +29,6 @@ add_library(
 
         types.cpp types.h
 
-        memory/pool.h
         memory/allocator.h
         memory/object_pool.h
         memory/temp_allocator.h

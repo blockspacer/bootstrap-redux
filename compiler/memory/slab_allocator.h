@@ -67,6 +67,7 @@ namespace basecode::compiler::memory {
         allocator_t* _backing;
         uint32_t _buffer_size;
         uint32_t _buffer_align;
+        uint32_t _page_count{};
         uint32_t _maximum_buffers{};
         uint32_t _total_allocated{};
     };

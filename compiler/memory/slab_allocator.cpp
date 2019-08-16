@@ -30,17 +30,18 @@ namespace basecode::compiler::memory {
                               _backing(backing),
                               _buffer_size(size),
                               _buffer_align(align) {
-        _maximum_buffers = (os_page_size() - sizeof(slab_t)) / _buffer_size;
+        const auto slab_size = sizeof(slab_t) + alignof(slab_t);
+        _maximum_buffers = (os_page_size() - slab_size) / _buffer_size;
     }
 
     slab_allocator_t::~slab_allocator_t() {
         const auto page_size = os_page_size();
 
-        while (_front) {
-            auto slab = _front;
-            remove(slab);
-            _backing->deallocate(slab->page);
+        auto current = _front;
+        while (current) {
+            _backing->deallocate(current->page);
             _total_allocated -= page_size;
+            current = current->next;
         }
 
         assert(_total_allocated == 0);
@@ -51,16 +52,24 @@ namespace basecode::compiler::memory {
 
         auto mem = (char*)_backing->allocate(page_size);
         _total_allocated += page_size;
+        _page_count++;
 
-        slab_t* slab = (slab_t*)mem + page_size - sizeof(slab_t);
-        slab->next = slab->prev = slab;
+        auto slab = (slab_t*)align_forward(
+            mem + page_size - (sizeof(slab_t) + alignof(slab_t)),
+            alignof(slab_t));
+        slab->next = slab->prev = nullptr;
         slab->buffer_count = 0;
         slab->page = mem;
         slab->free_list = mem;
 
-        void* last_buffer = mem + (_buffer_size * (_maximum_buffers - 1));
-        for (auto p = mem; p < last_buffer; p += _buffer_size)
-            *((void **)p) = p + _buffer_size;
+        auto effective_size = _buffer_align * ((_buffer_size - 1) / _buffer_align + 1);
+        char* last_buffer = mem + (effective_size * (_maximum_buffers - 1));
+
+        auto i = 0;
+        for (auto p = mem; p < last_buffer; p += effective_size) {
+            *((void**) p) = p + effective_size;
+            ++i;
+        }
 
         move_front(slab);
     }
@@ -68,8 +77,10 @@ namespace basecode::compiler::memory {
     void* slab_allocator_t::allocate(
             uint32_t size,
             uint32_t align) {
-        if (!_front || _front->buffer_count == _maximum_buffers)
+        if (!_front
+        ||  _front->buffer_count == _maximum_buffers) {
             grow();
+        }
 
         auto buffer = _front->free_list;
         _front->free_list = *((void**)buffer);
@@ -82,27 +93,24 @@ namespace basecode::compiler::memory {
     }
 
     void slab_allocator_t::remove(slab_t* slab) {
-        slab->next->prev = slab->prev;
-        slab->prev->next = slab->next;
+        if (slab->next)
+            slab->next->prev = slab->prev;
+
+        if (slab->prev)
+            slab->prev->next = slab->next;
 
         if (_front == slab) {
-            if (slab->prev == slab)
-                _front = nullptr;
-            else
-                _front = slab->prev;
+            _front = slab->next;
         }
 
         if (_back == slab) {
-            if (slab->next == slab)
-                _back = nullptr;
-            else
-                _back = slab->next;
+            _back = slab->prev;
         }
     }
 
     void slab_allocator_t::deallocate(void* p) {
         const auto page_size = os_page_size();
-        const auto slab_size = page_size - sizeof(slab_t);
+        const auto slab_size = page_size - (sizeof(slab_t) + alignof(slab_t));
 
         auto current = _front;
         while (current) {
@@ -115,7 +123,9 @@ namespace basecode::compiler::memory {
 
         assert(current);
 
-        slab_t* slab = (slab_t*)current->page + slab_size;
+        auto slab = (slab_t*)align_forward(
+            (char*)current->page + page_size - (sizeof(slab_t) + alignof(slab_t)),
+            alignof(slab_t));
         *((void**)p) = slab->free_list;
         slab->free_list = p;
         slab->buffer_count--;
@@ -135,17 +145,9 @@ namespace basecode::compiler::memory {
 
         remove(slab);
 
-        if (_front == nullptr) {
-            slab->prev = slab;
-            slab->next = slab;
-            _front = slab;
-        } else {
-            slab->prev = _front;
-            _front->next = slab;
-
-            slab->next = _back;
-            _back->prev = slab;
-        }
+        slab->next = nullptr;
+        slab->prev = _back;
+        _back->next = slab;
 
         _back = slab;
     }
@@ -155,17 +157,15 @@ namespace basecode::compiler::memory {
 
         remove(slab);
 
-        if (_front == nullptr) {
-            slab->prev = slab;
-            slab->next = slab;
-            _back = slab;
-        }
-        else {
-            slab->prev = _front;
-            _front->next = slab;
+        slab->prev = nullptr;
 
-            slab->next = _back;
-            _back->prev = slab;
+        if (_front) {
+            _front->prev = slab;
+            slab->next = _front;
+            if (!_back)
+                _back = _front;
+        } else {
+            _back = slab;
         }
 
         _front = slab;
