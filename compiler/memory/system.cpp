@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <boost/interprocess/mapped_region.hpp>
 #include "system.h"
 #include "dl_allocator.h"
 #include "scratch_allocator.h"
@@ -28,6 +29,7 @@ namespace basecode::compiler::memory {
 
         uint8_t buffer[allocator_memory_size]{};
 
+        size_t os_page_size{};
         dl_allocator_t* default_allocator = nullptr;
         scratch_allocator_t* default_scratch_allocator = nullptr;
     };
@@ -40,6 +42,10 @@ namespace basecode::compiler::memory {
         g_globals = globals_t();
     }
 
+    size_t os_page_size() {
+        return g_globals.os_page_size;
+    }
+
     allocator_t* default_allocator() {
         return g_globals.default_allocator;
     }
@@ -49,6 +55,7 @@ namespace basecode::compiler::memory {
     }
 
     void initialize(uint32_t scratch_buffer_size) {
+        g_globals.os_page_size = boost::interprocess::mapped_region::get_page_size();
         uint8_t* p = g_globals.buffer;
         g_globals.default_allocator = new (p) dl_allocator_t();
         p += sizeof(dl_allocator_t);

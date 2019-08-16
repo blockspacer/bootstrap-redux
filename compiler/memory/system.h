@@ -24,6 +24,8 @@ namespace basecode::compiler::memory {
 
     void shutdown();
 
+    size_t os_page_size();
+
     allocator_t* default_allocator();
 
     allocator_t* default_scratch_allocator();

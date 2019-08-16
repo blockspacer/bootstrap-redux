@@ -30,15 +30,11 @@ namespace basecode {
 
     TEST_CASE("slab_allocator_t") {
         trace_allocator_t tracer(memory::default_scratch_allocator());
-        slab_allocator_t slabbers(&tracer);
+        slab_allocator_t block1(&tracer, "block1", 64);
 
-        void* blocks[32];
-        for (size_t i = 0; i < 16; i++) {
-            blocks[i] = slabbers.allocate(slab_allocator_t::make_size(1, 256));
-        }
-
-        for (size_t i = 16; i < 32; i++) {
-            blocks[i] = slabbers.allocate(slab_allocator_t::make_size(1, 256));
+        void* blocks[128];
+        for (size_t i = 0; i < 128; i++) {
+            blocks[i] = block1.allocate();
         }
 
         for (auto p : blocks)

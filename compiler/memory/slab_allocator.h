@@ -18,67 +18,57 @@
 
 #pragma once
 
-#include <compiler/data/array.h>
-#include <boost/interprocess/mapped_region.hpp>
-
-//boost::interprocess::mapped_region::get_page_size();
+#include <string>
+#include "allocator.h"
 
 namespace basecode::compiler::memory {
 
     class slab_allocator_t : public allocator_t {
-        enum class slab_state_t : uint8_t {
-            empty,
-            partial,
-            full
-        };
-
         struct slab_t final {
-            char* chunk{};
-            uint32_t size{};
-            uint32_t offset{};
-            slab_state_t state{};
-        };
-
-        struct cache_t final {
-            explicit cache_t(
-                    memory::allocator_t* allocator,
-                    uint8_t id) : id(id),
-                                  slabs(allocator) {
-            }
-
-            uint8_t id{};
-            data::array_t<slab_t> slabs;
+            void* page{};
+            slab_t* prev{};
+            slab_t* next{};
+            void* free_list{};
+            uint32_t buffer_count{};
         };
 
     public:
-        static uint32_t make_size(
-                uint8_t cache_id,
-                uint32_t size);
-
-        explicit slab_allocator_t(
-                allocator_t* backing,
-                uint32_t slab_size = 4096);
+        slab_allocator_t(
+            allocator_t* backing,
+            std::string name,
+            uint32_t size,
+            uint32_t align = default_align);
 
         ~slab_allocator_t() override;
 
         void* allocate(
-                uint32_t size,
+                uint32_t size = 0,
                 uint32_t align = default_align) override;
 
         void deallocate(void* p) override;
 
         std::optional<uint32_t> total_allocated() override;
 
-        std::optional<uint32_t> allocated_size(void *p) override;
+        std::optional<uint32_t> allocated_size(void*) override;
 
     private:
-        cache_t* find_cache(uint8_t id);
+        void grow();
+
+        void remove(slab_t* slab);
+
+        void move_back(slab_t* slab);
+
+        void move_front(slab_t* slab);
 
     private:
-        uint32_t _slab_size;
+        slab_t* _back{};
+        slab_t* _front{};
+        std::string _name;
         allocator_t* _backing;
+        uint32_t _buffer_size;
+        uint32_t _buffer_align;
+        uint32_t _maximum_buffers{};
         uint32_t _total_allocated{};
-        data::array_t<cache_t> _caches;
     };
 
 }

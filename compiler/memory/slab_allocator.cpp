@@ -16,105 +16,167 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <utility>
+#include "system.h"
 #include "slab_allocator.h"
 
 namespace basecode::compiler::memory {
 
-    uint32_t slab_allocator_t::make_size(uint8_t cache_id, uint32_t size) {
-        auto bottom_24_bits = (size & 0b00000000111111111111111111111111);
-        auto shifted_id = (cache_id << 24);
-        return shifted_id | bottom_24_bits;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-
     slab_allocator_t::slab_allocator_t(
             allocator_t* backing,
-            uint32_t slab_size) : _slab_size(slab_size),
-                                  _backing(backing),
-                                  _caches(backing) {
+            std::string name,
+            uint32_t size,
+            uint32_t align) : _name(std::move(name)),
+                              _backing(backing),
+                              _buffer_size(size),
+                              _buffer_align(align) {
+        _maximum_buffers = (os_page_size() - sizeof(slab_t)) / _buffer_size;
     }
 
     slab_allocator_t::~slab_allocator_t() {
-        for (auto& cache : _caches) {
-            for (const auto& slab : cache.slabs) {
-                _backing->deallocate(slab.chunk);
-                _total_allocated -= _slab_size;
-            }
+        const auto page_size = os_page_size();
+
+        while (_front) {
+            auto slab = _front;
+            remove(slab);
+            _backing->deallocate(slab->page);
+            _total_allocated -= page_size;
         }
+
         assert(_total_allocated == 0);
+    }
+
+    void slab_allocator_t::grow() {
+        const auto page_size = os_page_size();
+
+        auto mem = (char*)_backing->allocate(page_size);
+        _total_allocated += page_size;
+
+        slab_t* slab = (slab_t*)mem + page_size - sizeof(slab_t);
+        slab->next = slab->prev = slab;
+        slab->buffer_count = 0;
+        slab->page = mem;
+        slab->free_list = mem;
+
+        void* last_buffer = mem + (_buffer_size * (_maximum_buffers - 1));
+        for (auto p = mem; p < last_buffer; p += _buffer_size)
+            *((void **)p) = p + _buffer_size;
+
+        move_front(slab);
     }
 
     void* slab_allocator_t::allocate(
             uint32_t size,
             uint32_t align) {
-        auto cache_id = (size & 0b11111111000000000000000000000000) >> 24;
-        auto actual_size = size & 0b00000000111111111111111111111111;
+        if (!_front || _front->buffer_count == _maximum_buffers)
+            grow();
 
-        auto cache = find_cache(cache_id);
-        if (cache == nullptr)
-            cache = &_caches.emplace(_backing, cache_id);
+        auto buffer = _front->free_list;
+        _front->free_list = *((void**)buffer);
+        _front->buffer_count++;
 
-        void* new_chunk = nullptr;
-        if (cache->slabs.empty()) {
-            auto& slab = cache->slabs.emplace();
-            slab.size = actual_size;
-            slab.state = slab_state_t::partial;
-            slab.chunk = (char*)_backing->allocate(_slab_size);
+        if (_front->buffer_count == _maximum_buffers)
+            move_back(_front);
 
-            new_chunk = slab.chunk;
-            _total_allocated += _slab_size;
-        } else {
-            slab_t* slab = nullptr;
+        return buffer;
+    }
 
-            for (size_t i = 0; i < cache->slabs.size(); i++) {
-                const auto& s = cache->slabs[i];
-                if (s.size != actual_size
-                ||  s.state == slab_state_t::full) {
-                    continue;
-                }
-                slab = &cache->slabs[i];
-                break;
-            }
+    void slab_allocator_t::remove(slab_t* slab) {
+        slab->next->prev = slab->prev;
+        slab->prev->next = slab->next;
 
-            if (slab == nullptr
-            ||  slab->offset + actual_size > _slab_size) {
-                if (slab)
-                    slab->state = slab_state_t::full;
-
-                auto& new_slab = cache->slabs.emplace();
-                new_slab.size = actual_size;
-                new_slab.state = slab_state_t::partial;
-                new_slab.chunk = (char*)_backing->allocate(_slab_size);
-
-                new_chunk = new_slab.chunk;
-                _total_allocated += _slab_size;
-            } else {
-                new_chunk = slab->chunk + slab->offset;
-                slab->offset += numbers::align(actual_size, align);
-            }
+        if (_front == slab) {
+            if (slab->prev == slab)
+                _front = nullptr;
+            else
+                _front = slab->prev;
         }
 
-        return new_chunk;
+        if (_back == slab) {
+            if (slab->next == slab)
+                _back = nullptr;
+            else
+                _back = slab->next;
+        }
     }
 
     void slab_allocator_t::deallocate(void* p) {
+        const auto page_size = os_page_size();
+        const auto slab_size = page_size - sizeof(slab_t);
+
+        auto current = _front;
+        while (current) {
+            if (p >= current->page
+            &&  p <= ((char*)current->page) + slab_size) {
+                break;
+            }
+            current = current->next;
+        }
+
+        assert(current);
+
+        slab_t* slab = (slab_t*)current->page + slab_size;
+        *((void**)p) = slab->free_list;
+        slab->free_list = p;
+        slab->buffer_count--;
+
+        if (slab->buffer_count == 0) {
+            remove(slab);
+            _backing->deallocate(slab->page);
+            _total_allocated -= page_size;
+        }
+
+        if (slab->buffer_count == _maximum_buffers - 1)
+            move_front(slab);
+    }
+
+    void slab_allocator_t::move_back(slab_t* slab) {
+        if (_back == slab) return;
+
+        remove(slab);
+
+        if (_front == nullptr) {
+            slab->prev = slab;
+            slab->next = slab;
+            _front = slab;
+        } else {
+            slab->prev = _front;
+            _front->next = slab;
+
+            slab->next = _back;
+            _back->prev = slab;
+        }
+
+        _back = slab;
+    }
+
+    void slab_allocator_t::move_front(slab_t* slab) {
+        if (_front == slab) return;
+
+        remove(slab);
+
+        if (_front == nullptr) {
+            slab->prev = slab;
+            slab->next = slab;
+            _back = slab;
+        }
+        else {
+            slab->prev = _front;
+            _front->next = slab;
+
+            slab->next = _back;
+            _back->prev = slab;
+        }
+
+        _front = slab;
     }
 
     std::optional<uint32_t> slab_allocator_t::total_allocated() {
         return _total_allocated;
     }
 
-    std::optional<uint32_t> slab_allocator_t::allocated_size(void* p) {
-        return {};
-    }
-
-    slab_allocator_t::cache_t* slab_allocator_t::find_cache(uint8_t id) {
-        for (auto& cache : _caches) {
-            if (cache.id == id)
-                return &cache;
-        }
-        return nullptr;
+    std::optional<uint32_t> slab_allocator_t::allocated_size(void*) {
+        return _buffer_size;
     }
 
 }
