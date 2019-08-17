@@ -22,6 +22,7 @@ add_library(
         data/array.h
         data/stack.h
         data/queue.h
+        data/trie_map.h
         data/hash_table.h
         data/red_black_tree.h
         data/directed_graph.h
