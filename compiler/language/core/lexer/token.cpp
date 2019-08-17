@@ -23,6 +23,7 @@ namespace basecode::compiler::language::core::lexer {
     std::string_view token_type_to_name(token_type_t type) {
         switch (type) {
             case token_type_t::none:                            return "none"sv;
+            case token_type_t::colon:                           return "colon"sv;
             case token_type_t::comma:                           return "comma"sv;
             case token_type_t::minus:                           return "minus"sv;
             case token_type_t::caret:                           return "caret"sv;
@@ -91,7 +92,6 @@ namespace basecode::compiler::language::core::lexer {
             case token_type_t::ellipsis_operator:               return "ellipsis_operator"sv;
             case token_type_t::not_equal_operator:              return "not_equal_operator"sv;
             case token_type_t::binary_or_operator:              return "binary_or_operator"sv;
-            case token_type_t::type_decl_operator:              return "type_decl_operator"sv;
             case token_type_t::fallthrough_keyword:             return "fallthrough_keyword"sv;
             case token_type_t::binary_not_operator:             return "binary_not_operator"sv;
             case token_type_t::binary_and_operator:             return "binary_and_operator"sv;

@@ -336,15 +336,18 @@ namespace basecode::compiler::language::core::parser {
 
 
         infix(lexer::token_type_t::comma, 10);
-        infix(lexer::token_type_t::assignment_operator, 20);
-        infix(lexer::token_type_t::add_assignment_operator, 20);
-        infix(lexer::token_type_t::divide_assignment_operator, 20);
-        infix(lexer::token_type_t::modulo_assignment_operator, 20);
-        infix(lexer::token_type_t::subtract_assignment_operator, 20);
-        infix(lexer::token_type_t::multiply_assignment_operator, 20);
-        infix(lexer::token_type_t::binary_or_assignment_operator, 20);
-        infix(lexer::token_type_t::binary_and_assignment_operator, 20);
-        infix(lexer::token_type_t::binary_not_assignment_operator, 20);
+        infix_right(lexer::token_type_t::bind_operator, 20);
+        infix_right(lexer::token_type_t::lambda_operator, 20);
+        infix_right(lexer::token_type_t::assignment_operator, 20);
+        infix_right(lexer::token_type_t::associative_operator, 20);
+        infix_right(lexer::token_type_t::add_assignment_operator, 20);
+        infix_right(lexer::token_type_t::divide_assignment_operator, 20);
+        infix_right(lexer::token_type_t::modulo_assignment_operator, 20);
+        infix_right(lexer::token_type_t::subtract_assignment_operator, 20);
+        infix_right(lexer::token_type_t::multiply_assignment_operator, 20);
+        infix_right(lexer::token_type_t::binary_or_assignment_operator, 20);
+        infix_right(lexer::token_type_t::binary_and_assignment_operator, 20);
+        infix_right(lexer::token_type_t::binary_not_assignment_operator, 20);
 
         infix(
             lexer::token_type_t::left_bracket,
