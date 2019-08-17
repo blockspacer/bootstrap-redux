@@ -50,6 +50,11 @@ add_library(
 
         formatters/formatters.h
 
+        graphviz/node.cpp graphviz/node.h
+        graphviz/edge.cpp graphviz/edge.h
+        graphviz/graph.cpp graphviz/graph.h
+        graphviz/attribute.cpp graphviz/attribute.h
+
         errors/errors.cpp errors/errors.h
 
         signals/hook.cpp signals/hook.h
