@@ -19,6 +19,7 @@
 #pragma once
 
 #include <compiler/types.h>
+#include <compiler/data/stack.h>
 #include <compiler/errors/errors.h>
 #include <compiler/workspace/session.h>
 #include <compiler/language/core/ast/ast.h>
@@ -56,6 +57,7 @@ namespace basecode::compiler::language::core::parser {
         parser_t* parser{};
         production_rule_t* rule{};
         entt::registry* registry{};
+        memory::allocator_t* allocator{};
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -66,6 +68,8 @@ namespace basecode::compiler::language::core::parser {
             workspace::session_t& session,
             utf8::source_buffer_t& buffer,
             entity_list_t tokens);
+
+        entity_t parse(result_t& r);
 
         bool initialize(result_t& r);
 
@@ -132,6 +136,9 @@ namespace basecode::compiler::language::core::parser {
         entity_list_t _tokens;
         workspace::session_t& _session;
         utf8::source_buffer_t& _buffer;
+        data::stack_t<entity_t> _scopes;
+        data::stack_t<entity_t> _blocks;
+        data::stack_t<entity_t> _parent;
         data::array_t<production_rule_t*> _rules;
         memory::frame_allocator_t<4096> _frame_allocator;
         data::hash_table_t<lexer::token_type_t, production_rule_t*> _rule_table;

@@ -18,8 +18,10 @@
 
 #pragma once
 
-#include <tsl/htrie_map.h>
+#include <utility>
 #include <compiler/types.h>
+#include <compiler/data/trie_map.h>
+#include <compiler/memory/allocator.h>
 
 using namespace std::literals;
 
@@ -77,76 +79,44 @@ namespace basecode::compiler::language::core::ast {
         initializer_expression,
     };
 
-    static inline std::string_view node_type_to_name(node_type_t type) {
-        switch (type) {
-            case node_type_t::label:                    return "label"sv;
-            case node_type_t::scope:                    return "scope"sv;
-            case node_type_t::block:                    return "block"sv;
-            case node_type_t::module:                   return "module"sv;
-            case node_type_t::statement:                return "statement"sv;
-            case node_type_t::directive:                return "directive"sv;
-            case node_type_t::annotation:               return "annotation"sv;
-            case node_type_t::identifier:               return "identifier"sv;
-            case node_type_t::expression:               return "expression"sv;
-            case node_type_t::nil_literal:              return "nil_literal"sv;
-            case node_type_t::line_comment:             return "line_comment"sv;
-            case node_type_t::block_comment:            return "block_comment"sv;
-            case node_type_t::block_literal:            return "block_literal"sv;
-            case node_type_t::ns_expression:            return "ns_expression"sv;
-            case node_type_t::if_expression:            return "if_expression"sv;
-            case node_type_t::in_expression:            return "in_expression"sv;
-            case node_type_t::string_literal:           return "string_literal"sv;
-            case node_type_t::number_literal:           return "number_literal"sv;
-            case node_type_t::type_parameter:           return "type_parameter"sv;
-            case node_type_t::unary_operator:           return "unary_operator"sv;
-            case node_type_t::for_expression:           return "for_expression"sv;
-            case node_type_t::use_expression:           return "use_expression"sv;
-            case node_type_t::binary_operator:          return "binary_operator"sv;
-            case node_type_t::cast_expression:          return "cast_expression"sv;
-            case node_type_t::case_expression:          return "case_expression"sv;
-            case node_type_t::proc_expression:          return "proc_expression"sv;
-            case node_type_t::enum_expression:          return "enum_expression"sv;
-            case node_type_t::with_expression:          return "with_expression"sv;
-            case node_type_t::goto_expression:          return "goto_expression"sv;
-            case node_type_t::boolean_literal:          return "boolean_literal"sv;
-            case node_type_t::while_expression:         return "while_expression"sv;
-            case node_type_t::defer_expression:         return "defer_expression"sv;
-            case node_type_t::break_expression:         return "break_expression"sv;
-            case node_type_t::union_expression:         return "union_expression"sv;
-            case node_type_t::yield_expression:         return "yield_expression"sv;
-            case node_type_t::struct_expression:        return "struct_expression"sv;
-            case node_type_t::module_expression:        return "module_expression"sv;
-            case node_type_t::import_expression:        return "import_expression"sv;
-            case node_type_t::return_expression:        return "return_expression"sv;
-            case node_type_t::family_expression:        return "family_expression"sv;
-            case node_type_t::switch_expression:        return "switch_expression"sv;
-            case node_type_t::bitcast_expression:       return "bitcast_expression"sv;
-            case node_type_t::type_decl_operator:       return "type_decl_operator"sv;
-            case node_type_t::value_sink_operator:      return "value_sink_operator"sv;
-            case node_type_t::assignment_operator:      return "assignment_operator"sv;
-            case node_type_t::continue_expression:      return "continue_expression"sv;
-            case node_type_t::variable_declaration:     return "variable_declaration"sv;
-            case node_type_t::fallthrough_expression:   return "fallthrough_expression"sv;
-            case node_type_t::initializer_expression:   return "initializer_expression"sv;
-            default: return "unknown"sv;
-        }
-    }
+    std::string_view node_type_to_name(node_type_t type);
 
     struct node_t final {
-        entity_t token{};
-        entity_t parent{};
-        node_type_t type{};
-        entity_list_t comments{};
-        entity_list_t directives{};
-        entity_list_t annotations{};
+        node_t(
+            memory::allocator_t* allocator,
+            node_type_t type,
+            entity_t token,
+            entity_t parent) : token(token),
+                               parent(parent),
+                               type(type),
+                               comments(allocator),
+                               directives(allocator),
+                               annotations(allocator) {
+        }
+
+        entity_t token;
+        entity_t parent;
+        node_type_t type;
+        entity_list_t comments;
+        entity_list_t directives;
+        entity_list_t annotations;
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
     struct module_t final {
+        module_t(
+            memory::allocator_t* allocator,
+            path_t path,
+            std::string_view name,
+            entity_t block) : path(std::move(path)),
+                              block(block),
+                              name(name) {
+        }
+
         path_t path;
-        std::string_view name{};
-        entity_list_t children{};
+        entity_t block;
+        std::string_view name;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -239,8 +209,8 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct assignment_operator_t final {
-        entity_list_t lhs{};
-        entity_list_t rhs{};
+        entity_list_t lhs;
+        entity_list_t rhs;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -258,13 +228,25 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct identifier_t final {
-        entity_t scope{};
-        entity_t block{};
+        identifier_t(
+            entity_t scope,
+            entity_t block) : scope(scope),
+                              block(block) {
+        }
+        entity_t scope;
+        entity_t block;
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
     struct variable_decl_t final {
+        variable_decl_t(
+            entity_t type,
+            entity_t identifier,
+            entity_t initializer) : type(type),
+                                    identifier(identifier),
+                                    initializer(initializer) {
+        }
         entity_t type{};
         entity_t identifier{};
         entity_t initializer{};
@@ -296,15 +278,23 @@ namespace basecode::compiler::language::core::ast {
     //          to_roman_numeral
     //
     struct scope_t final {
-        entity_list_t children{};
-        tsl::htrie_map<char, entity_t> identifiers{};
+        explicit scope_t(memory::allocator_t* allocator) : children(allocator),
+                                                           identifiers(allocator) {
+        }
+        entity_list_t children;
+        data::trie_map_t<entity_t> identifiers;
     };
 
     ///////////////////////////////////////////////////////////////////////////
 
     struct block_t final {
-        entity_t scope{};
-        entity_list_t children{};
+        block_t(
+            memory::allocator_t* allocator,
+            entity_t scope) : scope(scope),
+                              children(allocator) {
+        }
+        entity_t scope;
+        entity_list_t children;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -368,7 +358,7 @@ namespace basecode::compiler::language::core::ast {
     struct for_expression_t final {
         entity_t expr{};
         entity_t body{};
-        entity_list_t vars{};
+        entity_list_t vars;
     };
 
     // x := 256;
@@ -380,7 +370,7 @@ namespace basecode::compiler::language::core::ast {
     // };
     struct use_expression_t final {
         entity_t body{};
-        entity_list_t vars{};
+        entity_list_t vars;
     };
 
     // y: s16 := -128;
@@ -410,9 +400,9 @@ namespace basecode::compiler::language::core::ast {
     // };
     struct proc_expression_t final {
         entity_t body{};
-        entity_list_t params{};
+        entity_list_t params;
         entity_list_t return_params;
-        entity_list_t type_parameters{};
+        entity_list_t type_parameters;
     };
 
     // colors :: enum<u16> {
@@ -422,7 +412,7 @@ namespace basecode::compiler::language::core::ast {
     //      purple;
     // };
     struct enum_expression_t final {
-        entity_list_t body{};
+        entity_list_t body;
         entity_t type_parameter{};
     };
 
@@ -499,7 +489,7 @@ namespace basecode::compiler::language::core::ast {
     // #assert(size_of(Sized_Integer) == 8);
     struct union_expression_t final {
         entity_t body{};
-        entity_list_t type_parameters{};
+        entity_list_t type_parameters;
     };
 
     // co_something :: @coroutine proc(n: s32): s32 {
@@ -507,7 +497,7 @@ namespace basecode::compiler::language::core::ast {
     //      yield n * 2;
     // };
     struct yield_expression_t final {
-        entity_list_t expr{};
+        entity_list_t expr;
     };
 
     // Vector3 :: struct {
@@ -517,7 +507,7 @@ namespace basecode::compiler::language::core::ast {
     // #assert(size_of(Vector3) == 16);
     struct struct_expression_t final {
         entity_t body{};
-        entity_list_t type_parameters{};
+        entity_list_t type_parameters;
     };
 
     // Integer :: family(u8, s8, u16, s16, u32, s32, u64, s64);
@@ -539,7 +529,7 @@ namespace basecode::compiler::language::core::ast {
     //      remainder := lhs%rhs;
     // };
     struct return_expression_t final {
-        entity_list_t exprs{};
+        entity_list_t exprs;
     };
 
     //
@@ -557,7 +547,7 @@ namespace basecode::compiler::language::core::ast {
     // Integer :: family(u8, s8, u16, s16, u32, s32, u64, s64);
     // Floating_Point :: family(f32, f64);
     struct family_expression_t final {
-        entity_list_t types{};
+        entity_list_t types;
     };
 
     // core :: module("core");
@@ -614,8 +604,13 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct statement_t final {
+        statement_t(
+            memory::allocator_t* allocator,
+            entity_t expr) : expr(expr),
+                             labels(allocator) {
+        }
         entity_t expr{};
-        entity_list_t labels{};
+        entity_list_t labels;
     };
 
 }

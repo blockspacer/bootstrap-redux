@@ -56,10 +56,8 @@ namespace basecode {
         parser::parser_t parser(session, buffer, tokens);
         REQUIRE(parser.initialize(r));
 
-        while (true) {
-            auto root = parser.expression(r);
-            if (root == entt::null) break;
-        }
+        entity_t module_node = parser.parse(r);
+        REQUIRE(module_node != (entity_t)entt::null);
     }
 
 }

@@ -61,10 +61,6 @@ include_directories(ext/utf8proc-2.4.0)
 # libfmt
 add_subdirectory(ext/fmt-5.3.0 EXCLUDE_FROM_ALL)
 
-# hat-trie
-add_subdirectory(ext/hat-trie-0.6.0 EXCLUDE_FROM_ALL)
-include_directories(ext/hat-trie-0.6.0/include)
-
 # boost
 include_directories(ext/boost-1.70.0)
 

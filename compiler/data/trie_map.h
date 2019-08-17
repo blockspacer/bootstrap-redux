@@ -30,8 +30,9 @@ namespace basecode::compiler::data {
         struct tree_node_t;
 
         struct node_t final {
-            V* data{};
-            tree_node_t* tree{};
+            node_t(V data, tree_node_t* tree) : data(data), tree(tree) {}
+            V data;
+            tree_node_t* tree;
         };
 
         struct tree_node_t final {
@@ -47,14 +48,14 @@ namespace basecode::compiler::data {
 
         trie_map_t(
                 memory::allocator_t* allocator,
-                std::initializer_list<std::pair<std::string_view, V*>> elements) : _tree_root(allocator),
+                std::initializer_list<std::pair<std::string_view, V>> elements) : _tree_root(allocator),
                                                                                    _storage(allocator),
                                                                                    _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
 
-        V* search(std::string_view key) {
+        V search(std::string_view key) {
             if (key.empty()) return nullptr;
             node_t* current_node = nullptr;
             for (const char c : key) {
@@ -66,7 +67,7 @@ namespace basecode::compiler::data {
             return current_node->data;
         }
 
-        void insert(std::string_view key, V* value) {
+        void insert(std::string_view key, V value) {
             assert(!key.empty());
 
             auto current_node = &_root;
@@ -78,9 +79,7 @@ namespace basecode::compiler::data {
                 auto& children = current_node->tree->children;
                 auto node = children.find(rune);
                 if (!node) {
-                    current_node = _storage.construct<node_t>();
-                    current_node->data = nullptr;
-                    current_node->tree = nullptr;
+                    current_node = _storage.construct<node_t>(V{}, nullptr);
                     if (i <= key_length)
                         current_node->tree = _storage.construct<tree_node_t>(_allocator);
                     children.insert(rune, current_node);
@@ -102,22 +101,22 @@ namespace basecode::compiler::data {
             return child_node;
         }
 
-        trie_map_t& operator =(std::initializer_list<std::pair<std::string_view, V*>> elements) {
+        trie_map_t& operator =(std::initializer_list<std::pair<std::string_view, V>> elements) {
             insert(elements);
             return *this;
         }
 
     private:
-        void insert(std::initializer_list<std::pair<std::string_view, V*>> elements) {
+        void insert(std::initializer_list<std::pair<std::string_view, V>> elements) {
             for (const auto& e : elements)
                 insert(e.first, e.second);
         }
 
     private:
         tree_node_t _tree_root;
+        node_t _root{V{}, &_tree_root};
         memory::object_pool_t _storage;
         memory::allocator_t* _allocator;
-        node_t _root{nullptr, &_tree_root};
     };
 
 }

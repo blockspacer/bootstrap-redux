@@ -59,8 +59,8 @@ namespace basecode::compiler::data {
             insert(elements);
         }
 
-        hash_table_t(const hash_table_t& other) : _allocator(other._allocator),
-                                                  _size(other._size),
+        hash_table_t(const hash_table_t& other) : _size(other._size),
+                                                  _allocator(other._allocator),
                                                   _pairs(std::move(other._pairs)),
                                                   _buckets(std::move(other._buckets)) {
             assert(_allocator);
