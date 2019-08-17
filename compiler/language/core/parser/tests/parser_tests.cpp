@@ -42,7 +42,11 @@ namespace basecode {
             "false;\n"
             "nil;\n"
             "3.145;\n"
-            "a := 6 * 6 + 4;\n"
+            "a := 6 * (6 + 4);\n"
+            "vec.x := 2.5;\n"
+            "foo[2 * 2] := 66;\n"
+            "2 == 2 && 3 == 1;\n"
+            "2 == 2 || 3 == 3;\n";
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));

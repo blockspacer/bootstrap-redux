@@ -32,8 +32,8 @@ namespace basecode::compiler::language::core::parser {
 
     struct context_t;
 
-    using nud_callback_t = std::function<entity_t (context_t&)>;
-    using led_callback_t = std::function<entity_t (context_t&, entity_t)>;
+    using nud_callback_t = entity_t (*) (context_t&);
+    using led_callback_t = entity_t (*) (context_t&, entity_t);
 
     struct production_rule_t final {
         int32_t lbp{};
@@ -80,9 +80,13 @@ namespace basecode::compiler::language::core::parser {
 
         [[nodiscard]] bool has_more() const;
 
-        bool expect(result_t& r, std::string_view token = {});
+        [[nodiscard]] entity_t token() const;
 
-        bool advance(result_t& r, std::string_view token = {});
+        [[nodiscard]] production_rule_t* rule() const;
+
+        bool expect(result_t& r, lexer::token_type_t type = {});
+
+        bool advance(result_t& r, lexer::token_type_t type = {});
 
     private:
         template <typename... Args>
@@ -99,6 +103,8 @@ namespace basecode::compiler::language::core::parser {
                 loc,
                 std::forward<Args>(args)...);
         }
+
+        bool is_node_an_identifier(entity_t expr, source_location_t& loc);
 
     private:
         production_rule_t* infix(
@@ -121,10 +127,6 @@ namespace basecode::compiler::language::core::parser {
         production_rule_t* constant(
             lexer::token_type_t token_type,
             ast::node_type_t node_type);
-
-        production_rule_t* statement(
-            lexer::token_type_t token_type,
-            int32_t bp);
 
         production_rule_t* infix_right(
             lexer::token_type_t token_type,

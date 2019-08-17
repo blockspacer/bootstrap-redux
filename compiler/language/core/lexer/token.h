@@ -27,6 +27,7 @@ namespace basecode::compiler::language::core::lexer {
     using namespace std::literals;
 
     enum class token_type_t {
+        none,
         comma,
         minus,
         caret,

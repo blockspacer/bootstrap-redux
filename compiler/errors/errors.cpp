@@ -174,6 +174,16 @@ namespace basecode::compiler::errors {
                     {.code = "P004", .message = "expected token {} but encountered {}"}
                 },
 
+                {
+                    {.code = parser::member_select_operator_requires_identifier_lvalue, .locale = "en_US"},
+                    {.code = "P005", .message = "member select requires identifier lvalue"}
+                },
+
+                {
+                    {.code = parser::member_select_operator_requires_identifier_rvalue, .locale = "en_US"},
+                    {.code = "P006", .message = "member select requires identifier rvalue"}
+                },
+
                 // ----------------------
                 // source_buffer_t
                 // ----------------------

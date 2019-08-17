@@ -122,7 +122,9 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct unary_operator_t final {
-        entity_t lhs{};
+        explicit unary_operator_t(entity_t lhs) : lhs(lhs) {
+        }
+        entity_t lhs;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -156,8 +158,13 @@ namespace basecode::compiler::language::core::ast {
 //    };
 
     struct binary_operator_t final {
-        entity_t lhs{};
-        entity_t rhs{};
+        binary_operator_t(
+            entity_t lhs,
+            entity_t rhs) : lhs(lhs),
+                            rhs(rhs) {
+        }
+        entity_t lhs;
+        entity_t rhs;
     };
 
     ///////////////////////////////////////////////////////////////////////////
