@@ -46,7 +46,8 @@ namespace basecode {
             "vec.x := 2.5;\n"
             "foo[2 * 2] := 66;\n"
             "2 == 2 && 3 == 1;\n"
-            "2 == 2 || 3 == 3;\n";
+            "2 == 2 || 3 == 3;\n"
+            "a, b, c := 3, 4, 2;\n"
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
