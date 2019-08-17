@@ -465,7 +465,6 @@ namespace basecode::compiler::language::core::lexer {
         auto& registry = _session.registry();
         auto token = registry.create();
         registry.assign<token_t>(token, token_type_t::line_comment, capture);
-        registry.assign<line_comment_token_t>(token);
         registry.assign<source_location_t>(
             token,
             make_location(start_pos, _buffer.pos()));
@@ -648,7 +647,6 @@ namespace basecode::compiler::language::core::lexer {
 
         auto token = registry.create();
         registry.assign<token_t>(token, token_type_t::string_literal, capture);
-        registry.assign<string_literal_token_t>(token);
         registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));
@@ -944,7 +942,6 @@ namespace basecode::compiler::language::core::lexer {
         auto& registry = _session.registry();
         auto token = registry.create();
         registry.assign<token_t>(token, token_type_t::block_literal, capture);
-        registry.assign<block_literal_token_t>(token);
         registry.assign<source_location_t>(
             token,
             make_location(start_pos, end_pos));

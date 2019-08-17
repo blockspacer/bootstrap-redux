@@ -26,6 +26,7 @@ namespace basecode {
 
     using namespace std::literals;
     using namespace compiler;
+    using namespace compiler::language;
     using namespace compiler::language::core;
 
     [[maybe_unused]] static void format_tokens(
@@ -36,8 +37,8 @@ namespace basecode {
             const auto& token = registry.get<lexer::token_t>(entity);
             const auto& source_location = registry.get<compiler::source_location_t>(entity);
             fmt::print("token = {}", token);
-            if (registry.has<lexer::number_token_t>(entity)) {
-                const auto& number_token = registry.get<lexer::number_token_t>(entity);
+            if (registry.has<number_token_t>(entity)) {
+                const auto& number_token = registry.get<number_token_t>(entity);
                 fmt::print(", number_token = {}", number_token);
             }
             fmt::print(", location = {}\n", source_location);

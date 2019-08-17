@@ -69,6 +69,11 @@ add_library(
         terminal/stream_factory.cpp terminal/stream_factory.h
 
         language/lexeme_trie.h
+        language/common.cpp language/common.h
+
+        language/assembly/lexer/token.cpp language/assembly/lexer/token.h
+        language/assembly/lexer/lexer.cpp language/assembly/lexer/lexer.h
+
         language/core/ast/ast.cpp language/core/ast/ast.h
         language/core/lexer/token.cpp language/core/lexer/token.h
         language/core/lexer/lexer.cpp language/core/lexer/lexer.h

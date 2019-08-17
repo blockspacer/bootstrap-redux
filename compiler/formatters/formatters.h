@@ -21,7 +21,9 @@
 #include <fmt/format.h>
 #include <compiler/types.h>
 #include <compiler/utf8/rune.h>
+#include <compiler/language/common.h>
 #include <compiler/language/core/lexer/token.h>
+#include <compiler/language/assembly/lexer/token.h>
 
 namespace fmt {
 
@@ -126,7 +128,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<language::core::lexer::number_token_t> {
+    struct formatter<language::assembly::lexer::token_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -134,30 +136,52 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const language::core::lexer::number_token_t& token,
+            const language::assembly::lexer::token_t& token,
+            FormatContext& ctx) {
+            format_to(
+                ctx.out(),
+                "<type = {}",
+                language::assembly::lexer::token_type_to_name(token.type));
+            if (!token.value.empty()) {
+                format_to(ctx.out(), ", value = {}", token.value);
+            }
+            return format_to(ctx.out(), ">");
+        }
+    };
+
+    template<>
+    struct formatter<language::number_token_t> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const language::number_token_t& token,
                 FormatContext& ctx) {
             format_to(
                 ctx.out(),
                 "<is_signed = {}, radix = {}, type = {}",
                 token.is_signed,
                 token.radix,
-                language::core::lexer::number_type_to_name(token.type));
-            if (token.type == language::core::lexer::number_type_t::integer) {
+                language::number_type_to_name(token.type));
+            if (token.type == language::number_type_t::integer) {
                 switch (token.size) {
-                    case language::core::lexer::number_size_t::byte:
+                    case language::number_size_t::byte:
                         return format_to(ctx.out(), ", value = u8({})>", token.value.u8);
-                    case language::core::lexer::number_size_t::word:
+                    case language::number_size_t::word:
                         return format_to(ctx.out(), ", value = u16({})>", token.value.u16);
-                    case language::core::lexer::number_size_t::dword:
+                    case language::number_size_t::dword:
                         return format_to(ctx.out(), ", value = u32({})>", token.value.u32);
-                    case language::core::lexer::number_size_t::qword:
+                    case language::number_size_t::qword:
                         return format_to(ctx.out(), ", value = u64({})>", token.value.u64);
                 }
-            } else if (token.type == language::core::lexer::number_type_t::floating_point) {
+            } else if (token.type == language::number_type_t::floating_point) {
                 switch (token.size) {
-                    case language::core::lexer::number_size_t::dword:
+                    case language::number_size_t::dword:
                         return format_to(ctx.out(), ", value = f32({})>", token.value.f32);
-                    case language::core::lexer::number_size_t::qword:
+                    case language::number_size_t::qword:
                         return format_to(ctx.out(), ", value = f64({})>", token.value.f64);
                     default:
                         return format_to(ctx.out(), ", value = invalid({})>", token.value.f64);
