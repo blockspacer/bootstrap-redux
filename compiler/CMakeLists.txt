@@ -26,6 +26,7 @@ add_library(
         data/hash_table.h
         data/red_black_tree.h
         data/directed_graph.h
+        data/string.cpp data/string.h
         data/hashable.cpp data/hashable.h
 
         types.cpp types.h
