@@ -18,6 +18,7 @@
 
 #include <utf8proc.h>
 #include <compiler/numbers/parse.h>
+#include <compiler/formatters/formatters.h>
 #include "escape_parser.h"
 
 namespace basecode::compiler::strings {
@@ -47,7 +48,7 @@ namespace basecode::compiler::strings {
         return true;
     }
 
-    bool escape_parser_t::parse(result_t& r, std::stringstream& stream) {
+    bool escape_parser_t::parse(result_t& r, fmt::memory_buffer& stream) {
         while (!_reader.eof()) {
             auto rune = _reader.next(r);
             if (rune == utf8::rune_invalid)
@@ -66,43 +67,43 @@ namespace basecode::compiler::strings {
 
                 switch ((int32_t)rune) {
                     case 'a': {
-                        stream << (char)0x07;
+                        fmt::format_to(stream, "{}", (char)0x07);
                         break;
                     }
                     case 'b': {
-                        stream << (char)0x08;
+                        fmt::format_to(stream, "{}", (char)0x08);
                         break;
                     }
                     case 'e': {
-                        stream << (char)0x1b;
+                        fmt::format_to(stream, "{}", (char)0x1b);
                         break;
                     }
                     case 'n': {
-                        stream << (char)0x0a;
+                        fmt::format_to(stream, "{}", (char)0x0a);
                         break;
                     }
                     case 'r': {
-                        stream << (char)0x0d;
+                        fmt::format_to(stream, "{}", (char)0x0d);
                         break;
                     }
                     case 't': {
-                        stream << (char)0x09;
+                        fmt::format_to(stream, "{}", (char)0x09);
                         break;
                     }
                     case 'v': {
-                        stream << (char)0x0b;
+                        fmt::format_to(stream, "{}", (char)0x0b);
                         break;
                     }
                     case '\\': {
-                        stream << "\\";
+                        fmt::format_to(stream, "{}", "\\");
                         break;
                     }
                     case '\'': {
-                        stream << "'";
+                        fmt::format_to(stream, "{}", "'");
                         break;
                     }
                     case '\"': {
-                        stream << "\"";
+                        fmt::format_to(stream, "{}", "\"");
                         break;
                     }
                     case 'x': {
@@ -164,7 +165,7 @@ namespace basecode::compiler::strings {
                     }
 
                     if (number_value_len < 4) {
-                        stream << (char)value;
+                        fmt::format_to(stream, "{}", (char)value);
                     } else {
                         if (!utf8proc_codepoint_valid(value)) {
                             r.error("X000", fmt::format("invalid unicode codepoint: {}", value));
@@ -173,13 +174,13 @@ namespace basecode::compiler::strings {
                             uint8_t data[4];
                             auto len = utf8proc_encode_char(value, data);
                             for (size_t i = 0; i < len; i++) {
-                                stream << (char)data[i];
+                                fmt::format_to(stream, "{}", (char)data[i]);
                             }
                         }
                     }
                 }
             } else {
-                stream << rune;
+                fmt::format_to(stream, "{}", rune);
             }
         }
 

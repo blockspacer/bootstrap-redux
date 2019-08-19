@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <sstream>
 #include <functional>
 #include <string_view>
+#include <fmt/format.h>
 #include <compiler/utf8/reader.h>
 
 namespace basecode::compiler::strings {
@@ -29,7 +29,7 @@ namespace basecode::compiler::strings {
     public:
         explicit escape_parser_t(utf8::reader_t& reader);
 
-        bool parse(result_t& r, std::stringstream& stream);
+        bool parse(result_t& r, fmt::memory_buffer& stream);
 
     private:
         using predicate_t = std::function<bool (utf8::rune_t&)>;

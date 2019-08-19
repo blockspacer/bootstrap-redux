@@ -42,8 +42,8 @@ namespace basecode::compiler::memory {
         ~slab_allocator_t() override;
 
         void* allocate(
-                uint32_t size = 0,
-                uint32_t align = default_align) override;
+            uint32_t size = 0,
+            uint32_t align = default_align) override;
 
         void deallocate(void* p) override;
 
