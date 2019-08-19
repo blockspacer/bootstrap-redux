@@ -31,10 +31,12 @@ namespace basecode {
     TEST_CASE("graph_t") {
         auto allocator = memory::default_scratch_allocator();
 
+        strings::pool_t intern_pool(allocator);
+
         result_t r(allocator);
         defer(fmt::print("{}", r));
 
-        dot_model_t model(allocator);
+        dot_model_t model(allocator, intern_pool);
         REQUIRE(model.initialize(r));
 
         graph_t graph(

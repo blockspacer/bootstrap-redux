@@ -36,7 +36,9 @@ namespace basecode::compiler::graphviz {
         using metadata_table_t = data::hash_table_t<attribute_type_t, metadata_t>;
 
     public:
-        explicit dot_model_t(memory::allocator_t* allocator);
+        dot_model_t(
+            memory::allocator_t* allocator,
+            strings::pool_t& intern_pool);
 
         bool serialize(
             result_t& r,
@@ -65,8 +67,8 @@ namespace basecode::compiler::graphviz {
             fmt::memory_buffer& buffer);
 
     private:
-        strings::pool_t _intern_pool;
         metadata_table_t _attributes;
+        strings::pool_t& _intern_pool;
         memory::allocator_t* _allocator;
     };
 

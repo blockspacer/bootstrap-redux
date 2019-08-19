@@ -18,8 +18,6 @@
 
 #include <compiler/errors/errors.h>
 #include <compiler/formatters/formatters.h>
-#include "edge.h"
-#include "node.h"
 #include "graph.h"
 #include "dot_model.h"
 #include "attribute.h"
@@ -27,9 +25,10 @@
 namespace basecode::compiler::graphviz {
 
     dot_model_t::dot_model_t(
-            memory::allocator_t* allocator) : _intern_pool(allocator),
-                                              _attributes(allocator),
-                                              _allocator(allocator) {
+            memory::allocator_t* allocator,
+            strings::pool_t& intern_pool) : _attributes(allocator),
+                                            _intern_pool(intern_pool),
+                                            _allocator(allocator) {
         assert(_allocator);
     }
 
