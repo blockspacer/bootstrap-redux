@@ -157,11 +157,9 @@ namespace basecode::compiler::graphviz {
     ///////////////////////////////////////////////////////////////////////////
 
     enum class attribute_value_type_t {
-        color,
         string,
         boolean,
         integer,
-        color_list,
         enumeration,
         floating_point,
     };
@@ -175,6 +173,12 @@ namespace basecode::compiler::graphviz {
             double floating_point;
             data::string_t* string;
         } value;
+    };
+
+    struct enumeration_value_t final {
+        constexpr explicit enumeration_value_t(const char* name) : name(name) {
+        }
+        const char* name;
     };
 
     using attribute_value_list_t = data::array_t<attribute_value_t*>;

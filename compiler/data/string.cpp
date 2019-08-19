@@ -93,6 +93,32 @@ namespace basecode::compiler::data {
         return _data + _size;
     }
 
+    void string_t::left_trim() {
+        erase(
+            begin(),
+            std::find_if(
+                begin(),
+                end(),
+                [](unsigned char c) { return !std::isspace(c); }));
+    }
+
+    void string_t::to_lower() {
+        std::transform(begin(), end(), begin(), ::tolower);
+    }
+
+    void string_t::to_upper() {
+        std::transform(begin(), end(), begin(), ::toupper);
+    }
+
+    void string_t::right_trim() {
+        erase(
+            std::find_if(
+                rbegin(),
+                rend(),
+                [](unsigned char c) { return !std::isspace(c); }),
+            end());
+    }
+
     bool string_t::empty() const {
         return _size == 0;
     }
@@ -147,6 +173,14 @@ namespace basecode::compiler::data {
     void string_t::reserve(uint32_t new_capacity) {
         if (new_capacity > _capacity)
             set_capacity(new_capacity);
+    }
+
+    string_t& string_t::operator=(const char* other) {
+        const auto n = strlen(other);
+        set_capacity(n);
+        std::memcpy(_data, other, n * sizeof(char));
+        _size = n;
+        return *this;
     }
 
     void string_t::set_capacity(uint32_t new_capacity) {
@@ -213,32 +247,6 @@ namespace basecode::compiler::data {
             (_size - offset - count) * sizeof(char));
         _size -= count;
         return _data + offset;
-    }
-
-    void string_t::left_trim() {
-        erase(
-            begin(),
-            std::find_if(
-                begin(),
-                end(),
-                [](unsigned char c) { return !std::isspace(c); }));
-    }
-
-    void string_t::right_trim() {
-        erase(
-            std::find_if(
-                rbegin(),
-                rend(),
-                [](unsigned char c) { return !std::isspace(c); }),
-            end());
-    }
-
-    void string_t::to_lower() {
-        std::transform(begin(), end(), begin(), ::tolower);
-    }
-
-    void string_t::to_upper() {
-        std::transform(begin(), end(), begin(), ::toupper);
     }
 
 }

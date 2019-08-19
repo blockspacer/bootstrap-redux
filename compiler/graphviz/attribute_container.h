@@ -54,6 +54,10 @@ namespace basecode::compiler::graphviz {
 
         bool set_value(result_t& r, attribute_type_t attr, const data::string_t& v);
 
+        bool get_value(result_t& r, attribute_type_t attr, enumeration_value_t& v);
+
+        bool set_value(result_t& r, attribute_type_t attr, const enumeration_value_t& v);
+
     private:
         model_t* _model;
         component_type_t _type;

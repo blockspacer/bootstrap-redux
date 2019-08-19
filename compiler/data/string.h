@@ -85,6 +85,8 @@ namespace basecode::compiler::data {
 
         [[nodiscard]] const char& back() const;
 
+        string_t& operator=(const char* other);
+
         [[nodiscard]] uint32_t capacity() const;
 
         [[nodiscard]] const char* begin() const;
@@ -98,6 +100,10 @@ namespace basecode::compiler::data {
         string_t& operator=(const string_t& other);
 
         char* insert(const char* it, const char& v);
+
+        bool operator==(const string_t& other) const {
+            return std::memcmp(_data, other._data, _size) == 0;
+        }
 
         string_t& operator=(string_t&& other) noexcept;
 

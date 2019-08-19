@@ -223,10 +223,6 @@ namespace basecode::compiler::graphviz {
                     attr->value.integer);
                 break;
             }
-            case attribute_value_type_t::color_list: {
-                break;
-            }
-            case attribute_value_type_t::color:
             case attribute_value_type_t::enumeration: {
                 fmt::format_to(
                     buffer,

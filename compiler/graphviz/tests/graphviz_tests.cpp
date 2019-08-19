@@ -43,7 +43,7 @@ namespace basecode {
             graph_type_t::directed,
             "test");
         auto& attrs = graph.attributes();
-        REQUIRE(attrs.set_value(r, attribute_type_t::rankdir, data::string_t("LR", allocator)));
+        REQUIRE(attrs.set_value(r, attribute_type_t::rankdir, enumeration_value_t("LR")));
         REQUIRE(attrs.set_value(r, attribute_type_t::fontsize, 22.0));
 
         data::string_t temp;
@@ -52,18 +52,18 @@ namespace basecode {
 
         auto node1 = graph.make_node("node1"sv);
         REQUIRE(node1);
-        REQUIRE(node1->attributes().set_value(r, attribute_type_t::style, data::string_t("filled", allocator)));
-        REQUIRE(node1->attributes().set_value(r, attribute_type_t::fillcolor, data::string_t("grey", allocator)));
+        REQUIRE(node1->attributes().set_value(r, attribute_type_t::style, enumeration_value_t("filled")));
+        REQUIRE(node1->attributes().set_value(r, attribute_type_t::fillcolor, enumeration_value_t("grey")));
 
         auto node2 = graph.make_node("node2"sv);
         REQUIRE(node2);
-        REQUIRE(node2->attributes().set_value(r, attribute_type_t::style, data::string_t("filled", allocator)));
-        REQUIRE(node2->attributes().set_value(r, attribute_type_t::fillcolor, data::string_t("yellow", allocator)));
+        REQUIRE(node2->attributes().set_value(r, attribute_type_t::style, enumeration_value_t("filled")));
+        REQUIRE(node2->attributes().set_value(r, attribute_type_t::fillcolor, enumeration_value_t("yellow")));
 
         auto node3 = graph.make_node("node3"sv);
         REQUIRE(node3);
-        REQUIRE(node3->attributes().set_value(r, attribute_type_t::style, data::string_t("filled", allocator)));
-        REQUIRE(node3->attributes().set_value(r, attribute_type_t::fillcolor, data::string_t("red", allocator)));
+        REQUIRE(node3->attributes().set_value(r, attribute_type_t::style, enumeration_value_t("filled")));
+        REQUIRE(node3->attributes().set_value(r, attribute_type_t::fillcolor, enumeration_value_t("yellow")));
 
         auto edge1 = graph.make_edge(node1, node2);
         REQUIRE(edge1);

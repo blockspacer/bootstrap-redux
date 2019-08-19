@@ -155,4 +155,38 @@ namespace basecode::compiler::graphviz {
         return true;
     }
 
+    bool attribute_container_t::get_value(result_t& r, attribute_type_t attr, enumeration_value_t& v) {
+        if (!_model->is_attribute_valid(r, _type, attr)) return false;
+
+        auto wrapper = _values.find(attr);
+        if (!wrapper)
+            return false;
+
+        std::string_view slice(
+            wrapper->value.string->begin(),
+            wrapper->value.string->size());
+        enumeration_value_t temp(slice.data());
+        v = temp;
+
+        return true;
+    }
+
+    bool attribute_container_t::set_value(result_t& r, attribute_type_t attr, const enumeration_value_t& v) {
+        if (!_model->is_attribute_valid(r, _type, attr)) return false;
+
+        auto wrapper = _values.find(attr);
+        if (!wrapper) {
+            wrapper = _storage.construct<attribute_value_t>();
+            wrapper->type = attr;
+            wrapper->value_type = attribute_value_type_t::enumeration;
+            _values.insert(attr, wrapper);
+        }
+
+        auto str = _storage.construct<data::string_t>(_allocator);
+        *str = v.name;
+        wrapper->value.string = str;
+
+        return true;
+    }
+
 }
