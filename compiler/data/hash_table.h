@@ -61,8 +61,15 @@ namespace basecode::compiler::data {
 
         hash_table_t(const hash_table_t& other) : _size(other._size),
                                                   _allocator(other._allocator),
-                                                  _pairs(std::move(other._pairs)),
-                                                  _buckets(std::move(other._buckets)) {
+                                                  _pairs(other._pairs),
+                                                  _buckets(other._buckets) {
+            assert(_allocator);
+        }
+
+        hash_table_t(hash_table_t&& other) noexcept : _size(other._size),
+                                                      _allocator(other._allocator),
+                                                      _pairs(std::move(other._pairs)),
+                                                      _buckets(std::move(other._buckets)) {
             assert(_allocator);
         }
 
@@ -176,6 +183,22 @@ namespace basecode::compiler::data {
 
         [[nodiscard]] size_t size() const {
             return _size;
+        }
+
+        hash_table_t& operator=(const hash_table_t& other) {
+            _size = other._size;
+            _allocator = other._allocator;
+            _pairs = other._pairs;
+            _buckets = other._buckets;
+            return *this;
+        }
+
+        hash_table_t& operator=(hash_table_t&& other) noexcept {
+            _size = other._size;
+            _allocator = other._allocator;
+            _pairs = std::move(other._pairs);
+            _buckets = std::move(other._buckets);
+            return *this;
         }
 
     private:

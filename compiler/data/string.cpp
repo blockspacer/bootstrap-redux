@@ -20,6 +20,17 @@
 
 namespace basecode::compiler::data {
 
+    string_t::string_t(
+            const char* value,
+            memory::allocator_t* allocator) : _allocator(allocator) {
+        assert(_allocator);
+        assert(value);
+        const auto n = strlen(value);
+        set_capacity(n);
+        std::memcpy(_data, value, n * sizeof(char));
+        _size = n;
+    }
+
     string_t::string_t(memory::allocator_t* allocator) : _allocator(allocator) {
         assert(_allocator);
     }
@@ -106,6 +117,10 @@ namespace basecode::compiler::data {
         return _capacity;
     }
 
+    const char* string_t::begin() const {
+        return _data;
+    }
+
     char* string_t::erase(const char* it) {
         const auto offset = it - _data;
         std::memmove(
@@ -142,9 +157,7 @@ namespace basecode::compiler::data {
 
         char* new_data{};
         if (new_capacity > 0) {
-            new_data = (char*)_allocator->allocate(
-                new_capacity * sizeof(char),
-                alignof(char));
+            new_data = (char*)_allocator->allocate(new_capacity * sizeof(char));
             if (_data)
                 std::memcpy(new_data, _data, _size * sizeof(char));
         }

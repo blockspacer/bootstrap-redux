@@ -18,17 +18,40 @@
 
 #pragma once
 
+#include <compiler/types.h>
+#include <compiler/data/string.h>
+
 namespace basecode::compiler::graphviz {
 
-    enum class component_type_t {
-        edge,
-        node,
-        graph,
-        subgraph,
-        cluster_subgraph
+    using namespace std::literals;
+
+    static constexpr uint8_t edge_flag = 0b00000001;
+    static constexpr uint8_t node_flag = 0b00000010;
+    static constexpr uint8_t graph_flag = 0b00000100;
+    static constexpr uint8_t subgraph_flag = 0b00001000;
+    static constexpr uint8_t cluster_subgraph_flag = 0b00010000;
+
+    enum class component_type_t : uint8_t {
+        edge                = edge_flag,
+        node                = node_flag,
+        graph               = graph_flag,
+        subgraph            = subgraph_flag,
+        cluster_subgraph    = cluster_subgraph_flag
     };
 
+    std::string_view component_type_to_name(component_type_t type);
+
+    ///////////////////////////////////////////////////////////////////////////
+
     enum class attribute_type_t {
+        rankdir,            // G                 TB, LR, BT, RL
+        fontsize,           // G                 double
+        label,              // G, N, E           string
+        fillcolor,          // N                 color, colorList,
+        labelloc,           // G                 string
+        shape,              // N                 none, record, box, polygon, ellipse, oval, circle, point, etc.
+        style,              // N                 filled, invisible, diagonals, rounded, dashed, dotted, solid, bold
+
         background,
         arrowhead,
         arrowsize,
@@ -47,12 +70,10 @@ namespace basecode::compiler::graphviz {
         dir,
         distortion,
         esep,
-        fillcolor,
         fixedsize,
         fontcolor,
         fontname,
         fontpath,
-        fontsize,
         forcelabels,
         gradientangle,
         group,
@@ -64,7 +85,6 @@ namespace basecode::compiler::graphviz {
         imagepath,
         imagepos,
         imagescale,
-        label,
         labelangle,
         labeldistance,
         labelfloat,
@@ -72,7 +92,6 @@ namespace basecode::compiler::graphviz {
         labelfontname,
         labelfontsize,
         labeljust,
-        labelloc,
         landscape,
         layer,
         layerlistsep,
@@ -106,7 +125,6 @@ namespace basecode::compiler::graphviz {
         pos,
         quantum,
         rank,
-        rankdir,
         ranksep,
         ratio,
         regular,
@@ -118,7 +136,6 @@ namespace basecode::compiler::graphviz {
         scale,
         searchsize,
         sep,
-        shape,
         shapefile,
         showboxes,
         sides,
@@ -126,7 +143,6 @@ namespace basecode::compiler::graphviz {
         skew,
         sortv,
         splines,
-        style,
         tailclip,
         taillabel,
         tailport,
@@ -138,13 +154,29 @@ namespace basecode::compiler::graphviz {
         z
     };
 
+    ///////////////////////////////////////////////////////////////////////////
+
     enum class attribute_value_type_t {
         color,
         string,
         boolean,
         integer,
         color_list,
+        enumeration,
         floating_point,
     };
+
+    struct attribute_value_t final {
+        attribute_type_t type;
+        attribute_value_type_t value_type;
+        union {
+            bool flag;
+            int32_t integer;
+            double floating_point;
+            data::string_t* string;
+        } value;
+    };
+
+    using attribute_value_list_t = data::array_t<attribute_value_t*>;
 
 }

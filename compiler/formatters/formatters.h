@@ -21,6 +21,7 @@
 #include <fmt/format.h>
 #include <compiler/types.h>
 #include <compiler/utf8/rune.h>
+#include <compiler/data/string.h>
 #include <compiler/language/common.h>
 #include <compiler/language/core/lexer/token.h>
 #include <compiler/language/assembly/lexer/token.h>
@@ -81,6 +82,24 @@ namespace fmt {
             for (size_t j = 0; j < encode_result.width; j++)
                 temp += static_cast<char>(encode_result.data[j]);
             return format_to(ctx.out(), "{}", temp);
+        }
+    };
+
+    template<>
+    struct formatter<data::string_t> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const data::string_t& str,
+                FormatContext& ctx) {
+            return format_to(
+                ctx.out(),
+                "{}",
+                std::string_view(str.begin(), str.size()));
         }
     };
 

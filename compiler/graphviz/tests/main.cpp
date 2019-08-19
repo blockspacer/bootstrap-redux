@@ -16,19 +16,26 @@
 //
 // ----------------------------------------------------------------------------
 
-#include "attribute.h"
+#define CATCH_CONFIG_RUNNER
+#include <catch2/catch.hpp>
+#include <compiler/defer.h>
+#include <compiler/memory/system.h>
+#include <compiler/errors/errors.h>
 
-namespace basecode::compiler::graphviz {
+using namespace basecode::compiler;
 
-    std::string_view component_type_to_name(component_type_t type) {
-        switch (type) {
-            case component_type_t::edge:                return "edge"sv;
-            case component_type_t::node:                return "node"sv;
-            case component_type_t::graph:               return "graph"sv;
-            case component_type_t::subgraph:            return "subgraph"sv;
-            case component_type_t::cluster_subgraph:    return "cluster_subgraph"sv;
-            default:                                    return "unknown"sv;
-        }
-    }
+int main(int argc, char** argv) {
+    memory::initialize();
 
+    result_t r{};
+    if (!errors::initialize(r))
+        return 1;
+
+    defer({
+        errors::shutdown(r);
+        memory::shutdown();
+    });
+
+    auto result = Catch::Session().run(argc, argv);
+    return (result < 0xff ? result : 0xff);
 }

@@ -22,6 +22,7 @@
 #include <compiler/memory/object_pool.h>
 #include "edge.h"
 #include "node.h"
+#include "attribute_container.h"
 
 namespace basecode::compiler::graphviz {
 
@@ -40,18 +41,38 @@ namespace basecode::compiler::graphviz {
     public:
         graph_t(
             memory::allocator_t* allocator,
+            model_t* model,
             graph_type_t type,
-            std::string_view name);
+            std::string_view name,
+            graph_t* parent = nullptr);
+
+        attribute_container_t& attributes();
 
         [[nodiscard]] graph_type_t type() const;
 
+        node_t* make_node(std::string_view name);
+
+        [[nodiscard]] std::string_view name() const;
+
+        [[nodiscard]] const edge_list_t& edges() const;
+
+        [[nodiscard]] const node_list_t& nodes() const;
+
+        edge_t* make_edge(node_t* first, node_t* second);
+
+        graph_t* make_subgraph(graph_type_t type, std::string_view name);
+
     private:
+        model_t* _model;
+        graph_t* _parent{};
         graph_type_t _type;
         edge_list_t _edges;
         node_list_t _nodes;
         std::string_view _name;
         graph_list_t _subgraphs;
         memory::object_pool_t _storage;
+        memory::allocator_t* _allocator;
+        attribute_container_t _attributes;
     };
 
 }

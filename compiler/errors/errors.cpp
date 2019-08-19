@@ -185,6 +185,20 @@ namespace basecode::compiler::errors {
                 },
 
                 // ----------------------
+                // graphviz
+                // ----------------------
+
+                {
+                    {.code = graphviz::attribute_type_not_found, .locale = "en_US"},
+                    {.code = "G001", .message = "attribute type not found"}
+                },
+
+                {
+                    {.code = graphviz::invalid_attribute_for_component, .locale = "en_US"},
+                    {.code = "G002", .message = "invalid attriubte '{}' for component '{}'"}
+                },
+
+                // ----------------------
                 // source_buffer_t
                 // ----------------------
 

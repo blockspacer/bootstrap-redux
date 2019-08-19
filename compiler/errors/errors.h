@@ -82,6 +82,11 @@ namespace basecode::compiler::errors {
         static constexpr error_code_t member_select_operator_requires_identifier_rvalue = 204;
     }
 
+    namespace graphviz {
+        static constexpr error_code_t attribute_type_not_found = 400;
+        static constexpr error_code_t invalid_attribute_for_component = 401;
+    }
+
     namespace source_buffer {
         static constexpr error_code_t unable_to_open_file = 300;
     }

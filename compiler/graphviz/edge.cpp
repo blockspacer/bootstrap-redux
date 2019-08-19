@@ -20,5 +20,25 @@
 
 namespace basecode::compiler::graphviz {
 
+    edge_t::edge_t(
+            memory::allocator_t* allocator,
+            model_t* model,
+            node_t* first,
+            node_t* second) : _first(first),
+                              _second(second),
+                              _attributes(allocator, model, component_type_t::edge) {
+    }
+
+    const node_t* edge_t::first() const {
+        return _first;
+    }
+
+    const node_t* edge_t::second() const {
+        return _second;
+    }
+
+    attribute_container_t& edge_t::attributes() {
+        return _attributes;
+    }
 
 }

@@ -20,5 +20,19 @@
 
 namespace basecode::compiler::graphviz {
 
+    node_t::node_t(
+            memory::allocator_t* allocator,
+            model_t* model,
+            std::string_view name) : _name(name),
+                                     _attributes(allocator, model, component_type_t::node) {
+    }
+
+    std::string_view node_t::name() const {
+        return _name;
+    }
+
+    attribute_container_t& node_t::attributes() {
+        return _attributes;
+    }
 
 }

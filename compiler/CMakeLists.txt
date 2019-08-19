@@ -51,10 +51,13 @@ add_library(
 
         formatters/formatters.h
 
+        graphviz/model.h
         graphviz/node.cpp graphviz/node.h
         graphviz/edge.cpp graphviz/edge.h
         graphviz/graph.cpp graphviz/graph.h
+        graphviz/dot_model.cpp graphviz/dot_model.h
         graphviz/attribute.cpp graphviz/attribute.h
+        graphviz/attribute_container.cpp graphviz/attribute_container.h
 
         errors/errors.cpp errors/errors.h
 
@@ -103,5 +106,6 @@ target_link_libraries(
 
 add_subdirectory(data/tests)
 add_subdirectory(memory/tests)
+add_subdirectory(graphviz/tests)
 add_subdirectory(language/core/lexer/tests)
 add_subdirectory(language/core/parser/tests)

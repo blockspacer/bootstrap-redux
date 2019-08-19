@@ -16,19 +16,33 @@
 //
 // ----------------------------------------------------------------------------
 
+#pragma once
+
+#include <fmt/format.h>
+#include <compiler/types.h>
 #include "attribute.h"
 
 namespace basecode::compiler::graphviz {
 
-    std::string_view component_type_to_name(component_type_t type) {
-        switch (type) {
-            case component_type_t::edge:                return "edge"sv;
-            case component_type_t::node:                return "node"sv;
-            case component_type_t::graph:               return "graph"sv;
-            case component_type_t::subgraph:            return "subgraph"sv;
-            case component_type_t::cluster_subgraph:    return "cluster_subgraph"sv;
-            default:                                    return "unknown"sv;
-        }
-    }
+    class graph_t;
+
+    class model_t {
+    public:
+        virtual ~model_t() = default;
+
+        virtual bool serialize(
+            result_t& r,
+            graph_t& graph,
+            fmt::memory_buffer& buffer) = 0;
+
+        virtual bool is_attribute_valid(
+            result_t& r,
+            component_type_t component,
+            attribute_type_t type) = 0;
+
+        virtual bool initialize(result_t& r) = 0;
+
+        virtual std::string_view attribute_type_to_name(attribute_type_t type) = 0;
+    };
 
 }

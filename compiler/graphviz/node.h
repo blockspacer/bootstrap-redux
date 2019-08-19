@@ -18,12 +18,25 @@
 
 #pragma once
 
+#include <string_view>
+#include "attribute_container.h"
+
 namespace basecode::compiler::graphviz {
 
     class node_t final {
     public:
+        node_t(
+            memory::allocator_t* allocator,
+            model_t* model,
+            std::string_view name);
+
+        attribute_container_t& attributes();
+
+        [[nodiscard]] std::string_view name() const;
 
     private:
+        std::string_view _name;
+        attribute_container_t _attributes;
     };
 
 }

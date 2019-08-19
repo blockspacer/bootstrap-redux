@@ -21,6 +21,7 @@
 #include <cctype>
 #include <cstdint>
 #include <algorithm>
+#include <string_view>
 #include <compiler/memory/system.h>
 
 namespace basecode::compiler::data {
@@ -28,6 +29,10 @@ namespace basecode::compiler::data {
     class string_t final {
     public:
         explicit string_t(
+                memory::allocator_t* allocator = memory::default_allocator());
+
+        explicit string_t(
+                const char* value,
                 memory::allocator_t* allocator = memory::default_allocator());
 
         string_t(const string_t& other);
@@ -82,6 +87,12 @@ namespace basecode::compiler::data {
 
         [[nodiscard]] uint32_t capacity() const;
 
+        [[nodiscard]] const char* begin() const;
+
+        bool operator==(const char* other) const {
+            return std::memcmp(_data, other, _size) == 0;
+        }
+
         const char& operator[](size_t index) const;
 
         string_t& operator=(const string_t& other);
@@ -91,6 +102,10 @@ namespace basecode::compiler::data {
         string_t& operator=(string_t&& other) noexcept;
 
         char* erase(const char* it_begin, const char* it_end);
+
+        bool operator==(const std::string_view& other) const {
+            return std::memcmp(_data, other.data(), _size) == 0;
+        }
 
     private:
         void grow(uint32_t min_capacity = 32);

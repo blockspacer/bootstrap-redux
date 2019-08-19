@@ -18,12 +18,30 @@
 
 #pragma once
 
+#include "attribute_container.h"
+
 namespace basecode::compiler::graphviz {
+
+    class node_t;
 
     class edge_t final {
     public:
+        edge_t(
+            memory::allocator_t* allocator,
+            model_t* model,
+            node_t* first,
+            node_t* second);
+
+        attribute_container_t& attributes();
+
+        [[nodiscard]] const node_t* first() const;
+
+        [[nodiscard]] const node_t* second() const;
 
     private:
+        node_t* _first;
+        node_t* _second;
+        attribute_container_t _attributes;
     };
 
 }
