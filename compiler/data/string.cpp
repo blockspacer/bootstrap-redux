@@ -31,6 +31,17 @@ namespace basecode::compiler::data {
         _size = n;
     }
 
+    string_t::string_t(
+            std::string_view value,
+            memory::allocator_t* allocator) : _allocator(allocator) {
+        assert(_allocator);
+        assert(!value.empty());
+        const auto n = value.size();
+        set_capacity(n);
+        std::memcpy(_data, value.data(), n * sizeof(char));
+        _size = n;
+    }
+
     string_t::string_t(memory::allocator_t* allocator) : _allocator(allocator) {
         assert(_allocator);
     }
@@ -131,6 +142,11 @@ namespace basecode::compiler::data {
         return _data + _size;
     }
 
+    void string_t::append(char value) {
+        if (_size + 1 > _capacity) grow();
+        _data[_size++] = value;
+    }
+
     const char* string_t::rend() const {
         return _data;
     }
@@ -155,6 +171,14 @@ namespace basecode::compiler::data {
             (_size - offset - 1) * sizeof(char));
         _size--;
         return _data + offset;
+    }
+
+    void string_t::append(const char* value) {
+        const auto n = strlen(value);
+        if (_size + n > _capacity) grow();
+        size_t i = 0;
+        while (i < n)
+            _data[_size++] = value[i++];
     }
 
     char& string_t::operator[](size_t index) {
@@ -183,6 +207,10 @@ namespace basecode::compiler::data {
         return *this;
     }
 
+    memory::allocator_t* string_t::allocator() const {
+        return _allocator;
+    }
+
     void string_t::set_capacity(uint32_t new_capacity) {
         if (new_capacity == _capacity) return;
 
@@ -198,6 +226,10 @@ namespace basecode::compiler::data {
         _allocator->deallocate(_data);
         _data = new_data;
         _capacity = new_capacity;
+    }
+
+    bool string_t::operator==(const char* other) const {
+        return std::memcmp(_data, other, _size) == 0;
     }
 
     string_t& string_t::operator=(const string_t& other) {
@@ -227,6 +259,10 @@ namespace basecode::compiler::data {
         return _data + offset;
     }
 
+    bool string_t::operator==(const string_t& other) const {
+        return std::memcmp(_data, other._data, _size) == 0;
+    }
+
     string_t& string_t::operator=(string_t&& other) noexcept {
         assert(_allocator == other._allocator);
         _allocator->deallocate(_data);
@@ -236,6 +272,10 @@ namespace basecode::compiler::data {
         _allocator = other._allocator;
         other._moved = true;
         return *this;
+    }
+
+    bool string_t::operator==(const std::string_view& other) const {
+        return std::memcmp(_data, other.data(), _size) == 0;
     }
 
     char* string_t::erase(const char* it_begin, const char* it_end) {

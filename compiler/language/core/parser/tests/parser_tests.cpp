@@ -48,6 +48,7 @@ namespace basecode {
             "2 == 2 && 3 == 1;\n"
             "2 == 2 || 3 == 3;\n"
             "a, b, c := 3, 4, 2;\n"
+            "a := 1, b := 2, c:= 3;\n"
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -63,6 +64,8 @@ namespace basecode {
 
         entity_t module_node = parser.parse(r);
         REQUIRE(module_node != (entity_t)entt::null);
+
+        ast::write_dot_graph(r, session, "test.dot", module_node);
     }
 
 }

@@ -223,15 +223,37 @@ namespace basecode::compiler::language::core::parser {
     entity_t parser_t::parse(result_t& r) {
         auto& registry = _session.registry();
 
+        auto module_node = registry.create();
+        registry.assign<ast::node_t>(
+            module_node,
+            _session.allocator(),
+            ast::node_type_t::module,
+            entt::null,
+            entt::null);
+
         auto scope_node = registry.create();
+        registry.assign<ast::node_t>(
+            scope_node,
+            _session.allocator(),
+            ast::node_type_t::scope,
+            entt::null,
+            module_node);
         registry.assign<ast::scope_t>(
             scope_node,
-            _session.allocator());
+            _session.allocator(),
+            entt::null);
 
         auto block_node = registry.create();
+        registry.assign<ast::node_t>(
+            block_node,
+            _session.allocator(),
+            ast::node_type_t::block,
+            entt::null,
+            module_node);
         registry.assign<ast::block_t>(
             block_node,
             _session.allocator(),
+            entt::null,
             scope_node);
 
         std::string_view name;
@@ -245,7 +267,6 @@ namespace basecode::compiler::language::core::parser {
             name = _session.intern_pool().intern(base_filename.string());
         }
 
-        auto module_node = registry.create();
         registry.assign<ast::module_t>(
             module_node,
             _session.allocator(),
@@ -258,25 +279,29 @@ namespace basecode::compiler::language::core::parser {
         _parent.push(block_node);
 
         while (has_more()) {
-            auto expr = expression(r);
+            auto stmt_entity = registry.create();
+            auto& stmt_node = registry.assign<ast::node_t>(
+                stmt_entity,
+                _session.allocator(),
+                ast::node_type_t::statement,
+                entt::null,
+                *_parent.top());
 
-            auto terminator = token();
+            _parent.push(stmt_entity);
+            auto expr = expression(r);
+            _parent.pop();
+
+            auto terminator_token = token();
             if (!advance(r, lexer::token_type_t::semicolon))
                 break;
 
-            auto ast_node = registry.create();
-            registry.assign<ast::node_t>(
-                ast_node,
-                _session.allocator(),
-                ast::node_type_t::statement,
-                terminator,
-                *_parent.top());
+            stmt_node.token = terminator_token;
             registry.assign<ast::statement_t>(
-                ast_node,
+                stmt_entity,
                 _session.allocator(),
                 expr);
             auto& block = registry.get<ast::block_t>(*_blocks.top());
-            block.children.add(ast_node);
+            block.children.add(stmt_entity);
         }
 
         _scopes.pop();
@@ -335,6 +360,7 @@ namespace basecode::compiler::language::core::parser {
         infix(lexer::token_type_t::binary_and_operator, 70);
 
 
+        // XXX: a single token for both usages of comma is problematic
         infix(lexer::token_type_t::comma, 10);
         infix_right(lexer::token_type_t::bind_operator, 20);
         infix_right(lexer::token_type_t::lambda_operator, 20);

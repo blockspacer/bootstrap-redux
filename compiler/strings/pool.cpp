@@ -17,7 +17,6 @@
 // ----------------------------------------------------------------------------
 
 #include <compiler/memory/system.h>
-#include <compiler/hashing/murmur.h>
 #include "pool.h"
 
 namespace basecode::compiler::strings {

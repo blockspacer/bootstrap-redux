@@ -66,6 +66,8 @@ namespace basecode::compiler::graphviz {
             std::string_view separator,
             fmt::memory_buffer& buffer);
 
+        data::string_t escape_chars(const data::string_t& value);
+
     private:
         metadata_table_t _attributes;
         strings::pool_t& _intern_pool;

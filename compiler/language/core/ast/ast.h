@@ -22,6 +22,7 @@
 #include <compiler/types.h>
 #include <compiler/data/trie_map.h>
 #include <compiler/memory/allocator.h>
+#include <compiler/workspace/session.h>
 
 using namespace std::literals;
 
@@ -80,6 +81,16 @@ namespace basecode::compiler::language::core::ast {
     };
 
     std::string_view node_type_to_name(node_type_t type);
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    bool write_dot_graph(
+        result_t& r,
+        workspace::session_t& session,
+        const path_t& path,
+        entity_t root);
+
+    ///////////////////////////////////////////////////////////////////////////
 
     struct node_t final {
         node_t(
@@ -285,9 +296,13 @@ namespace basecode::compiler::language::core::ast {
     //          to_roman_numeral
     //
     struct scope_t final {
-        explicit scope_t(memory::allocator_t* allocator) : children(allocator),
-                                                           identifiers(allocator) {
+        scope_t(
+            memory::allocator_t* allocator,
+            entity_t parent) : parent(parent),
+                               children(allocator),
+                               identifiers(allocator) {
         }
+        entity_t parent;
         entity_list_t children;
         data::trie_map_t<entity_t> identifiers;
     };
@@ -297,10 +312,13 @@ namespace basecode::compiler::language::core::ast {
     struct block_t final {
         block_t(
             memory::allocator_t* allocator,
+            entity_t parent,
             entity_t scope) : scope(scope),
+                              parent(parent),
                               children(allocator) {
         }
         entity_t scope;
+        entity_t parent;
         entity_list_t children;
     };
 

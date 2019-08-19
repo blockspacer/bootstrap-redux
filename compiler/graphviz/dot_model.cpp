@@ -172,13 +172,6 @@ namespace basecode::compiler::graphviz {
         return true;
     }
 
-    std::string_view dot_model_t::attribute_type_to_name(attribute_type_t type) {
-        auto metadata = _attributes.find(type);
-        if (!metadata)
-            return "unknown"sv;
-        return metadata->name;
-    }
-
     bool dot_model_t::serialize_attributes(
             result_t& r,
             const attribute_value_list_t& attrs,
@@ -203,7 +196,7 @@ namespace basecode::compiler::graphviz {
                     buffer,
                     "{}=\"{}\"",
                     attribute_type_to_name(attr->type),
-                    *attr->value.string);
+                    escape_chars(*attr->value.string));
                 break;
             }
             case attribute_value_type_t::boolean: {
@@ -240,6 +233,49 @@ namespace basecode::compiler::graphviz {
             }
         }
         return true;
+    }
+
+    data::string_t dot_model_t::escape_chars(const data::string_t& value) {
+        data::string_t buffer(value.allocator());
+        for (size_t i = 0 ; i < value.size(); i++) {
+            const auto& c = value[i];
+            if (c == '\\') {
+                ++i;
+                if (value[i] == '|') {
+                    buffer.append('|');
+                }
+            } else {
+                if (c == '\"') {
+                    buffer.append("\\\"");
+                } else if (c == '{') {
+                    buffer.append("\\{");
+                } else if (c == '}') {
+                    buffer.append("\\}");
+                } else if (c == '.') {
+                    buffer.append("\\.");
+                } else if (c == ',') {
+                    buffer.append("\\,");
+                } else if (c == '|') {
+                    buffer.append("\\|");
+                } else if (c == '<') {
+                    buffer.append("\\<");
+                } else if (c == '>') {
+                    buffer.append("\\>");
+                } else if (c == '=') {
+                    buffer.append("\\=");
+                } else {
+                    buffer.append(c);
+                }
+            }
+        }
+        return buffer;
+    }
+
+    std::string_view dot_model_t::attribute_type_to_name(attribute_type_t type) {
+        auto metadata = _attributes.find(type);
+        if (!metadata)
+            return "unknown"sv;
+        return metadata->name;
     }
 
 }

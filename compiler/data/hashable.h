@@ -28,4 +28,6 @@ namespace basecode::compiler::data {
         return hashing::murmur::hash64(&key, sizeof(key));
     }
 
+    template <> uint64_t hash_key(std::string_view key);
+
 }

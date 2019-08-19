@@ -29,11 +29,15 @@ namespace basecode::compiler::data {
     class string_t final {
     public:
         explicit string_t(
-                memory::allocator_t* allocator = memory::default_allocator());
+            memory::allocator_t* allocator = memory::default_allocator());
 
         explicit string_t(
-                const char* value,
-                memory::allocator_t* allocator = memory::default_allocator());
+            const char* value,
+            memory::allocator_t* allocator = memory::default_allocator());
+
+        explicit string_t(
+            std::string_view value,
+            memory::allocator_t* allocator = memory::default_allocator());
 
         string_t(const string_t& other);
 
@@ -67,11 +71,15 @@ namespace basecode::compiler::data {
 
         void right_trim();
 
+        void append(char value);
+
         char* erase(const char* it);
 
         char& operator[](size_t index);
 
         void resize(uint32_t new_size);
+
+        void append(const char* value);
 
         [[nodiscard]] bool empty() const;
 
@@ -91,9 +99,7 @@ namespace basecode::compiler::data {
 
         [[nodiscard]] const char* begin() const;
 
-        bool operator==(const char* other) const {
-            return std::memcmp(_data, other, _size) == 0;
-        }
+        bool operator==(const char* other) const;
 
         const char& operator[](size_t index) const;
 
@@ -101,17 +107,15 @@ namespace basecode::compiler::data {
 
         char* insert(const char* it, const char& v);
 
-        bool operator==(const string_t& other) const {
-            return std::memcmp(_data, other._data, _size) == 0;
-        }
+        bool operator==(const string_t& other) const;
 
         string_t& operator=(string_t&& other) noexcept;
 
-        char* erase(const char* it_begin, const char* it_end);
+        [[nodiscard]] memory::allocator_t* allocator() const;
 
-        bool operator==(const std::string_view& other) const {
-            return std::memcmp(_data, other.data(), _size) == 0;
-        }
+        bool operator==(const std::string_view& other) const;
+
+        char* erase(const char* it_begin, const char* it_end);
 
     private:
         void grow(uint32_t min_capacity = 32);
