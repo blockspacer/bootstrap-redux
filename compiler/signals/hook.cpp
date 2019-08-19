@@ -16,44 +16,52 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <unordered_map>
+#include <compiler/data/hash_table.h>
 #include "hook.h"
 
 namespace basecode::compiler::signals {
 
-    static std::unordered_map<int, action_t> s_actions{};
+    static action_map_t* s_actions{};
+    static memory::allocator_t* s_allocator{};
+
+    void shutdown() {
+        s_actions->~action_map_t();
+        s_allocator->deallocate(s_actions);
+    }
+
+    bool initialize(
+            result_t& r,
+            memory::allocator_t* allocator) {
+        s_allocator = allocator;
+
+        auto mem = s_allocator->allocate(
+            sizeof(action_map_t),
+            alignof(action_map_t));
+        s_actions = new (mem) action_map_t(s_allocator);
+
+        return true;
+    }
 
     static void on_signal(int sig) {
-        auto it = s_actions.find(sig);
-        if (it == std::end(s_actions))
+        auto action = s_actions->find(sig);
+        if (!action)
             return;
-        for (auto handler : it->second.handlers) {
+        for (auto handler : action->handlers) {
             if (!(*handler)())
                 return;
         }
     }
 
     bool hook(int sig, handler_t* handler) {
-        action_t* action = nullptr;
-
-        auto it = s_actions.find(sig);
-        if (it == std::end(s_actions)) {
-            auto rc = s_actions.emplace(sig, action_t{});
-            if (rc.second) {
-                action = &rc.first->second;
-                action->sigact.sa_flags = 0;
-                sigemptyset(&action->sigact.sa_mask);
-                action->sigact.sa_handler = on_signal;
-                sigaction(sig, &action->sigact, nullptr);
-            } else {
-                return false;
-            }
-        } else {
-            action = &it->second;
+        auto action = s_actions->find(sig);
+        if (!action) {
+            action = &s_actions->insert(sig, action_t(s_allocator));
+            action->sigact.sa_flags = 0;
+            sigemptyset(&action->sigact.sa_mask);
+            action->sigact.sa_handler = on_signal;
+            sigaction(sig, &action->sigact, nullptr);
         }
-
-        action->handlers.push_back(handler);
-
+        action->handlers.add(handler);
         return true;
     }
 

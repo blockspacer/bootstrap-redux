@@ -18,8 +18,9 @@
 
 #pragma once
 
-#include <vector>
 #include <csignal>
+#include <compiler/types.h>
+#include <compiler/data/array.h>
 
 namespace basecode::compiler::signals {
 
@@ -33,9 +34,19 @@ namespace basecode::compiler::signals {
     };
 
     struct action_t final {
+        explicit action_t(memory::allocator_t* allocator) : handlers(allocator) {
+        }
         struct sigaction sigact{};
-        std::vector<handler_t*> handlers{};
+        data::array_t<handler_t*> handlers;
     };
+
+    using action_map_t = data::hash_table_t<int, action_t>;
+
+    void shutdown();
+
+    bool initialize(
+        result_t& r,
+        memory::allocator_t* allocator = memory::default_allocator());
 
     bool hook(int sig, handler_t* handler);
 
