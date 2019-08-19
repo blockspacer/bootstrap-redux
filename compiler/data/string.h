@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <cctype>
 #include <cstdint>
 #include <algorithm>
 #include <compiler/memory/system.h>
@@ -49,7 +50,19 @@ namespace basecode::compiler::data {
 
         char* begin();
 
+        void shrink();
+
         char* rbegin();
+
+        void to_lower();
+
+        void to_upper();
+
+        void left_trim();
+
+        void right_trim();
+
+        char* erase(const char* it);
 
         char& operator[](size_t index);
 
@@ -71,7 +84,13 @@ namespace basecode::compiler::data {
 
         const char& operator[](size_t index) const;
 
+        string_t& operator=(const string_t& other);
+
+        char* insert(const char* it, const char& v);
+
         string_t& operator=(string_t&& other) noexcept;
+
+        char* erase(const char* it_begin, const char* it_end);
 
     private:
         void grow(uint32_t min_capacity = 32);

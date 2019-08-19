@@ -175,7 +175,7 @@ namespace basecode::compiler::data {
                     _data + offset,
                     (_size - offset) * sizeof(T));
             }
-            std::memcpy(&_data[offset], &v, sizeof(v));
+            std::memcpy(&_data[offset], &v, sizeof(T));
             _size++;
             return _data + offset;
         }

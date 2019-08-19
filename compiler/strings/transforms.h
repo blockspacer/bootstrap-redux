@@ -46,52 +46,6 @@ namespace basecode::compiler::strings {
         }
     }
 
-    inline void ltrim(std::string& s) {
-        s.erase(
-            s.begin(),
-            std::find_if(
-                s.begin(),
-                s.end(),
-                [](unsigned char c) { return !std::isspace(c); }));
-    }
-
-    inline void rtrim(std::string& s) {
-        s.erase(
-            std::find_if(
-                s.rbegin(),
-                s.rend(),
-                [](unsigned char c) { return !std::isspace(c); }).base(),
-            s.end());
-    }
-
-    inline void trim(std::string& s) {
-        ltrim(s);
-        rtrim(s);
-    }
-
-    inline void to_lower(std::string& s) {
-        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    }
-
-    inline void to_upper(std::string& s) {
-        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-    }
-
-    inline std::string trimmed(std::string s) {
-        trim(s);
-        return s;
-    }
-
-    inline std::string ltrimmed(std::string s) {
-        ltrim(s);
-        return s;
-    }
-
-    inline std::string rtrimmed(std::string s) {
-        rtrim(s);
-        return s;
-    }
-
     std::string remove_underscores(const std::string_view& value);
 
     std::pair<std::string, std::string> size_to_units(size_t size);
