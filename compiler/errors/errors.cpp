@@ -184,6 +184,11 @@ namespace basecode::compiler::errors {
                     {.code = "P006", .message = "member select requires identifier rvalue"}
                 },
 
+                {
+                    {.code = parser::expected_expression, .locale = "en_US"},
+                    {.code = "P007", .message = "expected expression"}
+                },
+
                 // ----------------------
                 // graphviz
                 // ----------------------

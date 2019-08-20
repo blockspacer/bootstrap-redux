@@ -76,6 +76,7 @@ namespace basecode::compiler::errors {
     namespace parser {
         static constexpr error_code_t invalid_token = 200;
         static constexpr error_code_t unexpected_token = 203;
+        static constexpr error_code_t expected_expression = 205;
         static constexpr error_code_t undefined_production_rule = 201;
         static constexpr error_code_t missing_operator_production_rule = 202;
         static constexpr error_code_t member_select_operator_requires_identifier_lvalue = 203;

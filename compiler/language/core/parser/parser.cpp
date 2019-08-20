@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <utility>
+#include <compiler/defer.h>
 #include <compiler/errors/errors.h>
 #include <compiler/data/hashable.h>
 #include "parser.h"
@@ -280,7 +281,7 @@ namespace basecode::compiler::language::core::parser {
 
         while (has_more()) {
             auto stmt_entity = registry.create();
-            auto& stmt_node = registry.assign<ast::node_t>(
+            registry.assign<ast::node_t>(
                 stmt_entity,
                 _session.allocator(),
                 ast::node_type_t::statement,
@@ -288,13 +289,22 @@ namespace basecode::compiler::language::core::parser {
                 *_parent.top());
 
             _parent.push(stmt_entity);
+            defer(_parent.pop());
             auto expr = expression(r);
-            _parent.pop();
+            if (expr == entt::null) {
+                const auto& loc = registry.get<source_location_t>(token());
+                add_source_highlighted_error(
+                    r,
+                    errors::parser::expected_expression,
+                    loc);
+                return entt::null;
+            }
 
             auto terminator_token = token();
             if (!advance(r, lexer::token_type_t::semicolon))
                 break;
 
+            auto& stmt_node = registry.get<ast::node_t>(stmt_entity);
             stmt_node.token = terminator_token;
             registry.assign<ast::statement_t>(
                 stmt_entity,

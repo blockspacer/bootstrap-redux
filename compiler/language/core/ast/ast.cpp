@@ -19,6 +19,7 @@
 #include <compiler/io/text.h>
 #include <compiler/graphviz/graph.h>
 #include <compiler/graphviz/dot_model.h>
+#include <compiler/formatters/formatters.h>
 #include <compiler/language/core/lexer/token.h>
 #include "ast.h"
 
@@ -88,34 +89,36 @@ namespace basecode::compiler::language::core::ast {
             entity_t entity) {
         auto& registry = session.registry();
         auto& intern_pool = session.intern_pool();
-        const auto& ast_node = registry.get<node_t>(entity);
-        lexer::token_t* token{};
-        if (ast_node.token != entt::null)
-            token = &registry.get<lexer::token_t>(ast_node.token);
+
         auto node_name = intern_pool.intern(fmt::format("id_{}", entity));
         auto node = graph.make_node(node_name);
+
         auto& node_attrs = node->attributes();
         node_attrs.set_value(
             r,
             graphviz::attribute_type_t::shape,
             graphviz::enumeration_value_t("record"));
-        std::string label;
-        if (token) {
-            label = fmt::format(
-                "{}\\|{}",
-                node_type_to_name(ast_node.type),
-                token->value);
-        } else {
-            label = fmt::format(
-                "{}",
-                node_type_to_name(ast_node.type));
-        }
         node_attrs.set_value(
             r,
-            graphviz::attribute_type_t::label,
-            data::string_t(label, session.allocator()));
+            graphviz::attribute_type_t::style,
+            graphviz::enumeration_value_t("filled"));
+
+        data::array_t<data::string_t> ports(session.allocator());
+
+        auto& ast_node = registry.get<node_t>(entity);
+        ports.emplace(node_type_to_name(ast_node.type), session.allocator());
+
+        if (ast_node.token != entt::null) {
+            auto token = registry.get<lexer::token_t>(ast_node.token);
+            ports.emplace(token.value, session.allocator());
+        }
+
         switch (ast_node.type) {
             case node_type_t::block: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("azure3"));
                 const auto& block_node = registry.get<block_t>(entity);
                 auto scope_node = create_dot_node(r, session, graph, block_node.scope);
                 graph.make_edge(node, scope_node);
@@ -126,24 +129,77 @@ namespace basecode::compiler::language::core::ast {
                 break;
             }
             case node_type_t::scope: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("cadetblue3"));
                 break;
             }
             case node_type_t::module: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("deepskyblue3"));
                 const auto& module_node = registry.get<module_t>(entity);
                 auto block_node = create_dot_node(r, session, graph, module_node.block);
                 graph.make_edge(node, block_node);
                 break;
             }
             case node_type_t::statement: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("darkolivegreen1"));
                 const auto& stmt_node = registry.get<statement_t>(entity);
                 auto expr_node = create_dot_node(r, session, graph, stmt_node.expr);
                 graph.make_edge(node, expr_node);
                 break;
             }
+            case node_type_t::directive: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("gold"));
+                const auto& directive_node = registry.get<directive_t>(entity);
+                auto lhs_expr = create_dot_node(r, session, graph, directive_node.lhs);
+                auto rhs_expr = create_dot_node(r, session, graph, directive_node.rhs);
+                auto lhs_edge = graph.make_edge(node, lhs_expr);
+                lhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("lhs"sv, session.allocator()));
+                auto rhs_edge = graph.make_edge(node, rhs_expr);
+                rhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("rhs"sv, session.allocator()));
+                break;
+            }
             case node_type_t::annotation: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("goldenrod"));
+                const auto& annotation_node = registry.get<annotation_t>(entity);
+                auto lhs_expr = create_dot_node(r, session, graph, annotation_node.lhs);
+                auto rhs_expr = create_dot_node(r, session, graph, annotation_node.rhs);
+                auto lhs_edge = graph.make_edge(node, lhs_expr);
+                lhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("lhs"sv, session.allocator()));
+                auto rhs_edge = graph.make_edge(node, rhs_expr);
+                rhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("rhs"sv, session.allocator()));
                 break;
             }
             case node_type_t::unary_operator: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("cyan"));
                 const auto& unary_op_node = registry.get<unary_operator_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, unary_op_node.lhs);
                 auto lhs_edge = graph.make_edge(node, lhs_expr);
@@ -154,6 +210,10 @@ namespace basecode::compiler::language::core::ast {
                 break;
             }
             case node_type_t::binary_operator: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("cornsilk3"));
                 const auto& bin_op_node = registry.get<binary_operator_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, bin_op_node.lhs);
                 auto rhs_expr = create_dot_node(r, session, graph, bin_op_node.rhs);
@@ -169,19 +229,49 @@ namespace basecode::compiler::language::core::ast {
                     data::string_t("rhs"sv, session.allocator()));
                 break;
             }
+            case node_type_t::identifier: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("aliceblue"));
+                break;
+            }
+            case node_type_t::nil_literal: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("deeppink"));
+                break;
+            }
+            case node_type_t::string_literal: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("aquamarine"));
+                break;
+            }
+            case node_type_t::number_literal: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("bisque"));
+                break;
+            }
+            case node_type_t::boolean_literal: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("cornflowerblue"));
+                break;
+            }
             case node_type_t::label:
-            case node_type_t::directive:
-            case node_type_t::identifier:
             case node_type_t::expression:
-            case node_type_t::nil_literal:
             case node_type_t::line_comment:
             case node_type_t::block_comment:
             case node_type_t::block_literal:
             case node_type_t::ns_expression:
             case node_type_t::if_expression:
             case node_type_t::in_expression:
-            case node_type_t::string_literal:
-            case node_type_t::number_literal:
             case node_type_t::type_parameter:
             case node_type_t::for_expression:
             case node_type_t::use_expression:
@@ -191,7 +281,6 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::enum_expression:
             case node_type_t::with_expression:
             case node_type_t::goto_expression:
-            case node_type_t::boolean_literal:
             case node_type_t::while_expression:
             case node_type_t::defer_expression:
             case node_type_t::break_expression:
@@ -213,6 +302,20 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::initializer_expression:
                 break;
         }
+
+        fmt::memory_buffer label{};
+        for (size_t i = 0; i < ports.size(); i++) {
+            const auto& port = ports[i];
+            fmt::format_to(label, "{}", port);
+            if (i < ports.size() - 1)
+                fmt::format_to(label, "\\|");
+        }
+
+        auto label_str = fmt::to_string(label);
+        node_attrs.set_value(
+            r,
+            graphviz::attribute_type_t::label,
+            data::string_t(label_str.c_str(), session.allocator()));
 
         return node;
     }
