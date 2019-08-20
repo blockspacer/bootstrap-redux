@@ -244,6 +244,10 @@ namespace basecode::compiler::graphviz {
                 ++i;
                 if (value[i] == '|') {
                     buffer.append('|');
+                } else if (value[i] == '{') {
+                    buffer.append('{');
+                } else if (value[i] == '}') {
+                    buffer.append('}');
                 }
             } else {
                 if (c == '\"') {

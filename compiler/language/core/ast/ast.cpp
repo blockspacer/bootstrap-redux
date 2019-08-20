@@ -251,10 +251,32 @@ namespace basecode::compiler::language::core::ast {
                 break;
             }
             case node_type_t::number_literal: {
+                const auto& number_token = registry.get<number_token_t>(ast_node.token);
                 node_attrs.set_value(
                     r,
                     graphviz::attribute_type_t::fillcolor,
                     graphviz::enumeration_value_t("bisque"));
+                ports.emplace(
+                    fmt::format("\\{{ type: {}", number_type_to_name(number_token.type)).c_str(),
+                    session.allocator());
+
+                ports.emplace(
+                    fmt::format("radix: {}", number_token.radix).c_str(),
+                    session.allocator());
+
+                ports.emplace(
+                    fmt::format("size: {}", number_size_to_name(number_token.size)).c_str(),
+                    session.allocator());
+
+                if (number_token.type == number_type_t::floating_point) {
+                    ports.emplace(
+                        fmt::format("imaginary: {}", number_token.imaginary).c_str(),
+                        session.allocator());
+                }
+
+                ports.emplace(
+                    fmt::format("signed: {} \\}}", number_token.is_signed).c_str(),
+                    session.allocator());
                 break;
             }
             case node_type_t::boolean_literal: {
