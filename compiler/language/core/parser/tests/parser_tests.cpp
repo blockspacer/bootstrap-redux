@@ -48,7 +48,6 @@ namespace basecode {
             "2 == 2 && 3 == 1;\n"
             "2 == 2 || 3 == 3;\n"
             "a, b, c := 3, 4, 2;\n"
-            "a := 1, b := 2, c:= 3;\n"
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));

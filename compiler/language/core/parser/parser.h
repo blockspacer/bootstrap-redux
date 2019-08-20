@@ -104,6 +104,8 @@ namespace basecode::compiler::language::core::parser {
                 std::forward<Args>(args)...);
         }
 
+        void comma_binding_power(int32_t bp = 25);
+
         bool is_node_an_identifier(entity_t expr, source_location_t& loc);
 
     private:
@@ -133,6 +135,8 @@ namespace basecode::compiler::language::core::parser {
             int32_t bp,
             const led_callback_t& led = {});
 
+        production_rule_t* assignment(lexer::token_type_t token_type);
+
     private:
         size_t _token_index{};
         entity_list_t _tokens;
@@ -140,7 +144,8 @@ namespace basecode::compiler::language::core::parser {
         utf8::source_buffer_t& _buffer;
         data::stack_t<entity_t> _scopes;
         data::stack_t<entity_t> _blocks;
-        data::stack_t<entity_t> _parent;
+        data::stack_t<entity_t> _parents;
+        production_rule_t* _comma_rule{};
         data::array_t<production_rule_t*> _rules;
         memory::frame_allocator_t<4096> _frame_allocator;
         data::hash_table_t<lexer::token_type_t, production_rule_t*> _rule_table;

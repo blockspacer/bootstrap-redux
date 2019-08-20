@@ -286,6 +286,26 @@ namespace basecode::compiler::language::core::ast {
                     graphviz::enumeration_value_t("cornflowerblue"));
                 break;
             }
+            case node_type_t::assignment_operator: {
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("darkseagreen1"));
+                const auto& assignment_op_node = registry.get<assignment_operator_t>(entity);
+                auto lhs_expr = create_dot_node(r, session, graph, assignment_op_node.lhs);
+                auto rhs_expr = create_dot_node(r, session, graph, assignment_op_node.rhs);
+                auto lhs_edge = graph.make_edge(node, lhs_expr);
+                lhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("lhs"sv, session.allocator()));
+                auto rhs_edge = graph.make_edge(node, rhs_expr);
+                rhs_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    data::string_t("rhs"sv, session.allocator()));
+                break;
+            }
             case node_type_t::label:
             case node_type_t::expression:
             case node_type_t::line_comment:
@@ -317,7 +337,6 @@ namespace basecode::compiler::language::core::ast {
             case node_type_t::bitcast_expression:
             case node_type_t::type_decl_operator:
             case node_type_t::value_sink_operator:
-            case node_type_t::assignment_operator:
             case node_type_t::continue_expression:
             case node_type_t::variable_declaration:
             case node_type_t::fallthrough_expression:

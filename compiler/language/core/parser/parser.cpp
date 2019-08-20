@@ -32,7 +32,7 @@ namespace basecode::compiler::language::core::parser {
                                     _buffer(buffer),
                                     _scopes(session.allocator()),
                                     _blocks(session.allocator()),
-                                    _parent(session.allocator()),
+                                    _parents(session.allocator()),
                                     _rules(session.allocator()),
                                     _frame_allocator(session.allocator()),
                                     _rule_table(session.allocator()) {
@@ -277,7 +277,7 @@ namespace basecode::compiler::language::core::parser {
 
         _scopes.push(scope_node);
         _blocks.push(block_node);
-        _parent.push(block_node);
+        _parents.push(block_node);
 
         while (has_more()) {
             auto stmt_entity = registry.create();
@@ -286,10 +286,12 @@ namespace basecode::compiler::language::core::parser {
                 _session.allocator(),
                 ast::node_type_t::statement,
                 entt::null,
-                *_parent.top());
+                *_parents.top());
 
-            _parent.push(stmt_entity);
-            defer(_parent.pop());
+            _parents.push(stmt_entity);
+            defer(_parents.pop());
+
+            _comma_rule->lbp = 25;      // binding power for statements
             auto expr = expression(r);
             if (expr == entt::null) {
                 const auto& loc = registry.get<source_location_t>(token());
@@ -320,8 +322,8 @@ namespace basecode::compiler::language::core::parser {
         _blocks.pop();
         assert(_blocks.empty());
 
-        _parent.pop();
-        assert(_parent.empty());
+        _parents.pop();
+        assert(_parents.empty());
 
         return module_node;
     }
@@ -370,20 +372,21 @@ namespace basecode::compiler::language::core::parser {
         infix(lexer::token_type_t::binary_and_operator, 70);
 
 
-        // XXX: a single token for both usages of comma is problematic
-        infix(lexer::token_type_t::comma, 10);
-        infix_right(lexer::token_type_t::bind_operator, 20);
+        assignment(lexer::token_type_t::bind_operator);
+        assignment(lexer::token_type_t::assignment_operator);
+        assignment(lexer::token_type_t::add_assignment_operator);
+        assignment(lexer::token_type_t::divide_assignment_operator);
+        assignment(lexer::token_type_t::modulo_assignment_operator);
+        assignment(lexer::token_type_t::subtract_assignment_operator);
+        assignment(lexer::token_type_t::multiply_assignment_operator);
+        assignment(lexer::token_type_t::binary_or_assignment_operator);
+        assignment(lexer::token_type_t::binary_and_assignment_operator);
+        assignment(lexer::token_type_t::binary_not_assignment_operator);
+
         infix_right(lexer::token_type_t::lambda_operator, 20);
-        infix_right(lexer::token_type_t::assignment_operator, 20);
         infix_right(lexer::token_type_t::associative_operator, 20);
-        infix_right(lexer::token_type_t::add_assignment_operator, 20);
-        infix_right(lexer::token_type_t::divide_assignment_operator, 20);
-        infix_right(lexer::token_type_t::modulo_assignment_operator, 20);
-        infix_right(lexer::token_type_t::subtract_assignment_operator, 20);
-        infix_right(lexer::token_type_t::multiply_assignment_operator, 20);
-        infix_right(lexer::token_type_t::binary_or_assignment_operator, 20);
-        infix_right(lexer::token_type_t::binary_and_assignment_operator, 20);
-        infix_right(lexer::token_type_t::binary_not_assignment_operator, 20);
+
+        _comma_rule = infix_right(lexer::token_type_t::comma, 25);
 
         infix(
             lexer::token_type_t::left_bracket,
@@ -516,6 +519,10 @@ namespace basecode::compiler::language::core::parser {
         return _rules[_token_index];
     }
 
+    void parser_t::comma_binding_power(int32_t bp) {
+        _comma_rule->lbp = bp;
+    }
+
     entity_t parser_t::expression(result_t& r, int32_t rbp) {
         if (!has_more()) return entt::null;
 
@@ -529,7 +536,7 @@ namespace basecode::compiler::language::core::parser {
             .token = current_token,
             .scope = *_scopes.top(),
             .block = *_blocks.top(),
-            .parent = *_parent.top(),
+            .parent = *_parents.top(),
             .registry = &_session.registry(),
             .allocator = _session.allocator()
         };
@@ -545,7 +552,7 @@ namespace basecode::compiler::language::core::parser {
             ctx.rule = next_rule;
             ctx.scope = *_scopes.top();
             ctx.block = *_blocks.top();
-            ctx.parent = *_parent.top();
+            ctx.parent = *_parents.top();
 
             if (!advance(r)) return entt::null;
 
@@ -587,6 +594,43 @@ namespace basecode::compiler::language::core::parser {
         } else {
             return false;
         }
+    }
+
+    production_rule_t* parser_t::assignment(lexer::token_type_t token_type) {
+        return infix(
+            token_type,
+            20,
+            [](context_t& ctx, entity_t lhs) {
+                auto ast_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    ast_node,
+                    ctx.allocator,
+                    ast::node_type_t::assignment_operator,
+                    ctx.token,
+                    ctx.parent);
+                auto rhs = ctx.parser->expression(
+                    *ctx.r,
+                    ctx.rule->lbp - 1);
+                if (rhs == entt::null) {
+                    return (entity_t)entt::null;
+                }
+
+                const auto& node = ctx.registry->get<ast::node_t>(rhs);
+                if (node.type == ast::node_type_t::assignment_operator) {
+                    const auto& loc = ctx.registry->get<source_location_t>(node.token);
+                    ctx.parser->add_source_highlighted_error(
+                        *ctx.r,
+                        errors::parser::invalid_assignment_expression,
+                        loc);
+                    return (entity_t)entt::null;
+                }
+
+                ctx.registry->assign<ast::assignment_operator_t>(
+                    ast_node,
+                    lhs,
+                    rhs);
+                return ast_node;
+            });
     }
 
     bool parser_t::is_node_an_identifier(entity_t expr, source_location_t& loc) {

@@ -227,8 +227,9 @@ namespace basecode::compiler::language::core::ast {
     ///////////////////////////////////////////////////////////////////////////
 
     struct assignment_operator_t final {
-        entity_list_t lhs;
-        entity_list_t rhs;
+        assignment_operator_t(entity_t lhs, entity_t rhs) : lhs(lhs), rhs(rhs) {}
+        entity_t lhs;
+        entity_t rhs;
     };
 
     ///////////////////////////////////////////////////////////////////////////

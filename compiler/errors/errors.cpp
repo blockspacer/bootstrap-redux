@@ -189,6 +189,11 @@ namespace basecode::compiler::errors {
                     {.code = "P007", .message = "expected expression"}
                 },
 
+                {
+                    {.code = parser::invalid_assignment_expression, .locale = "en_US"},
+                    {.code = "P008", .message = "invalid assignment expression"}
+                },
+
                 // ----------------------
                 // graphviz
                 // ----------------------
