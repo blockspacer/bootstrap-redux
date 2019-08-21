@@ -61,6 +61,13 @@ namespace basecode::compiler::data {
         other._moved = true;
     }
 
+    string_t::string_t(const std::string& other) : _allocator(memory::default_allocator()) {
+        const auto n = other.size();
+        set_capacity(n);
+        std::memcpy(_data, other.data(), n * sizeof(char));
+        _size = n;
+    }
+
     string_t::~string_t() {
         if (_moved) return;
         if (_data)

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cctype>
+#include <string>
 #include <cstdint>
 #include <algorithm>
 #include <string_view>
@@ -40,6 +41,8 @@ namespace basecode::compiler::data {
             memory::allocator_t* allocator = memory::default_allocator());
 
         string_t(const string_t& other);
+
+        string_t(const std::string& other);
 
         string_t(string_t&& other) noexcept;
 

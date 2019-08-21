@@ -51,9 +51,9 @@ namespace basecode::compiler::data {
     public:
         hash_table_t(
                 std::initializer_list<std::pair<K, V>> elements,
-                memory::allocator_t* allocator) : _allocator(allocator),
-                                                  _pairs(allocator),
-                                                  _buckets(allocator) {
+                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator),
+                                                                                _pairs(allocator),
+                                                                                _buckets(allocator) {
             assert(_allocator);
             init();
             insert(elements);
@@ -73,9 +73,10 @@ namespace basecode::compiler::data {
             assert(_allocator);
         }
 
-        explicit hash_table_t(memory::allocator_t* allocator) : _allocator(allocator),
-                                                                _pairs(allocator),
-                                                                _buckets(allocator) {
+        explicit hash_table_t(
+                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator),
+                                                                                _pairs(allocator),
+                                                                                _buckets(allocator) {
             assert(_allocator);
             init();
         }
