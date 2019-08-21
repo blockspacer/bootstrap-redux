@@ -19,21 +19,18 @@
 #pragma once
 
 #include "allocator.h"
-#include "dlmalloc_config.h"
 
 namespace basecode::compiler::memory {
 
-    class dl_allocator_t : public allocator_t {
+    class stack_allocator_t : public allocator_t {
     public:
-        dl_allocator_t() = default;
+        stack_allocator_t() = default;
 
-        explicit dl_allocator_t(mspace* space);
-
-        ~dl_allocator_t() override;
+        ~stack_allocator_t() override;
 
         void* allocate(
             uint32_t size,
-            uint32_t align) override;
+            uint32_t align = default_align) override;
 
         void deallocate(void* p) override;
 
@@ -42,8 +39,7 @@ namespace basecode::compiler::memory {
         std::optional<uint32_t> allocated_size(void* p) override;
 
     private:
-        mspace* _space{};
-        uint32_t _total_allocated = 0;
+        uint32_t _total_allocated{};
     };
 
 }

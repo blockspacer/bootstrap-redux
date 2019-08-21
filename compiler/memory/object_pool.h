@@ -71,8 +71,8 @@ namespace basecode::compiler::memory {
             auto slab = _pools.find(type_id);
             assert(slab);
 
-            const auto& dtor = _objs.find(obj);
-            dtor.destroy(dtor.p);
+            auto dtor = _objs.find(obj);
+            dtor->destroy(dtor->p);
 
             _objs.remove(obj);
 
@@ -80,7 +80,7 @@ namespace basecode::compiler::memory {
         }
 
         template <typename T, typename... Args>
-        T* construct(Args... args) {
+        T* construct(Args&&... args) {
             auto type_id = family_t<>::template type<T>;
             auto slab = _pools.find(type_id);
             if (slab == nullptr) {

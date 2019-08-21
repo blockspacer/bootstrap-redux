@@ -39,6 +39,7 @@ add_library(
         memory/dlmalloc.c memory/dlmalloc.h
         memory/dl_allocator.cpp memory/dl_allocator.h
         memory/slab_allocator.cpp memory/slab_allocator.h
+        memory/stack_allocator.cpp memory/stack_allocator.h
         memory/proxy_allocator.cpp memory/proxy_allocator.h
         memory/trace_allocator.cpp memory/trace_allocator.h
         memory/system_allocator.cpp memory/system_allocator.h

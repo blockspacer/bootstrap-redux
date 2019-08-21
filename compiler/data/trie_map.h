@@ -55,18 +55,6 @@ namespace basecode::compiler::data {
             insert(elements);
         }
 
-        V search(std::string_view key) {
-            if (key.empty()) return nullptr;
-            node_t* current_node = nullptr;
-            for (const char c : key) {
-                current_node = find(current_node, c);
-                if (!current_node)
-                    return nullptr;
-            }
-            assert(current_node);
-            return current_node->data;
-        }
-
         void insert(std::string_view key, V value) {
             assert(!key.empty());
 
@@ -90,6 +78,24 @@ namespace basecode::compiler::data {
             }
 
             current_node->data = value;
+        }
+
+        decltype(auto) search(std::string_view key) {
+            node_t* current_node = nullptr;
+
+            for (const char c : key) {
+                current_node = find(current_node, c);
+                if (!current_node)
+                    break;
+            }
+
+            if constexpr (std::is_pointer<V>::value) {
+                V r = !current_node ? nullptr : current_node->data;
+                return r;
+            } else {
+                V* r = !current_node ? nullptr : &current_node->data;
+                return r;
+            }
         }
 
         node_t* find(node_t* node, const utf8::rune_t& rune) {

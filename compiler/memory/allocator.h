@@ -56,6 +56,10 @@ namespace basecode::compiler::memory {
             *p++ = header_pad_value;
     }
 
+    inline uint32_t size_with_padding(uint32_t size, uint32_t align) {
+        return size + align + sizeof(header_t);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     class allocator_t {
