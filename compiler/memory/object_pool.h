@@ -55,8 +55,8 @@ namespace basecode::compiler::memory {
 
         ~object_pool_t() {
             const auto& objs = _objs.values();
-            for (const auto& obj : objs)
-                obj.destroy(obj.p);
+            for (auto obj : objs)
+                obj->destroy(obj->p);
 
             const auto& slabs = _pools.values();
             for (auto slab : slabs) {

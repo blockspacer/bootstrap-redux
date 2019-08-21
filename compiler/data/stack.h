@@ -42,10 +42,6 @@ namespace basecode::compiler::data {
                                         _values(other._values) {
         }
 
-        T* top() {
-            return _values.empty() ? nullptr : &_values[_values.size() - 1];
-        }
-
         void pop() {
             if (!_values.empty())
                 _values.pop();
@@ -57,6 +53,16 @@ namespace basecode::compiler::data {
 
         void push(T& value) {
             _values.add(value);
+        }
+
+        decltype(auto) top() {
+            if constexpr (std::is_pointer<T>::value) {
+                T r = _values.empty() ? nullptr : _values[_values.size() - 1];
+                return r;
+            } else {
+                T* r = _values.empty() ? nullptr : &_values[_values.size() - 1];
+                return r;
+            }
         }
 
         const T* top() const {

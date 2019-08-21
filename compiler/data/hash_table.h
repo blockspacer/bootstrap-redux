@@ -132,7 +132,35 @@ namespace basecode::compiler::data {
             }
         }
 
-        V& insert(K key, V value) {
+        decltype(auto) values() const {
+            if constexpr (std::is_pointer<V>::value) {
+                array_t<V> list(_allocator);
+                list.resize(_size);
+
+                size_t i = 0, j = 0;
+                for (const auto& b : _buckets) {
+                    if (b.state == hash_bucket_state_t::s_filled)
+                        list[j++] = _pairs[i].value;
+                    ++i;
+                }
+
+                return list;
+            } else {
+                array_t<V*> list(_allocator);
+                list.resize(_size);
+
+                size_t i = 0, j = 0;
+                for (const auto& b : _buckets) {
+                    if (b.state == hash_bucket_state_t::s_filled)
+                        list[j++] = const_cast<V*>(&_pairs[i].value);
+                    ++i;
+                }
+
+                return list;
+            }
+        }
+
+        decltype(auto) insert(K key, V value) {
             if (_size * 3 > _buckets.size() * 2)
                 rehash(_buckets.size() * 2);
 
@@ -157,21 +185,11 @@ namespace basecode::compiler::data {
 
             ++_size;
 
-            return target_pair->value;
-        }
-
-        array_t<V> values() const {
-            array_t<V> list(_allocator);
-            list.resize(_size);
-
-            size_t i = 0, j = 0;
-            for (const auto& b : _buckets) {
-                if (b.state == hash_bucket_state_t::s_filled)
-                    list[j++] = _pairs[i].value;
-                ++i;
+            if constexpr (std::is_pointer<V>::value) {
+                return target_pair->value;
+            } else {
+                return &target_pair->value;
             }
-
-            return list;
         }
 
         void reserve(uint32_t new_size) {

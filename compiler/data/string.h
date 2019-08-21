@@ -40,9 +40,9 @@ namespace basecode::compiler::data {
             std::string_view value,
             memory::allocator_t* allocator = memory::default_allocator());
 
-        string_t(const string_t& other);
-
         string_t(const std::string& other);
+
+        string_t(const string_t& other);
 
         string_t(string_t&& other) noexcept;
 
@@ -84,7 +84,11 @@ namespace basecode::compiler::data {
 
         void append(const char* value);
 
+        std::string_view slice() const;
+
         [[nodiscard]] bool empty() const;
+
+        std::string as_std_string() const;
 
         [[nodiscard]] uint32_t size() const;
 
@@ -114,6 +118,8 @@ namespace basecode::compiler::data {
 
         string_t& operator=(string_t&& other) noexcept;
 
+        string_t& insert(size_t pos, size_t n, char c);
+
         [[nodiscard]] memory::allocator_t* allocator() const;
 
         bool operator==(const std::string_view& other) const;
@@ -132,4 +138,5 @@ namespace basecode::compiler::data {
         uint32_t _capacity{};
         memory::allocator_t* _allocator;
     };
+
 }

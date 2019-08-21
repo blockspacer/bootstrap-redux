@@ -526,7 +526,7 @@ namespace basecode::compiler::language::core::lexer {
                             _buffer.pos() - block_start - 1);
 
                         if (!blocks.empty()) {
-                            current_block = *blocks.top();
+                            current_block = blocks.top();
                             blocks.pop();
                         }
                     }

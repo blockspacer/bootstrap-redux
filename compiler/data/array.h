@@ -42,12 +42,19 @@ namespace basecode::compiler::data {
             insert(elements);
         }
 
+        array_t(
+                std::initializer_list<const char*> elements,
+                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            assert(_allocator);
+            insert(elements);
+        }
+
         array_t(const array_t& other) : _allocator(other._allocator) {
             assert(_allocator);
             const auto n = other._size;
-            set_capacity(n);
-            std::memcpy(_data, other._data, n * sizeof(T));
-            _size = n;
+            grow(n);
+            for (size_t i = 0; i < n; i++)
+                _data[_size++] = other._data[i];
         }
 
         array_t(array_t&& other) noexcept : _data(other._data),
@@ -198,10 +205,13 @@ namespace basecode::compiler::data {
         }
 
         array_t& operator=(const array_t& other) {
+            if (!_allocator)
+                _allocator = other._allocator;
             auto n = other._size;
-            resize(n);
-            std::memcpy(_data, other._data, n * sizeof(T));
-            _allocator = other._allocator;
+            grow(n);
+            for (size_t i = 0; i < n; i++)
+                _data[i] = other._data[i];
+            _size = n;
             return *this;
         }
 
@@ -252,6 +262,7 @@ namespace basecode::compiler::data {
                 new_data = (T*)_allocator->allocate(
                     new_capacity * sizeof(T),
                     alignof(T));
+                std::memset(new_data, 0, new_capacity * sizeof(T));
                 if (_data)
                     std::memcpy(new_data, _data, _size * sizeof(T));
             }
@@ -268,6 +279,12 @@ namespace basecode::compiler::data {
 
         void grow(uint32_t min_capacity = Initial_Capacity) {
             set_capacity(std::max(_capacity * 2 + 8, min_capacity));
+        }
+
+        void insert(std::initializer_list<const char*> elements) {
+            reserve(elements.size());
+            for (const auto& e : elements)
+                _data[_size++] = e;
         }
 
     private:

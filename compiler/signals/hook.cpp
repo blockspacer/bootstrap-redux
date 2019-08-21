@@ -55,7 +55,7 @@ namespace basecode::compiler::signals {
     bool hook(int sig, handler_t* handler) {
         auto action = s_actions->find(sig);
         if (!action) {
-            action = &s_actions->insert(sig, action_t(s_allocator));
+            action = s_actions->insert(sig, action_t(s_allocator));
             action->sigact.sa_flags = 0;
             sigemptyset(&action->sigact.sa_mask);
             action->sigact.sa_handler = on_signal;

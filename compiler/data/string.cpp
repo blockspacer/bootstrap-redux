@@ -26,7 +26,7 @@ namespace basecode::compiler::data {
         assert(_allocator);
         assert(value);
         const auto n = strlen(value);
-        set_capacity(n);
+        grow(n);
         std::memcpy(_data, value, n * sizeof(char));
         _size = n;
     }
@@ -37,7 +37,7 @@ namespace basecode::compiler::data {
         assert(_allocator);
         assert(!value.empty());
         const auto n = value.size();
-        set_capacity(n);
+        grow(n);
         std::memcpy(_data, value.data(), n * sizeof(char));
         _size = n;
     }
@@ -49,7 +49,7 @@ namespace basecode::compiler::data {
     string_t::string_t(const string_t& other) : _allocator(other._allocator) {
         assert(_allocator);
         const auto n = other._size;
-        set_capacity(n);
+        grow(n);
         std::memcpy(_data, other._data, n * sizeof(char));
         _size = n;
     }
@@ -63,7 +63,7 @@ namespace basecode::compiler::data {
 
     string_t::string_t(const std::string& other) : _allocator(memory::default_allocator()) {
         const auto n = other.size();
-        set_capacity(n);
+        grow(n);
         std::memcpy(_data, other.data(), n * sizeof(char));
         _size = n;
     }
@@ -188,6 +188,10 @@ namespace basecode::compiler::data {
             _data[_size++] = value[i++];
     }
 
+    std::string_view string_t::slice() const {
+        return std::string_view(_data, _size);
+    }
+
     char& string_t::operator[](size_t index) {
         return _data[index];
     }
@@ -201,14 +205,21 @@ namespace basecode::compiler::data {
         set_capacity(std::max(_capacity * 2 + 8, min_capacity));
     }
 
+    std::string string_t::as_std_string() const {
+        return std::string(_data, _size);
+    }
+
     void string_t::reserve(uint32_t new_capacity) {
         if (new_capacity > _capacity)
             set_capacity(new_capacity);
     }
 
     string_t& string_t::operator=(const char* other) {
+        assert(!_moved);
         const auto n = strlen(other);
-        set_capacity(n);
+        if (!_allocator)
+            _allocator = memory::default_allocator();
+        grow(n);
         std::memcpy(_data, other, n * sizeof(char));
         _size = n;
         return *this;
@@ -227,9 +238,11 @@ namespace basecode::compiler::data {
         char* new_data{};
         if (new_capacity > 0) {
             new_data = (char*)_allocator->allocate(new_capacity * sizeof(char));
+            std::memset(new_data, 0, new_capacity * sizeof(char));
             if (_data)
                 std::memcpy(new_data, _data, _size * sizeof(char));
         }
+
         _allocator->deallocate(_data);
         _data = new_data;
         _capacity = new_capacity;
@@ -240,10 +253,14 @@ namespace basecode::compiler::data {
     }
 
     string_t& string_t::operator=(const string_t& other) {
+        assert(!_moved);
+        if (this == &other) return *this;
+        if (!_allocator)
+            _allocator = other._allocator;
         auto n = other._size;
-        resize(n);
+        grow(n);
         std::memcpy(_data, other._data, n * sizeof(char));
-        _allocator = other._allocator;
+        _size = n;
         return *this;
     }
 
@@ -270,6 +287,12 @@ namespace basecode::compiler::data {
         return std::memcmp(_data, other._data, _size) == 0;
     }
 
+    string_t& string_t::insert(size_t pos, size_t n, char c) {
+        for (size_t i = 0; i < n; i++)
+            insert(_data + pos++, c);
+        return *this;
+    }
+
     string_t& string_t::operator=(string_t&& other) noexcept {
         assert(_allocator == other._allocator);
         _allocator->deallocate(_data);
@@ -278,6 +301,9 @@ namespace basecode::compiler::data {
         _capacity = other._capacity;
         _allocator = other._allocator;
         other._moved = true;
+        other._data = nullptr;
+        other._allocator = nullptr;
+        other._size = other._capacity = 0;
         return *this;
     }
 
