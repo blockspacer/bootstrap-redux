@@ -43,37 +43,37 @@ namespace basecode::logging {
         virtual ~logger_t() = default;
 
         template <typename... Args>
-        void info(const std::string& format, const Args& ... args) {
+        void info(std::string_view format, const Args& ... args) {
             on_log(log_level_t::info, fmt::format(format, args...));
         }
 
         template <typename... Args>
-        void warn(const std::string& format, const Args& ... args) {
+        void warn(std::string_view format, const Args& ... args) {
             on_log(log_level_t::warn, fmt::format(format, args...));
         }
 
         template <typename... Args>
-        void debug(const std::string& format, const Args& ... args) {
+        void debug(std::string_view format, const Args& ... args) {
             on_log(log_level_t::debug, fmt::format(format, args...));
         }
 
         template <typename... Args>
-        void trace(const std::string& format, const Args& ... args) {
+        void trace(std::string_view format, const Args& ... args) {
             on_log(log_level_t::trace, fmt::format(format, args...));
         }
 
         template <typename... Args>
-        void error(const std::string& format, const Args& ... args) {
+        void error(std::string_view format, const Args& ... args) {
             on_log(log_level_t::error, fmt::format(format, args...));
         }
 
         template <typename... Args>
-        void critical(const std::string& format, const Args& ... args) {
+        void critical(std::string_view format, const Args& ... args) {
             on_log(log_level_t::critical, fmt::format(format, args...));
         }
 
     protected:
-        virtual void on_log(log_level_t level, const std::string& message) = 0;
+        virtual void on_log(log_level_t level, std::string_view message) = 0;
     };
 
 }

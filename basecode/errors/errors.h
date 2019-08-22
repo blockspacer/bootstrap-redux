@@ -285,3 +285,9 @@ namespace basecode::errors {
     }
 
 }
+
+namespace basecode::adt {
+
+    template <> uint64_t hash_key(basecode::errors::error_decl_key_t key);
+
+}

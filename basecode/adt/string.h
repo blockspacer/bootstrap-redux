@@ -88,11 +88,19 @@ namespace basecode::adt {
 
         void append(const char* value);
 
+        operator std::string () const {
+            return std::string(_data, _size);
+        }
+
         [[nodiscard]] bool empty() const;
 
         [[nodiscard]] uint32_t size() const;
 
         void reserve(uint32_t new_capacity);
+
+        operator std::string_view () const {
+            return std::string_view(_data, _size);
+        }
 
         [[nodiscard]] const char* end() const;
 
@@ -105,6 +113,8 @@ namespace basecode::adt {
         [[nodiscard]] uint32_t capacity() const;
 
         [[nodiscard]] const char* begin() const;
+
+        [[nodiscard]] const char* c_str() const;
 
         bool operator==(const char* other) const;
 

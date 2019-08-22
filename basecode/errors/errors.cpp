@@ -240,3 +240,9 @@ namespace basecode::errors {
     }
 
 }
+
+template<>
+uint64_t basecode::adt::hash_key(basecode::errors::error_decl_key_t key) {
+    const auto composite_key = fmt::format("{}:{}", key.locale, key.code);
+    return hashing::murmur::hash64(composite_key.data(), composite_key.size());
+}

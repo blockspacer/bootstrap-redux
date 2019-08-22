@@ -42,7 +42,7 @@ namespace basecode::logging {
         return _entries[index];
     }
 
-    void fake_logger_t::on_log(log_level_t level, const std::string& message) {
+    void fake_logger_t::on_log(log_level_t level, std::string_view message) {
         fmt::print("[{}] {}\n", log_level_name(level), message);
         _entries.emplace(level, message);
     }

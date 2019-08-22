@@ -97,10 +97,7 @@ namespace fmt {
         auto format(
                 const adt::string_t& str,
                 FormatContext& ctx) {
-            return format_to(
-                ctx.out(),
-                "{}",
-                std::string_view(str.begin(), str.size()));
+            return format_to(ctx.out(), "{}", str.slice());
         }
     };
 

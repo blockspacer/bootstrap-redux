@@ -185,6 +185,13 @@ namespace basecode::adt {
         return _data;
     }
 
+    const char* string_t::c_str() const {
+        auto self = const_cast<string_t*>(this);
+        if (_size + 1 > _capacity) self->grow();
+        _data[_size + 1] = '\0';
+        return _data;
+    }
+
     char* string_t::erase(const char* it) {
         const auto offset = it - _data;
         std::memmove(
@@ -253,7 +260,6 @@ namespace basecode::adt {
         char* new_data{};
         if (new_capacity > 0) {
             new_data = (char*)_allocator->allocate(new_capacity * sizeof(char));
-            std::memset(new_data, 0, new_capacity * sizeof(char));
             if (_data)
                 std::memcpy(new_data, _data, _size * sizeof(char));
         }

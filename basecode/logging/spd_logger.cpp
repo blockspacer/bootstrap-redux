@@ -37,7 +37,7 @@ namespace basecode::logging {
         return true;
     }
 
-    void spd_logger_t::on_log(log_level_t level, const std::string& message) {
+    void spd_logger_t::on_log(log_level_t level, std::string_view message) {
         switch (level) {
             case log_level_t::info:
                 _logger->info(message);

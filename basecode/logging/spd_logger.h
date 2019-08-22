@@ -37,7 +37,7 @@ namespace basecode::logging {
         bool shutdown(result_t& r);
 
     protected:
-        void on_log(log_level_t level, const std::string& message) override;
+        void on_log(log_level_t level, std::string_view message) override;
 
     private:
         spdlog::logger* _logger{};

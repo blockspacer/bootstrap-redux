@@ -52,7 +52,7 @@ namespace basecode::logging {
         fake_log_entry_t& operator[] (size_t index);
 
     protected:
-        void on_log(log_level_t level, const std::string& message) override;
+        void on_log(log_level_t level, std::string_view message) override;
 
     private:
         fake_log_entry_list_t _entries;
