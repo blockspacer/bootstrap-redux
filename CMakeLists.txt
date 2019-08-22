@@ -149,10 +149,10 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 # sub-projects
 add_subdirectory(bc)
-add_subdirectory(compiler)
+add_subdirectory(basecode)
 
 # post build
-add_custom_target(basecode-configured DEPENDS dummy-target compiler bc tinycc test-core-lexer test-core-parser)
+add_custom_target(basecode-configured DEPENDS dummy-target basecode bc)
 add_custom_command(
         TARGET basecode-configured
 

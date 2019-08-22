@@ -11,6 +11,6 @@ add_executable(
 target_link_libraries(
         ${PROJECT_NAME}
 
-        compiler
+        basecode
         boost-program_options
 )
