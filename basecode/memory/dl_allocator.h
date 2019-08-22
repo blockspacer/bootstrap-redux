@@ -27,7 +27,7 @@ namespace basecode::memory {
     public:
         dl_allocator_t() = default;
 
-        explicit dl_allocator_t(mspace* space);
+        explicit dl_allocator_t(mspace space);
 
         ~dl_allocator_t() override;
 
@@ -42,7 +42,7 @@ namespace basecode::memory {
         std::optional<uint32_t> allocated_size(void* p) override;
 
     private:
-        mspace* _space{};
+        mspace _space{};
         uint32_t _total_allocated = 0;
     };
 

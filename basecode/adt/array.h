@@ -31,20 +31,20 @@ namespace basecode::adt {
     class array_t final {
     public:
         explicit array_t(
-            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
         array_t(
-            std::initializer_list<T> elements,
-            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
+                std::initializer_list<T> elements,
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
 
         array_t(
-            std::initializer_list<const char*> elements,
-            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
+                std::initializer_list<const char*> elements,
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
@@ -66,13 +66,7 @@ namespace basecode::adt {
 
         ~array_t() {
             if (_moved) return;
-            if (_data) {
-                for (size_t i = 0; i < _size; i++) {
-                    auto p = &_data[i];
-                    p->~T();
-                }
-                _allocator->deallocate(_data);
-            }
+            if (_data)  deallocate_data();
         }
 
         T* end() {
@@ -104,10 +98,9 @@ namespace basecode::adt {
         }
 
         void clear() {
-            for (size_t i = 0; i < _size; i++) {
-                auto p = &_data[i];
-                p->~T();
-            }
+            for (size_t i = 0; i < _size; i++)
+                (&_data[i])->~T();
+            std::memset(_data, 0, _capacity * sizeof(T));
             resize(0);
         }
 
@@ -138,6 +131,7 @@ namespace basecode::adt {
 
         T* erase(const T* it) {
             const auto offset = it - _data;
+            (&_data[offset])->~T();
             std::memmove(
                 _data + offset,
                 _data + offset + 1,
@@ -182,7 +176,7 @@ namespace basecode::adt {
                     _data + offset,
                     (_size - offset) * sizeof(T));
             }
-            std::memcpy(&_data[offset], &v, sizeof(T));
+            _data[offset] = v;
             _size++;
             return _data + offset;
         }
@@ -209,8 +203,10 @@ namespace basecode::adt {
                 _allocator = other._allocator;
             auto n = other._size;
             grow(n);
-            for (size_t i = 0; i < n; i++)
+            for (size_t i = 0; i < n; i++) {
+                if (i < _size) (&_data[i])->~T();
                 _data[i] = other._data[i];
+            }
             _size = n;
             return *this;
         }
@@ -218,6 +214,8 @@ namespace basecode::adt {
         T* erase(const T* it_begin, const T* it_end) {
             const auto count = it_end - it_begin;
             const auto offset = it_begin - _data;
+            for (size_t i = 0; i < count; i++)
+                (&_data[offset + i])->~T();
             std::memmove(
                 _data + offset,
                 _data + offset + count,
@@ -230,7 +228,7 @@ namespace basecode::adt {
             assert(_allocator == other._allocator);
 
             // free any memory we're already using
-            _allocator->deallocate(_data);
+            deallocate_data();
 
             _data = other._data;
             _size = other._size;
@@ -251,6 +249,12 @@ namespace basecode::adt {
         }
 
     private:
+        void deallocate_data() {
+            for (size_t i = 0; i < _size; i++)
+                (&_data[i])->~T();
+            _allocator->deallocate(_data);
+        }
+
         void set_capacity(uint32_t new_capacity) {
             if (new_capacity == _capacity) return;
 

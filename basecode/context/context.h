@@ -28,11 +28,7 @@ namespace basecode::logging {
 
 namespace basecode::context {
 
-    struct context_t final {
-        void* user{};
-        logging::logger_t* logger{};
-        memory::allocator_t* allocator{};
-    };
+    struct context_t;
 
     void pop();
 
@@ -45,5 +41,12 @@ namespace basecode::context {
     context_t* current();
 
     void push(context_t* ctx);
+
+    struct context_t final {
+        ~context_t() { pop(); }
+        void* user{};
+        logging::logger_t* logger{};
+        memory::allocator_t* allocator{};
+    };
 
 }

@@ -20,7 +20,7 @@
 
 namespace basecode::memory {
 
-    dl_allocator_t::dl_allocator_t(mspace* space) : _space(space) {
+    dl_allocator_t::dl_allocator_t(mspace space) : _space(space) {
     }
 
     dl_allocator_t::~dl_allocator_t() {

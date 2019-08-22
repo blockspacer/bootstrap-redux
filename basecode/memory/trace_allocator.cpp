@@ -24,29 +24,47 @@ using namespace std::literals;
 
 namespace basecode::memory {
 
-    trace_allocator_t::trace_allocator_t(allocator_t* backing) : _backing(backing) {
+    trace_allocator_t::trace_allocator_t(
+            allocator_t* backing,
+            size_t debug_heap_size) : _debug_heap(create_mspace(debug_heap_size, 0)),
+                                      _backing(backing),
+                                      _debug_allocator(_debug_heap) {
         _stream_factory.enabled(true);
         _stream = _stream_factory.use_memory_buffer(_buffer);
     }
 
     trace_allocator_t::~trace_allocator_t() {
-        fmt::print("{}\n", _stream->format());
+        {
+            auto debug_context = *context::current();
+            debug_context.allocator = &_debug_allocator;
+            context::push(&debug_context);
+
+            fmt::print("{}\n", _stream->format());
+        }
+        destroy_mspace(_debug_heap);
     }
 
     void* trace_allocator_t::allocate(
-            uint32_t size,
-            uint32_t align) {
+        uint32_t size,
+        uint32_t align) {
         boost::stacktrace::stacktrace trace(2, 2);
-        _stream->color(
-            terminal::colors_t::default_color,
-            terminal::colors_t::yellow);
-        for (int32_t i = trace.size() - 1; i >= 0; --i) {
-            if (i != trace.size() - 1) _stream->append(" -> "sv);
-            const auto& frame = trace[i];
-            if (frame.empty()) continue;
-            _stream->append(frame.name());
+
+        {
+            auto debug_context = *context::current();
+            debug_context.allocator = &_debug_allocator;
+            context::push(&debug_context);
+
+            _stream->color(
+                terminal::colors_t::default_color,
+                terminal::colors_t::yellow);
+            for (int32_t i = trace.size() - 1; i >= 0; --i) {
+                if (i != trace.size() - 1) _stream->append(" -> "sv);
+                const auto& frame = trace[i];
+                if (frame.empty()) continue;
+                _stream->append(frame.name());
+            }
+            _stream->append("\n"sv)->color_reset();
         }
-        _stream->append("\n"sv)->color_reset();
 
         auto p = _backing->allocate(size, align);
         return p;
@@ -54,16 +72,23 @@ namespace basecode::memory {
 
     void trace_allocator_t::deallocate(void* p) {
         boost::stacktrace::stacktrace trace(2, 2);
-        _stream->color(
-            terminal::colors_t::default_color,
-            terminal::colors_t::green);
-        for (int32_t i = trace.size() - 1; i >= 0; --i) {
-            if (i != trace.size() - 1) _stream->append(" -> "sv);
-            const auto& frame = trace[i];
-            if (frame.empty()) continue;
-            _stream->append(frame.name());
+
+        {
+            auto debug_context = *context::current();
+            debug_context.allocator = &_debug_allocator;
+            context::push(&debug_context);
+
+            _stream->color(
+                terminal::colors_t::default_color,
+                terminal::colors_t::green);
+            for (int32_t i = trace.size() - 1; i >= 0; --i) {
+                if (i != trace.size() - 1) _stream->append(" -> "sv);
+                const auto& frame = trace[i];
+                if (frame.empty()) continue;
+                _stream->append(frame.name());
+            }
+            _stream->append("\n"sv)->color_reset();
         }
-        _stream->append("\n"sv)->color_reset();
 
         _backing->deallocate(p);
     }

@@ -21,17 +21,19 @@
 namespace basecode::logging {
 
     spd_logger_t::spd_logger_t(spdlog::logger* logger): _logger(logger) {
+        assert(logger);
     }
 
     bool spd_logger_t::initialize(
-        result_t& r,
-        spdlog::level::level_enum level) {
+            result_t& r,
+            spdlog::level::level_enum level) {
         _logger->set_level(level);
         _logger->set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
         return true;
     }
 
     bool spd_logger_t::shutdown(result_t& r) {
+        memory::destroy(_logger);
         return true;
     }
 

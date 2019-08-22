@@ -19,13 +19,15 @@
 #pragma once
 
 #include <basecode/terminal/stream_factory.h>
-#include "allocator.h"
+#include "dl_allocator.h"
 
 namespace basecode::memory {
 
     class trace_allocator_t : public allocator_t {
     public:
-        explicit trace_allocator_t(allocator_t* backing);
+        explicit trace_allocator_t(
+            allocator_t* backing,
+            size_t debug_heap_size = 2 * 1024 * 1024);
 
         ~trace_allocator_t() override;
 
@@ -40,8 +42,10 @@ namespace basecode::memory {
         std::optional<uint32_t> allocated_size(void *p) override;
 
     private:
+        mspace _debug_heap{};
         allocator_t* _backing{};
         fmt::memory_buffer _buffer{};
+        dl_allocator_t _debug_allocator;
         terminal::stream_unique_ptr_t _stream{};
         terminal::stream_factory_t _stream_factory{};
     };
