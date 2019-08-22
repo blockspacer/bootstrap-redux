@@ -82,7 +82,6 @@ add_library(
 
         terminal/stream_factory.cpp terminal/stream_factory.h
 
-        language/lexeme_trie.h
         language/common.cpp language/common.h
 
         language/assembly/lexer/token.cpp language/assembly/lexer/token.h

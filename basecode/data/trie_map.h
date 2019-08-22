@@ -16,6 +16,8 @@
 //
 // ----------------------------------------------------------------------------
 
+#pragma once
+
 #include <utility>
 #include <basecode/types.h>
 #include <basecode/utf8/rune.h>

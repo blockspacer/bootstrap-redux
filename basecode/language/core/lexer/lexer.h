@@ -20,9 +20,9 @@
 
 #include <utility>
 #include <basecode/types.h>
+#include <basecode/data/trie_map.h>
 #include <basecode/data/hash_table.h>
 #include <basecode/workspace/session.h>
-#include <basecode/language/lexeme_trie.h>
 #include "token.h"
 
 namespace basecode::language::core::lexer {
@@ -40,7 +40,8 @@ namespace basecode::language::core::lexer {
         lexeme_tokenizer_t tokenizer{};
     };
 
-    using lexer_trie_t = lexeme_trie_t<lexeme_t>;
+    using lexer_trie_t = data::trie_map_t<lexeme_t*>;
+    using lexeme_init_list_t = std::initializer_list<std::pair<std::string_view, lexeme_t>>;
 
     using entity_maker_t = std::function<entt::entity (
         token_type_t type,
@@ -105,6 +106,7 @@ namespace basecode::language::core::lexer {
         lexer_trie_t* _lexemes{};
         utf8::source_buffer_t& _buffer;
         workspace::session_t& _session;
+        memory::object_pool_t _storage;
         const utf8::source_buffer_line_t* _source_line{};
     };
 
