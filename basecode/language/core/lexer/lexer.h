@@ -20,6 +20,7 @@
 
 #include <utility>
 #include <basecode/types.h>
+#include <basecode/errors/errors.h>
 #include <basecode/data/trie_map.h>
 #include <basecode/data/hash_table.h>
 #include <basecode/workspace/session.h>
@@ -29,7 +30,7 @@ namespace basecode::language::core::lexer {
 
     class lexer_t;
 
-    using lexeme_tokenizer_t = std::function<bool (
+    using tokenizer_t = std::function<bool (
         lexer_t*,
         result_t&,
         entity_list_t&)>;
@@ -37,17 +38,20 @@ namespace basecode::language::core::lexer {
     struct lexeme_t final {
         bool keyword{};
         token_type_t type{};
-        lexeme_tokenizer_t tokenizer{};
+        tokenizer_t tokenizer{};
     };
 
     using lexer_trie_t = data::trie_map_t<lexeme_t*>;
-    using lexeme_init_list_t = std::initializer_list<std::pair<std::string_view, lexeme_t>>;
 
     using entity_maker_t = std::function<entt::entity (
         token_type_t type,
         size_t,
         size_t,
         std::string_view)>;
+
+    using lexeme_init_list_t = std::initializer_list<std::pair<
+        std::string_view,
+        lexeme_t>>;
 
     class lexer_t final {
     public:
@@ -81,6 +85,21 @@ namespace basecode::language::core::lexer {
         bool binary_number_literal(result_t& r, entity_list_t& entities);
 
     private:
+        template <typename... Args>
+        void add_source_highlighted_error(
+                result_t& r,
+                errors::error_code_t code,
+                size_t start_pos,
+                Args&&... args) {
+            errors::add_source_highlighted_error(
+                r,
+                _session.intern_pool(),
+                code,
+                _buffer,
+                make_location(start_pos, _buffer.pos() - start_pos),
+                std::forward<Args>(args)...);
+        }
+
         bool make_number_token(
                 result_t& r, 
                 entity_list_t& entities,
