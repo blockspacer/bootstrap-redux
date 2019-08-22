@@ -20,7 +20,7 @@
 #include "system.h"
 #include "slab_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     slab_allocator_t::slab_allocator_t(
             allocator_t* backing,

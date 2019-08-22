@@ -23,7 +23,7 @@
 #include <compiler/language/core/lexer/token.h>
 #include "ast.h"
 
-namespace basecode::compiler::language::core::ast {
+namespace basecode::language::core::ast {
 
     std::string_view node_type_to_name(node_type_t type) {
         switch (type) {

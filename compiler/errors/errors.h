@@ -26,7 +26,7 @@
 #include <compiler/utf8/source_buffer.h>
 #include <compiler/terminal/stream_factory.h>
 
-namespace basecode::compiler::errors {
+namespace basecode::errors {
 
     using error_code_t = uint32_t;
 
@@ -95,11 +95,11 @@ namespace basecode::compiler::errors {
 
     ///////////////////////////////////////////////////////////////////////////
 
+    bool shutdown();
+
     bool initialize(
         result_t& r,
         memory::allocator_t* allocator = memory::default_allocator());
-
-    bool shutdown(result_t& r);
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -283,20 +283,5 @@ namespace basecode::compiler::errors {
         auto interned_details = intern_pool.intern(fmt::to_string(stream));
         r.error(decl->code, interned_message, loc, interned_details);
     }
-
-}
-
-namespace std {
-
-    template<>
-    struct hash<basecode::compiler::errors::error_decl_key_t> {
-        std::size_t operator()(const basecode::compiler::errors::error_decl_key_t& key) const {
-            fmt::memory_buffer buffer{};
-            fmt::format_to(buffer, "{}:{}", key.locale, key.code);
-            return basecode::compiler::hashing::murmur::hash64(
-                buffer.data(),
-                buffer.size());
-        }
-    };
 
 }

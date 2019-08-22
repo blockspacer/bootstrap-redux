@@ -20,7 +20,7 @@
 #include <fmt/format.h>
 #include "text.h"
 
-namespace basecode::compiler::io::text {
+namespace basecode::io::text {
 
     bool read(
             result_t& r,

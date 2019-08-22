@@ -18,7 +18,7 @@
 
 #include "pool.h"
 
-namespace basecode::compiler::id {
+namespace basecode::id {
 
     pool_t::pool_t() {
         _set.insert(interval_t(1, std::numeric_limits<type_t>::max()));

@@ -27,7 +27,7 @@
 #include "array.h"
 #include "hash_table.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename V>
     struct directed_edge_t {
@@ -47,8 +47,9 @@ namespace basecode::compiler::data {
         using edge_map_t = hash_table_t<vertex_t, edge_list_t>;
         using transpose_callback_t = std::function<directed_edge_t (const directed_edge_t&)>;
 
-        explicit directed_graph_t(memory::allocator_t* allocator) : _graph(_allocator),
-                                                                    _allocator(allocator) {
+        explicit directed_graph_t(
+            memory::allocator_t* allocator = context::current()->allocator) : _graph(_allocator),
+                                                                              _allocator(allocator) {
         }
 
         vertex_set_t vertices() const {

@@ -19,7 +19,7 @@
 #include <compiler/data/hash_table.h>
 #include "errors.h"
 
-namespace basecode::compiler::errors {
+namespace basecode::errors {
 
     struct error_system_t final {
         explicit error_system_t(
@@ -220,7 +220,7 @@ namespace basecode::compiler::errors {
         return true;
     }
 
-    bool shutdown(result_t& r) {
+    bool shutdown() {
         auto allocator = g_error_system->allocator;
         g_error_system->~error_system_t();
         allocator->deallocate(g_error_system);

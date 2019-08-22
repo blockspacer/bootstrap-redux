@@ -19,20 +19,25 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 #include <compiler/defer.h>
+#include <compiler/signals/hook.h>
 #include <compiler/memory/system.h>
 #include <compiler/errors/errors.h>
 
-using namespace basecode::compiler;
+using namespace basecode;
 
 int main(int argc, char** argv) {
     memory::initialize();
+    context::initialize(memory::default_scratch_allocator());
 
-    result_t r{};
-    if (!errors::initialize(r))
-        return 1;
+    result_t r;
+    if (!errors::initialize(r))  return 1;
+
+    if (!signals::initialize(r)) return 1;
 
     defer({
-        errors::shutdown(r);
+        signals::shutdown();
+        errors::shutdown();
+        context::shutdown();
         memory::shutdown();
     });
 

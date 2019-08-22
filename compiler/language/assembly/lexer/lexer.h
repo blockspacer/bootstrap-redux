@@ -18,7 +18,7 @@
 
 #pragma once
 
-namespace basecode::compiler::language::assembly::lexer {
+namespace basecode::language::assembly::lexer {
 
 
 }

@@ -26,7 +26,7 @@
 #include <compiler/memory/frame_allocator.h>
 #include <compiler/language/core/lexer/token.h>
 
-namespace basecode::compiler::language::core::parser {
+namespace basecode::language::core::parser {
 
     using namespace std::literals;
 

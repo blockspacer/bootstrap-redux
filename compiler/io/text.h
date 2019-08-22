@@ -20,8 +20,9 @@
 
 #include <iostream>
 #include <compiler/types.h>
+#include <compiler/result.h>
 
-namespace basecode::compiler::io::text {
+namespace basecode::io::text {
 
     bool read(
         result_t& r,

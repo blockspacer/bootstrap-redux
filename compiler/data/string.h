@@ -25,20 +25,20 @@
 #include <string_view>
 #include <compiler/memory/system.h>
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     class string_t final {
     public:
         explicit string_t(
-            memory::allocator_t* allocator = memory::default_allocator());
+            memory::allocator_t* allocator = context::current()->allocator);
 
         explicit string_t(
             const char* value,
-            memory::allocator_t* allocator = memory::default_allocator());
+            memory::allocator_t* allocator = context::current()->allocator);
 
         explicit string_t(
             std::string_view value,
-            memory::allocator_t* allocator = memory::default_allocator());
+            memory::allocator_t* allocator = context::current()->allocator);
 
         string_t(const std::string& other);
 

@@ -18,7 +18,7 @@
 
 #include "proxy_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     proxy_allocator_t::proxy_allocator_t(
             std::string name,

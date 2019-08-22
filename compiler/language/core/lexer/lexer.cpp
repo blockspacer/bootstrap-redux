@@ -23,7 +23,7 @@
 #include <compiler/formatters/formatters.h>
 #include "lexer.h"
 
-namespace basecode::compiler::language::core::lexer {
+namespace basecode::language::core::lexer {
 
     lexer_t::lexer_t(
             workspace::session_t& session,
@@ -44,7 +44,6 @@ namespace basecode::compiler::language::core::lexer {
                 sizeof(lexer_trie_t),
                 alignof(lexer_trie_t));
             new (_lexemes) lexer_trie_t(
-                _session.allocator(),
                 {
                     {"0"sv,           lexeme_t{.type = token_type_t::number_literal, .tokenizer = &lexer_t::dec_number_literal}},
                     {"1"sv,           lexeme_t{.type = token_type_t::number_literal, .tokenizer = &lexer_t::dec_number_literal}},

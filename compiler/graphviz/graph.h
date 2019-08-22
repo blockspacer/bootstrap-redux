@@ -24,7 +24,7 @@
 #include "node.h"
 #include "attribute_container.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     enum class graph_type_t {
         undirected,

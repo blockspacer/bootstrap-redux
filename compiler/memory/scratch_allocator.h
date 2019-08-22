@@ -21,7 +21,7 @@
 #include <string_view>
 #include "system_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class scratch_allocator_t : public allocator_t {
     public:

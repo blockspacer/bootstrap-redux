@@ -19,7 +19,7 @@
 #include <compiler/memory/system.h>
 #include "pool.h"
 
-namespace basecode::compiler::strings {
+namespace basecode::strings {
 
     pool_t::pool_t(
             memory::allocator_t* allocator,

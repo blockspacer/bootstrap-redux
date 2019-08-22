@@ -25,17 +25,17 @@
 namespace basecode {
 
     using namespace std::literals;
-    using namespace compiler;
-    using namespace compiler::language;
-    using namespace compiler::language::core;
+    using namespace basecode;
+    using namespace basecode::language;
+    using namespace basecode::language::core;
 
     [[maybe_unused]] static void format_tokens(
-            basecode::compiler::workspace::session_t& session,
-            compiler::entity_list_t& tokens) {
+            workspace::session_t& session,
+            entity_list_t& tokens) {
         auto& registry = session.registry();
         for (auto entity : tokens) {
             const auto& token = registry.get<lexer::token_t>(entity);
-            const auto& source_location = registry.get<compiler::source_location_t>(entity);
+            const auto& source_location = registry.get<source_location_t>(entity);
             fmt::print("token = {}", token);
             if (registry.has<number_token_t>(entity)) {
                 const auto& number_token = registry.get<number_token_t>(entity);

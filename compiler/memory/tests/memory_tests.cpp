@@ -26,8 +26,8 @@
 namespace basecode {
 
     using namespace std::literals;
-    using namespace compiler;
-    using namespace compiler::memory;
+    using namespace basecode;
+    using namespace basecode::memory;
 
     TEST_CASE("slab_allocator_t") {
         trace_allocator_t tracer(memory::default_scratch_allocator());

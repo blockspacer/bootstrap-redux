@@ -18,7 +18,7 @@
 
 #include "token.h"
 
-namespace basecode::compiler::language::assembly::lexer {
+namespace basecode::language::assembly::lexer {
 
     std::string_view token_type_to_name(token_type_t type) {
         switch (type) {

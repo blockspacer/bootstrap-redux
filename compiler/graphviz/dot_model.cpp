@@ -22,7 +22,7 @@
 #include "dot_model.h"
 #include "attribute.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     dot_model_t::dot_model_t(
             memory::allocator_t* allocator,

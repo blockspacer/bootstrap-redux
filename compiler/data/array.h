@@ -25,26 +25,26 @@
 #include <compiler/numbers/bytes.h>
 #include <compiler/memory/system.h>
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename T, std::uint32_t Initial_Capacity = 16>
     class array_t final {
     public:
         explicit array_t(
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
         array_t(
-                std::initializer_list<T> elements,
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            std::initializer_list<T> elements,
+            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
 
         array_t(
-                std::initializer_list<const char*> elements,
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+            std::initializer_list<const char*> elements,
+            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }

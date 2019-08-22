@@ -20,7 +20,7 @@
 #include <fmt/format.h>
 #include "binary.h"
 
-namespace basecode::compiler::io::binary {
+namespace basecode::io::binary {
 
     bool read(
             result_t& r,

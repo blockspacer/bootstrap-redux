@@ -25,8 +25,8 @@
 namespace basecode {
 
     using namespace std::literals;
-    using namespace compiler;
-    using namespace compiler::language::core;
+    using namespace basecode;
+    using namespace basecode::language::core;
 
     TEST_CASE("lexer_t::tokenize identifiers") {
         workspace::session_options_t options{};

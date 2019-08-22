@@ -25,7 +25,7 @@
 #include <compiler/language/lexeme_trie.h>
 #include "token.h"
 
-namespace basecode::compiler::language::core::lexer {
+namespace basecode::language::core::lexer {
 
     class lexer_t;
 

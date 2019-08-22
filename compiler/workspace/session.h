@@ -23,7 +23,7 @@
 #include <compiler/utf8/source_buffer.h>
 #include <compiler/memory/frame_allocator.h>
 
-namespace basecode::compiler::workspace {
+namespace basecode::workspace {
 
     struct session_options_t final {
         uint32_t intern_string_block_size = 64*1024;

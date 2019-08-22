@@ -18,6 +18,6 @@
 
 #include "types.h"
 
-namespace basecode::compiler {
+namespace basecode {
 
 }

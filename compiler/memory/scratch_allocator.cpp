@@ -18,7 +18,7 @@
 
 #include "scratch_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     scratch_allocator_t::scratch_allocator_t(
             allocator_t* backing,

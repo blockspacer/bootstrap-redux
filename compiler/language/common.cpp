@@ -20,7 +20,7 @@
 #include <compiler/numbers/bytes.h>
 #include "common.h"
 
-namespace basecode::compiler::language {
+namespace basecode::language {
 
     void apply_narrowed_value(
             number_token_t& token,

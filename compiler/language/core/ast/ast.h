@@ -26,7 +26,7 @@
 
 using namespace std::literals;
 
-namespace basecode::compiler::language::core::ast {
+namespace basecode::language::core::ast {
 
     enum class node_type_t {
         label,

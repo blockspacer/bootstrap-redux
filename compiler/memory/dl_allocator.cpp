@@ -18,7 +18,7 @@
 
 #include "dl_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     dl_allocator_t::dl_allocator_t(mspace* space) : _space(space) {
     }

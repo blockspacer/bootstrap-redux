@@ -28,7 +28,7 @@
 #include <compiler/terminal/stream_factory.h>
 #include "reader.h"
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     struct source_buffer_range_t final {
         int32_t end;

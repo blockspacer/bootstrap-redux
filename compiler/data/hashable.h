@@ -22,7 +22,7 @@
 #include <string_view>
 #include <compiler/hashing/murmur.h>
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename K> uint64_t hash_key(K key) {
         return hashing::murmur::hash64(&key, sizeof(key));

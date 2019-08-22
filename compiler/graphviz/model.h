@@ -19,10 +19,10 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <compiler/types.h>
+#include <compiler/result.h>
 #include "attribute.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     class graph_t;
 

@@ -20,20 +20,20 @@
 
 #include "array.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename T, std::uint32_t Initial_Capacity = 16>
     class stack_t final {
     public:
         explicit stack_t(
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator),
-                                                                                _values(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator),
+                                                                                  _values(allocator) {
             assert(_allocator);
         }
 
         stack_t(
                 std::initializer_list<T> elements,
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }

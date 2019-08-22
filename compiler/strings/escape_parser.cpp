@@ -21,7 +21,7 @@
 #include <compiler/formatters/formatters.h>
 #include "escape_parser.h"
 
-namespace basecode::compiler::strings {
+namespace basecode::strings {
 
     escape_parser_t::escape_parser_t(
             utf8::reader_t& reader) : _reader(reader) {

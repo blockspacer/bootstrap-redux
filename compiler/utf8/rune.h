@@ -24,7 +24,7 @@
 #include <utf8proc.h>
 #include <fmt/format.h>
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     struct rune_t final {
         constexpr rune_t() = default;

@@ -21,7 +21,7 @@
 #include "allocator.h"
 #include "dlmalloc_config.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class dl_allocator_t : public allocator_t {
     public:

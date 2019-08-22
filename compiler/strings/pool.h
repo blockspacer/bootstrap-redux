@@ -24,7 +24,7 @@
 #include <compiler/data/hash_table.h>
 #include <compiler/memory/allocator.h>
 
-namespace basecode::compiler::strings {
+namespace basecode::strings {
 
     class pool_t final {
     public:

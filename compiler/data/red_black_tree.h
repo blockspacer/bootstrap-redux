@@ -24,7 +24,7 @@
 #include <compiler/memory/system.h>
 #include <compiler/memory/allocator.h>
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename K>
     class red_black_tree_t final {
@@ -45,13 +45,13 @@ namespace basecode::compiler::data {
         using walk_callback_t = std::function<bool (node_t*)>;
 
         explicit red_black_tree_t(
-                memory::allocator_t* allocator = memory::default_scratch_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
         red_black_tree_t(
                 std::initializer_list<K> elements,
-                memory::allocator_t* allocator = memory::default_scratch_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
@@ -61,8 +61,8 @@ namespace basecode::compiler::data {
         }
 
         bool walk(
-                node_t* root,
-                const walk_callback_t& callback) {
+            node_t* root,
+            const walk_callback_t& callback) {
             if (root == nullptr) return false;
             walk(root->left, callback);
             if (!callback(root))
@@ -123,7 +123,9 @@ namespace basecode::compiler::data {
 
     private:
         node_t* make_node(const K& key) {
-            auto mem = _allocator->allocate(sizeof(node_t), alignof(node_t));
+            auto mem = _allocator->allocate(
+                sizeof(node_t),
+                alignof(node_t));
             auto node = new (mem) node_t();
             node->key = key;
             _size++;
@@ -202,8 +204,8 @@ namespace basecode::compiler::data {
             node_t* grand_parent_pt = nullptr;
 
             while (pt != root
-               &&  pt->color != node_color_t::black
-               &&  pt->parent->color == node_color_t::red) {
+                   &&  pt->color != node_color_t::black
+                   &&  pt->parent->color == node_color_t::red) {
                 parent_pt = pt->parent;
                 grand_parent_pt = pt->parent->parent;
 
@@ -211,7 +213,7 @@ namespace basecode::compiler::data {
                     auto uncle_pt = grand_parent_pt->right;
 
                     if (uncle_pt != nullptr
-                    &&  uncle_pt->color == node_color_t::red) {
+                        &&  uncle_pt->color == node_color_t::red) {
                         grand_parent_pt->color = node_color_t::red;
                         parent_pt->color = node_color_t::black;
                         uncle_pt->color = node_color_t::black;
@@ -231,7 +233,7 @@ namespace basecode::compiler::data {
                     auto uncle_pt = grand_parent_pt->left;
 
                     if (uncle_pt != nullptr
-                    &&  uncle_pt->color == node_color_t::red) {
+                        &&  uncle_pt->color == node_color_t::red) {
                         grand_parent_pt->color = node_color_t::red;
                         parent_pt->color = node_color_t::black;
                         uncle_pt->color = node_color_t::black;

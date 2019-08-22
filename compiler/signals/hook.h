@@ -19,10 +19,10 @@
 #pragma once
 
 #include <csignal>
-#include <compiler/types.h>
-#include <compiler/data/array.h>
+#include <compiler/result.h>
+#include <compiler/data/hash_table.h>
 
-namespace basecode::compiler::signals {
+namespace basecode::signals {
 
     struct handler_t {
         bool operator ()() {

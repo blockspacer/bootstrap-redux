@@ -19,7 +19,7 @@
 #include <fmt/format.h>
 #include "transforms.h"
 
-namespace basecode::compiler::strings {
+namespace basecode::strings {
 
     std::string word_wrap(
             std::string text,

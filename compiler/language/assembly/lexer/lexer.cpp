@@ -18,7 +18,7 @@
 
 #include "lexer.h"
 
-namespace basecode::compiler::language::assembly::lexer {
+namespace basecode::language::assembly::lexer {
 
 
 }

@@ -20,15 +20,15 @@
 
 #include "array.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename T, std::uint32_t Initial_Capacity = 16>
     class queue_t final {
     public:
         queue_t(
-                memory::allocator_t* allocator,
-                std::initializer_list<T> elements) : _allocator(allocator),
-                                                     _data(allocator) {
+                std::initializer_list<T> elements,
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator),
+                                                                                  _data(allocator) {
             assert(_allocator);
             insert(elements);
         }
@@ -40,8 +40,9 @@ namespace basecode::compiler::data {
             assert(_allocator);
         }
 
-        explicit queue_t(memory::allocator_t* allocator) : _allocator(allocator),
-                                                           _data(allocator) {
+        explicit queue_t(
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator),
+                                                                                  _data(allocator) {
             assert(_allocator);
         }
 

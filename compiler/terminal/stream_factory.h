@@ -27,7 +27,7 @@
 #include <fmt/format.h>
 #include <compiler/utf8/reader.h>
 
-namespace basecode::compiler::terminal {
+namespace basecode::terminal {
 
     using namespace std::literals;
 

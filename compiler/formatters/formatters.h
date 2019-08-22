@@ -20,6 +20,7 @@
 
 #include <fmt/format.h>
 #include <compiler/types.h>
+#include <compiler/result.h>
 #include <compiler/utf8/rune.h>
 #include <compiler/data/string.h>
 #include <compiler/language/common.h>
@@ -28,7 +29,7 @@
 
 namespace fmt {
 
-    using namespace basecode::compiler;
+    using namespace basecode;
 
     template<>
     struct formatter<result_t> {

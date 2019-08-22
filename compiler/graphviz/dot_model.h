@@ -23,7 +23,7 @@
 #include <compiler/data/hash_table.h>
 #include "model.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     using namespace std::literals;
 

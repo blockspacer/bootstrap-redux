@@ -20,7 +20,7 @@
 #include <compiler/errors/errors.h>
 #include "source_buffer.h"
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     source_buffer_t::source_buffer_t(
             memory::allocator_t* allocator) : _allocator(allocator),

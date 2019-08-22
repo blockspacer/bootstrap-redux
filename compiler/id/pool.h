@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <boost/numeric/interval.hpp>
 
-namespace basecode::compiler::id {
+namespace basecode::id {
 
     using type_t = uint32_t;
     using set_t = std::set<type_t>;

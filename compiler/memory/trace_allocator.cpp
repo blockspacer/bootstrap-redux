@@ -22,7 +22,7 @@
 
 using namespace std::literals;
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     trace_allocator_t::trace_allocator_t(allocator_t* backing) : _backing(backing) {
         _stream_factory.enabled(true);

@@ -18,7 +18,7 @@
 
 #include "edge.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     edge_t::edge_t(
             memory::allocator_t* allocator,

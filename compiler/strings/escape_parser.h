@@ -23,7 +23,7 @@
 #include <fmt/format.h>
 #include <compiler/utf8/reader.h>
 
-namespace basecode::compiler::strings {
+namespace basecode::strings {
 
     class escape_parser_t final {
     public:

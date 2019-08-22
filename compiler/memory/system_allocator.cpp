@@ -18,7 +18,7 @@
 
 #include "system_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     system_allocator_t::~system_allocator_t() {
         assert(_total_allocated == 0);

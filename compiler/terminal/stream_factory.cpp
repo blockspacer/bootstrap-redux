@@ -19,7 +19,7 @@
 #include <compiler/formatters/formatters.h>
 #include "stream_factory.h"
 
-namespace basecode::compiler::terminal {
+namespace basecode::terminal {
 
     std::string color_code(colors_t fg_color, colors_t bg_color) {
         return fmt::format(

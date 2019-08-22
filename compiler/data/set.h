@@ -27,7 +27,7 @@
 #include "array.h"
 #include "hashable.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename T, std::uint32_t Initial_Size = 16>
     class set_t final {
@@ -53,7 +53,7 @@ namespace basecode::compiler::data {
     public:
         set_t(
                 std::initializer_list<T> elements,
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             init();
             insert(elements);
@@ -67,7 +67,7 @@ namespace basecode::compiler::data {
         }
 
         explicit set_t(
-                memory::allocator_t* allocator = memory::default_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             init();
         }
@@ -246,11 +246,11 @@ namespace basecode::compiler::data {
         }
 
         bool find_available_bucket_and_value(
-                array_t<hash_bucket_t>& buckets,
-                array_t<hash_value_t>& values,
-                uint32_t bucket_start_index,
-                hash_bucket_t** target_bucket,
-                hash_value_t** target_value) {
+            array_t<hash_bucket_t>& buckets,
+            array_t<hash_value_t>& values,
+            uint32_t bucket_start_index,
+            hash_bucket_t** target_bucket,
+            hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < buckets.size(); i++) {
                 auto& bucket = buckets[i];
                 if (bucket.state != hash_bucket_state_t::s_filled) {
@@ -273,11 +273,11 @@ namespace basecode::compiler::data {
         }
 
         bool find_bucket_and_pair_by_matching_value(
-                uint32_t bucket_start_index,
-                size_t hash,
-                T value,
-                hash_bucket_t** target_bucket,
-                hash_value_t** target_value) {
+            uint32_t bucket_start_index,
+            size_t hash,
+            T value,
+            hash_bucket_t** target_bucket,
+            hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < _buckets.size(); i++) {
                 auto& bucket = _buckets[i];
                 switch (bucket.state) {

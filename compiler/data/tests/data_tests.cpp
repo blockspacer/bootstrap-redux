@@ -44,8 +44,8 @@ namespace basecode {
     };
 
     using namespace std::literals;
-    using namespace compiler;
-    using namespace compiler::data;
+    using namespace basecode;
+    using namespace basecode::data;
 
     TEST_CASE("set_t with small initializer list") {
         set_t<int32_t> set_of_integers{0, 1, 2, 3, 4, 5, 6, 7, 8};

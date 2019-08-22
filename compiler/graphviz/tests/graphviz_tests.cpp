@@ -25,8 +25,8 @@
 namespace basecode {
 
     using namespace std::literals;
-    using namespace compiler;
-    using namespace compiler::graphviz;
+    using namespace basecode;
+    using namespace basecode::graphviz;
 
     TEST_CASE("graph_t") {
         auto allocator = memory::default_scratch_allocator();

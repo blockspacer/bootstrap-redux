@@ -24,7 +24,7 @@
 #include <compiler/workspace/session.h>
 #include <compiler/memory/object_pool.h>
 
-namespace basecode::compiler::language {
+namespace basecode::language {
 
     template <typename V>
     class lexeme_trie_t final {
@@ -41,15 +41,16 @@ namespace basecode::compiler::language {
             data::hash_table_t<utf8::rune_t, node_t*> children;
         };
 
-        explicit lexeme_trie_t(memory::allocator_t* allocator) : _tree_root(allocator),
-                                                                 _storage(allocator),
-                                                                 _allocator(allocator) {
+        explicit lexeme_trie_t(
+            memory::allocator_t* allocator = context::current()->allocator) : _tree_root(allocator),
+                                                                              _storage(allocator),
+                                                                              _allocator(allocator) {
             assert(_allocator);
         }
 
         lexeme_trie_t(
-                memory::allocator_t* allocator,
-                std::initializer_list<std::pair<std::string_view, V>> elements) : _tree_root(allocator),
+                std::initializer_list<std::pair<std::string_view, V>> elements,
+                memory::allocator_t* allocator = context::current()->allocator) : _tree_root(allocator),
                                                                                   _storage(allocator),
                                                                                   _allocator(allocator) {
             assert(_allocator);

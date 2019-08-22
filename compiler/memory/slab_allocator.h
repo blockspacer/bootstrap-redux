@@ -21,7 +21,7 @@
 #include <string>
 #include "allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class slab_allocator_t : public allocator_t {
         struct slab_t final {

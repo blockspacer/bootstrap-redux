@@ -23,7 +23,7 @@
 #include <compiler/memory/system.h>
 #include <compiler/memory/allocator.h>
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <typename K>
     class bst_t final {
@@ -36,13 +36,14 @@ namespace basecode::compiler::data {
 
         using walk_callback_t = std::function<bool (node_t*)>;
 
-        explicit bst_t(memory::allocator_t* allocator = memory::default_scratch_allocator()) : _allocator(allocator) {
+        explicit bst_t(
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
         bst_t(
                 std::initializer_list<K> elements,
-                memory::allocator_t* allocator = memory::default_scratch_allocator()) : _allocator(allocator) {
+                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
@@ -61,8 +62,8 @@ namespace basecode::compiler::data {
         }
 
         bool walk(
-                node_t* root,
-                const walk_callback_t& callback) {
+            node_t* root,
+            const walk_callback_t& callback) {
             if (root == nullptr) return false;
             walk(root->left, callback);
             if (!callback(root))

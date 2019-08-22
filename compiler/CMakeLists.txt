@@ -15,7 +15,10 @@ configure_file (
 add_library(
         ${PROJECT_NAME}
 
+        context/context.cpp context/context.h
+        
         defer.h
+        result.h result_message.h
 
         data/bst.h
         data/set.h
@@ -89,6 +92,10 @@ add_library(
         language/core/lexer/token.cpp language/core/lexer/token.h
         language/core/lexer/lexer.cpp language/core/lexer/lexer.h
         language/core/parser/parser.cpp language/core/parser/parser.h
+
+        logging/logger.cpp logging/logger.h
+        logging/spd_logger.cpp logging/spd_logger.h
+        logging/fake_logger.cpp logging/fake_logger.h
 
         threading/auto_reset_event.cpp threading/auto_reset_event.h
         threading/manual_reset_event.cpp threading/manual_reset_event.h

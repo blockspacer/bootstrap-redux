@@ -21,7 +21,7 @@
 #include <optional>
 #include <compiler/types.h>
 
-namespace basecode::compiler::language {
+namespace basecode::language {
 
     using namespace std::literals;
 

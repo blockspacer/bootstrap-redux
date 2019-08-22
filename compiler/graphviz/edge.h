@@ -20,7 +20,7 @@
 
 #include "attribute_container.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     class node_t;
 

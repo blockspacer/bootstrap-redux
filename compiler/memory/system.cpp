@@ -21,7 +21,7 @@
 #include "dl_allocator.h"
 #include "scratch_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     struct globals_t final {
         static const int allocator_memory_size =

@@ -19,7 +19,7 @@
 #include <ostream>
 #include "rune.h"
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     bool rune_t::is_eof() const {
         return _value == rune_eof._value;

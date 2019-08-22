@@ -25,7 +25,7 @@
 #include "model.h"
 #include "attribute.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     class attribute_container_t final {
     public:

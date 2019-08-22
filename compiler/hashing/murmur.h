@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace basecode::compiler::hashing::murmur {
+namespace basecode::hashing::murmur {
 
     uint32_t hash32(const void* src, size_t len);
 

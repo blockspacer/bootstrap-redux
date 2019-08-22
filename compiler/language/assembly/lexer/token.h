@@ -21,7 +21,7 @@
 #include <compiler/types.h>
 #include <compiler/language/common.h>
 
-namespace basecode::compiler::language::assembly::lexer {
+namespace basecode::language::assembly::lexer {
 
     using namespace std::literals;
 

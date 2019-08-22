@@ -18,7 +18,7 @@
 
 #include "attribute.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     std::string_view component_type_to_name(component_type_t type) {
         switch (type) {

@@ -20,7 +20,7 @@
 
 #include "system.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     template <uint32_t Buffer_Size>
     class temp_allocator_t : public allocator_t {

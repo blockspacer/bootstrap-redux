@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <climits>
 
-namespace basecode::compiler::numbers {
+namespace basecode::numbers {
 
     inline uint64_t bit(uint64_t n) {
         return static_cast<uint64_t>(1) << n;

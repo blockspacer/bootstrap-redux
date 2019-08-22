@@ -18,7 +18,7 @@
 
 #include "node.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     node_t::node_t(
             memory::allocator_t* allocator,

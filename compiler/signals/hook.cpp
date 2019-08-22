@@ -19,7 +19,7 @@
 #include <compiler/data/hash_table.h>
 #include "hook.h"
 
-namespace basecode::compiler::signals {
+namespace basecode::signals {
 
     static action_map_t* s_actions{};
     static memory::allocator_t* s_allocator{};

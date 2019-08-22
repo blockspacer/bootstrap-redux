@@ -18,7 +18,7 @@
 
 #include "stack_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     stack_allocator_t::~stack_allocator_t() {
         assert(_total_allocated == 0);

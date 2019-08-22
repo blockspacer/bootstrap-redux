@@ -18,7 +18,7 @@
 
 #include "murmur.h"
 
-namespace basecode::compiler::hashing::murmur {
+namespace basecode::hashing::murmur {
 
     uint32_t hash32(const void* src, size_t len) {
         return hash32(src, len, 0x9747b28c);

@@ -19,7 +19,7 @@
 #include <compiler/strings/transforms.h>
 #include "parse.h"
 
-namespace basecode::compiler::numbers {
+namespace basecode::numbers {
 
     conversion_result_t parse_double(std::string_view value, double& out) {
         const char* s = strings::remove_underscores(value).c_str();

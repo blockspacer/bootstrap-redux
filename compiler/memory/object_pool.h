@@ -24,7 +24,7 @@
 #include <compiler/data/hash_table.h>
 #include "slab_allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class object_pool_t final {
         template<typename...>
@@ -47,9 +47,10 @@ namespace basecode::compiler::memory {
         };
 
     public:
-        explicit object_pool_t(allocator_t* backing) : _backing(backing),
-                                                       _objs(backing),
-                                                       _pools(backing) {
+        explicit object_pool_t(
+            allocator_t* backing = context::current()->allocator) : _backing(backing),
+                                                                    _objs(backing),
+                                                                    _pools(backing) {
             assert(_backing);
         }
 

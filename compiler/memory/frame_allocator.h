@@ -20,7 +20,7 @@
 
 #include "system.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     template <std::size_t Frame_Size>
     class frame_allocator_t : public allocator_t {

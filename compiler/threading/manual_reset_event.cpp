@@ -18,7 +18,7 @@
 
 #include "manual_reset_event.h"
 
-namespace basecode::compiler::threading {
+namespace basecode::threading {
 
     manual_reset_event_t::manual_reset_event_t(bool initial) : _flag(initial) {
     }

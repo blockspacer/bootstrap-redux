@@ -18,7 +18,7 @@
 
 #include "reader.h"
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     reader_t::reader_t(
             memory::allocator_t* allocator,

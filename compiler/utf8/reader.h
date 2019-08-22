@@ -20,11 +20,11 @@
 
 #include <stack>
 #include <string_view>
-#include <compiler/types.h>
+#include <compiler/result.h>
 #include <compiler/data/stack.h>
 #include "rune.h"
 
-namespace basecode::compiler::utf8 {
+namespace basecode::utf8 {
 
     class reader_t final {
     public:

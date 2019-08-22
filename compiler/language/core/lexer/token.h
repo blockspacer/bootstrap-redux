@@ -22,7 +22,7 @@
 #include <compiler/data/array.h>
 #include <compiler/language/common.h>
 
-namespace basecode::compiler::language::core::lexer {
+namespace basecode::language::core::lexer {
 
     using namespace std::literals;
 

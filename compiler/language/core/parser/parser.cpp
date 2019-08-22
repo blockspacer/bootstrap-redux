@@ -22,7 +22,7 @@
 #include <compiler/data/hashable.h>
 #include "parser.h"
 
-namespace basecode::compiler::language::core::parser {
+namespace basecode::language::core::parser {
 
     parser_t::parser_t(
             workspace::session_t& session,

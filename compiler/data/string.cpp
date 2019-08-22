@@ -18,7 +18,7 @@
 
 #include "string.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     string_t::string_t(
             const char* value,
@@ -61,7 +61,7 @@ namespace basecode::compiler::data {
         other._moved = true;
     }
 
-    string_t::string_t(const std::string& other) : _allocator(memory::default_allocator()) {
+    string_t::string_t(const std::string& other) : _allocator(context::current()->allocator) {
         const auto n = other.size();
         grow(n);
         std::memcpy(_data, other.data(), n * sizeof(char));
@@ -218,7 +218,7 @@ namespace basecode::compiler::data {
         assert(!_moved);
         const auto n = strlen(other);
         if (!_allocator)
-            _allocator = memory::default_allocator();
+            _allocator = context::current()->allocator;
         grow(n);
         std::memcpy(_data, other, n * sizeof(char));
         _size = n;

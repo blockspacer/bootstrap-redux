@@ -21,7 +21,7 @@
 #include <compiler/types.h>
 #include <compiler/data/string.h>
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     using namespace std::literals;
 

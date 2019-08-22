@@ -18,7 +18,7 @@
 
 #include "graph.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     graph_t::graph_t(
             memory::allocator_t* allocator,

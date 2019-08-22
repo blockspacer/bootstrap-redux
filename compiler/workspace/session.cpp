@@ -18,7 +18,7 @@
 
 #include "session.h"
 
-namespace basecode::compiler::workspace {
+namespace basecode::workspace {
 
     session_t::session_t(
             const session_options_t& options) : _intern_pool(

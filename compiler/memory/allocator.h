@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     struct header_t final {
         uint32_t size;

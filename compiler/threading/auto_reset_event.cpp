@@ -18,7 +18,7 @@
 
 #include "auto_reset_event.h"
 
-namespace basecode::compiler::threading {
+namespace basecode::threading {
 
     auto_reset_event_t::auto_reset_event_t(bool initial) : _flag(initial) {
     }

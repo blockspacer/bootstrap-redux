@@ -20,7 +20,7 @@
 
 #include "allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class stack_allocator_t : public allocator_t {
     public:

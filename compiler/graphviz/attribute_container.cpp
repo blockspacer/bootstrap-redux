@@ -19,7 +19,7 @@
 #include "attribute_container.h"
 #include "attribute.h"
 
-namespace basecode::compiler::graphviz {
+namespace basecode::graphviz {
 
     attribute_container_t::attribute_container_t(
             memory::allocator_t* allocator,

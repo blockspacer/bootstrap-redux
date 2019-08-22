@@ -18,7 +18,7 @@
 
 #include "hashable.h"
 
-namespace basecode::compiler::data {
+namespace basecode::data {
 
     template <> uint64_t hash_key(std::string_view key) {
         return hashing::murmur::hash64(key.data(), key.length());

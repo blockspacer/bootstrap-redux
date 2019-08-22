@@ -23,7 +23,7 @@
 #include <chrono>
 #include <condition_variable>
 
-namespace basecode::compiler::threading {
+namespace basecode::threading {
 
     class auto_reset_event_t final {
     public:

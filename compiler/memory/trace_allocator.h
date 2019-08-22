@@ -21,7 +21,7 @@
 #include <compiler/terminal/stream_factory.h>
 #include "allocator.h"
 
-namespace basecode::compiler::memory {
+namespace basecode::memory {
 
     class trace_allocator_t : public allocator_t {
     public:

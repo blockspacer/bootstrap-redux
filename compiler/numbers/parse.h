@@ -20,7 +20,7 @@
 
 #include <string_view>
 
-namespace basecode::compiler::numbers {
+namespace basecode::numbers {
 
     using namespace std::literals;
 
