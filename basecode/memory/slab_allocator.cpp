@@ -24,7 +24,7 @@ namespace basecode::memory {
 
     slab_allocator_t::slab_allocator_t(
             allocator_t* backing,
-            std::string name,
+            adt::string_t name,
             uint32_t size,
             uint32_t align) : _name(std::move(name)),
                               _backing(backing),
@@ -169,6 +169,10 @@ namespace basecode::memory {
         }
 
         _front = slab;
+    }
+
+    std::string_view slab_allocator_t::name() const {
+        return _name.slice();
     }
 
     std::optional<uint32_t> slab_allocator_t::total_allocated() {

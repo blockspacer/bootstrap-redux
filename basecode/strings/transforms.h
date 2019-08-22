@@ -18,40 +18,29 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <sstream>
-#include <functional>
-#include <type_traits>
 #include <basecode/types.h>
+#include <basecode/adt/string.h>
 
 namespace basecode::strings {
 
-    std::string word_wrap(
-        std::string text,
+    void word_wrap(
+        adt::string_t& text,
         size_t width,
         size_t right_pad = 0,
         const char& fill = ' ');
 
-    inline std::string pad_to(
-            const std::string& str,
-            const size_t num,
-            const char padding = ' ') {
-        if (num > str.size()) {
-            auto padded = str;
-            padded.insert(padded.begin(), num - padded.size(), padding);
-            return padded;
-        } else {
-            return str;
-        }
-    }
+    adt::string_t pad_to(
+        const adt::string_t& str,
+        size_t num,
+        char padding = ' ');
 
-    std::string remove_underscores(const std::string_view& value);
-
+    // XXX: FIX THIS
     std::pair<std::string, std::string> size_to_units(size_t size);
 
-    std::string list_to_string(const string_list_t& list, const char& sep = ',');
+    adt::string_t remove_underscores(const std::string_view& value);
 
-    string_list_t string_to_list(const std::string& value, const char& sep = ',');
+    adt::string_t list_to_string(const string_list_t& list, const char& sep = ',');
+
+    string_list_t string_to_list(const adt::string_t& value, const char& sep = ',');
 
 }

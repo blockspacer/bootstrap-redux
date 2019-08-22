@@ -259,7 +259,7 @@ namespace basecode::errors {
                     fmt::format_to(stream, "{:8d}: {}", i + 1, source_text);
                 }
             }
-            if (i < static_cast<int32_t>(stop_line - 1))
+            if (i < static_cast<int32_t>(stop_line - 2))
                 fmt::format_to(stream, "\n");
         }
 

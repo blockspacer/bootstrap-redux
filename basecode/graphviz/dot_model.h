@@ -20,7 +20,7 @@
 
 #include <string_view>
 #include <basecode/strings/pool.h>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include "model.h"
 
 namespace basecode::graphviz {
@@ -33,7 +33,7 @@ namespace basecode::graphviz {
             uint8_t component_flags{};
         };
 
-        using metadata_table_t = data::hash_table_t<attribute_type_t, metadata_t>;
+        using metadata_table_t = adt::hash_table_t<attribute_type_t, metadata_t>;
 
     public:
         dot_model_t(
@@ -66,7 +66,7 @@ namespace basecode::graphviz {
             std::string_view separator,
             fmt::memory_buffer& buffer);
 
-        data::string_t escape_chars(const data::string_t& value);
+        adt::string_t escape_chars(const adt::string_t& value);
 
     private:
         metadata_table_t _attributes;

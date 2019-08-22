@@ -19,7 +19,6 @@
 #pragma once
 
 #include <basecode/types.h>
-#include <basecode/data/array.h>
 #include <basecode/language/common.h>
 
 namespace basecode::language::core::lexer {

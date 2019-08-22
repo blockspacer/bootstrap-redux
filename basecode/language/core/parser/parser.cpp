@@ -18,8 +18,8 @@
 
 #include <utility>
 #include <basecode/defer.h>
+#include <basecode/adt/hashable.h>
 #include <basecode/errors/errors.h>
-#include <basecode/data/hashable.h>
 #include "parser.h"
 
 namespace basecode::language::core::parser {

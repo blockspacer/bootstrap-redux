@@ -23,8 +23,9 @@
 #include <cstdint>
 #include <string_view>
 #include <basecode/types.h>
-#include <basecode/data/hash_table.h>
-#include <basecode/data/red_black_tree.h>
+#include <basecode/adt/string.h>
+#include <basecode/adt/hash_table.h>
+#include <basecode/adt/red_black_tree.h>
 #include <basecode/terminal/stream_factory.h>
 #include "reader.h"
 
@@ -68,7 +69,7 @@ namespace basecode::utf8 {
         bool load(
             result_t& r,
             strings::pool_t& pool,
-            const std::string& buffer);
+            const adt::string_t& buffer);
 
         bool load(
             result_t& r,
@@ -132,8 +133,8 @@ namespace basecode::utf8 {
         reader_t* _reader{};
         size_t _buffer_size{};
         memory::allocator_t* _allocator;
-        data::array_t<source_buffer_line_t> _lines;
-        data::red_black_tree_t<source_buffer_range_t> _lines_by_index_range;
+        adt::array_t<source_buffer_line_t> _lines;
+        adt::red_black_tree_t<source_buffer_range_t> _lines_by_index_range;
     };
 
 }

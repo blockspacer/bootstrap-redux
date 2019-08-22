@@ -103,7 +103,7 @@ namespace basecode::language::core::ast {
             graphviz::attribute_type_t::style,
             graphviz::enumeration_value_t("filled"));
 
-        data::array_t<data::string_t> ports(session.allocator());
+        adt::array_t<adt::string_t> ports(session.allocator());
 
         auto& ast_node = registry.get<node_t>(entity);
         ports.emplace(node_type_to_name(ast_node.type), session.allocator());
@@ -167,12 +167,12 @@ namespace basecode::language::core::ast {
                 lhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("lhs"sv, session.allocator()));
+                    "lhs"sv);
                 auto rhs_edge = graph.make_edge(node, rhs_expr);
                 rhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("rhs"sv, session.allocator()));
+                    "rhs"sv);
                 break;
             }
             case node_type_t::annotation: {
@@ -187,12 +187,12 @@ namespace basecode::language::core::ast {
                 lhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("lhs"sv, session.allocator()));
+                    "lhs"sv);
                 auto rhs_edge = graph.make_edge(node, rhs_expr);
                 rhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("rhs"sv, session.allocator()));
+                    "rhs"sv);
                 break;
             }
             case node_type_t::unary_operator: {
@@ -206,7 +206,7 @@ namespace basecode::language::core::ast {
                 lhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("lhs"sv, session.allocator()));
+                    "lhs"sv);
                 break;
             }
             case node_type_t::binary_operator: {
@@ -221,12 +221,12 @@ namespace basecode::language::core::ast {
                 lhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("lhs"sv, session.allocator()));
+                    "lhs"sv);
                 auto rhs_edge = graph.make_edge(node, rhs_expr);
                 rhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("rhs"sv, session.allocator()));
+                    "rhs"sv);
                 break;
             }
             case node_type_t::identifier: {
@@ -298,12 +298,12 @@ namespace basecode::language::core::ast {
                 lhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("lhs"sv, session.allocator()));
+                    "lhs"sv);
                 auto rhs_edge = graph.make_edge(node, rhs_expr);
                 rhs_edge->attributes().set_value(
                     r,
                     graphviz::attribute_type_t::label,
-                    data::string_t("rhs"sv, session.allocator()));
+                    "rhs"sv);
                 break;
             }
             case node_type_t::label:
@@ -356,7 +356,7 @@ namespace basecode::language::core::ast {
         node_attrs.set_value(
             r,
             graphviz::attribute_type_t::label,
-            data::string_t(label_str.c_str(), session.allocator()));
+            label_str);
 
         return node;
     }

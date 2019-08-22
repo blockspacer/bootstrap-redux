@@ -18,7 +18,7 @@
 
 #include "string.h"
 
-namespace basecode::data {
+namespace basecode::adt {
 
     string_t::string_t(
             const char* value,
@@ -32,7 +32,7 @@ namespace basecode::data {
     }
 
     string_t::string_t(
-            std::string_view value,
+            const std::string_view& value,
             memory::allocator_t* allocator) : _allocator(allocator) {
         assert(_allocator);
         assert(!value.empty());
@@ -46,6 +46,21 @@ namespace basecode::data {
         assert(_allocator);
     }
 
+    string_t::string_t(string_t&& other) noexcept : _data(other._data),
+                                                    _size(other._size),
+                                                    _capacity(other._capacity),
+                                                    _allocator(other._allocator) {
+        other._moved = true;
+    }
+
+    string_t::string_t(const char* other) : _allocator(context::current()->allocator) {
+        assert(_allocator);
+        const auto n = strlen(other);
+        grow(n);
+        std::memcpy(_data, other, n * sizeof(char));
+        _size = n;
+    }
+
     string_t::string_t(const string_t& other) : _allocator(other._allocator) {
         assert(_allocator);
         const auto n = other._size;
@@ -54,14 +69,14 @@ namespace basecode::data {
         _size = n;
     }
 
-    string_t::string_t(string_t&& other) noexcept : _data(other._data),
-                                                    _size(other._size),
-                                                    _capacity(other._capacity),
-                                                    _allocator(other._allocator) {
-        other._moved = true;
+    string_t::string_t(const std::string& other) : _allocator(context::current()->allocator) {
+        const auto n = other.size();
+        grow(n);
+        std::memcpy(_data, other.data(), n * sizeof(char));
+        _size = n;
     }
 
-    string_t::string_t(const std::string& other) : _allocator(context::current()->allocator) {
+    string_t::string_t(const std::string_view& other) : _allocator(context::current()->allocator) {
         const auto n = other.size();
         grow(n);
         std::memcpy(_data, other.data(), n * sizeof(char));
@@ -304,6 +319,17 @@ namespace basecode::data {
         other._data = nullptr;
         other._allocator = nullptr;
         other._size = other._capacity = 0;
+        return *this;
+    }
+
+    string_t& string_t::operator=(const std::string_view& other) {
+        assert(!_moved);
+        const auto n = other.size();
+        if (!_allocator)
+            _allocator = context::current()->allocator;
+        grow(n);
+        std::memcpy(_data, other.data(), n * sizeof(char));
+        _size = n;
         return *this;
     }
 

@@ -21,7 +21,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include <basecode/memory/allocator.h>
 
 namespace basecode::strings {
@@ -39,7 +39,7 @@ namespace basecode::strings {
     private:
         uint32_t _block_size;
         memory::allocator_t* _allocator;
-        data::hash_table_t<std::string_view, void*> _index;
+        adt::hash_table_t<std::string_view, void*> _index;
     };
 
 }

@@ -48,7 +48,7 @@ namespace basecode {
         REQUIRE(attrs.set_value(r, attribute_type_t::rankdir, enumeration_value_t("LR")));
         REQUIRE(attrs.set_value(r, attribute_type_t::fontsize, 22.0));
 
-        data::string_t temp;
+        adt::string_t temp;
         REQUIRE(attrs.get_value(r, attribute_type_t::rankdir, temp));
         REQUIRE(temp == "LR"sv);
 

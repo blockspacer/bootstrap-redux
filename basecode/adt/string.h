@@ -25,7 +25,7 @@
 #include <string_view>
 #include <basecode/memory/system.h>
 
-namespace basecode::data {
+namespace basecode::adt {
 
     class string_t final {
     public:
@@ -37,12 +37,16 @@ namespace basecode::data {
             memory::allocator_t* allocator = context::current()->allocator);
 
         explicit string_t(
-            std::string_view value,
+            const std::string_view& value,
             memory::allocator_t* allocator = context::current()->allocator);
+
+        string_t(const char* other);
+
+        string_t(const string_t& other);
 
         string_t(const std::string& other);
 
-        string_t(const string_t& other);
+        string_t(const std::string_view& other);
 
         string_t(string_t&& other) noexcept;
 
@@ -84,11 +88,7 @@ namespace basecode::data {
 
         void append(const char* value);
 
-        std::string_view slice() const;
-
         [[nodiscard]] bool empty() const;
-
-        std::string as_std_string() const;
 
         [[nodiscard]] uint32_t size() const;
 
@@ -116,9 +116,15 @@ namespace basecode::data {
 
         bool operator==(const string_t& other) const;
 
+        [[nodiscard]] std::string_view slice() const;
+
         string_t& operator=(string_t&& other) noexcept;
 
         string_t& insert(size_t pos, size_t n, char c);
+
+        [[nodiscard]] std::string as_std_string() const;
+
+        string_t& operator=(const std::string_view& other);
 
         [[nodiscard]] memory::allocator_t* allocator() const;
 

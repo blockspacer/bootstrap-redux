@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <basecode/data/array.h>
+#include <basecode/adt/array.h>
 #include <basecode/memory/object_pool.h>
 #include "edge.h"
 #include "node.h"
@@ -33,9 +33,9 @@ namespace basecode::graphviz {
 
     class graph_t;
 
-    using node_list_t  = data::array_t<node_t*>;
-    using edge_list_t  = data::array_t<edge_t*>;
-    using graph_list_t = data::array_t<graph_t*>;
+    using node_list_t  = adt::array_t<node_t*>;
+    using edge_list_t  = adt::array_t<edge_t*>;
+    using graph_list_t = adt::array_t<graph_t*>;
 
     class graph_t final {
     public:

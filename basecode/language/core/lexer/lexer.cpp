@@ -16,7 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <basecode/data/stack.h>
+#include <basecode/adt/stack.h>
 #include <basecode/errors/errors.h>
 #include <basecode/numbers/bytes.h>
 #include <basecode/numbers/parse.h>
@@ -472,10 +472,10 @@ namespace basecode::language::core::lexer {
         auto block_count = 1;
         auto start_pos = _buffer.pos();
 
-        data::stack_t<size_t> block_starts(_session.allocator());
+        adt::stack_t<size_t> block_starts(_session.allocator());
         block_starts.push(start_pos);
 
-        data::stack_t<block_comment_token_t*> blocks(_session.allocator());
+        adt::stack_t<block_comment_token_t*> blocks(_session.allocator());
 
         block_comment_token_t root(_session.allocator());
         auto* current_block = &root;

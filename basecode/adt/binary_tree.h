@@ -23,10 +23,10 @@
 #include <basecode/memory/system.h>
 #include <basecode/memory/allocator.h>
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename K>
-    class bst_t final {
+    class binary_tree_t final {
     public:
         struct node_t final {
             K key;
@@ -36,19 +36,19 @@ namespace basecode::data {
 
         using walk_callback_t = std::function<bool (node_t*)>;
 
-        explicit bst_t(
+        explicit binary_tree_t(
                 memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
-        bst_t(
+        binary_tree_t(
                 std::initializer_list<K> elements,
                 memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
             insert(elements);
         }
 
-        ~bst_t() {
+        ~binary_tree_t() {
             auto i = 0;
             node_t* to_free[_size];
             walk(_root, [&](auto node) {

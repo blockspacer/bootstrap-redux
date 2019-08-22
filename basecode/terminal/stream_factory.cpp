@@ -16,12 +16,11 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <basecode/formatters/formatters.h>
 #include "stream_factory.h"
 
 namespace basecode::terminal {
 
-    std::string color_code(colors_t fg_color, colors_t bg_color) {
+    adt::string_t color_code(colors_t fg_color, colors_t bg_color) {
         return fmt::format(
             "\033[1;{};{}m",
             (uint32_t) fg_color,
@@ -30,12 +29,12 @@ namespace basecode::terminal {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    std::string stream_factory_t::colorize(
+    adt::string_t stream_factory_t::colorize(
             std::string_view text,
             colors_t fg_color,
             colors_t bg_color) const {
         if (!_enabled)
-            return std::string(text);
+            return text;
         return fmt::format(
             "{}{}{}",
             color_code(fg_color, bg_color),
@@ -51,7 +50,7 @@ namespace basecode::terminal {
         _enabled = value;
     }
 
-    std::string stream_factory_t::colorize_range(
+    adt::string_t stream_factory_t::colorize_range(
             utf8::reader_t& reader,
             size_t begin,
             size_t end,

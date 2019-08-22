@@ -20,7 +20,7 @@
 
 #include <string_view>
 #include <basecode/types.h>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include <basecode/memory/object_pool.h>
 #include "model.h"
 #include "attribute.h"
@@ -50,9 +50,9 @@ namespace basecode::graphviz {
 
         bool get_value(result_t& r, attribute_type_t attr, int32_t& v);
 
-        bool get_value(result_t& r, attribute_type_t attr, data::string_t& v);
+        bool get_value(result_t& r, attribute_type_t attr, adt::string_t& v);
 
-        bool set_value(result_t& r, attribute_type_t attr, const data::string_t& v);
+        bool set_value(result_t& r, attribute_type_t attr, const adt::string_t& v);
 
         bool get_value(result_t& r, attribute_type_t attr, enumeration_value_t& v);
 
@@ -63,7 +63,7 @@ namespace basecode::graphviz {
         component_type_t _type;
         memory::object_pool_t _storage;
         memory::allocator_t* _allocator;
-        data::hash_table_t<attribute_type_t, attribute_value_t*> _values;
+        adt::hash_table_t<attribute_type_t, attribute_value_t*> _values;
     };
 
 }

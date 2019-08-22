@@ -27,7 +27,7 @@
 #include "array.h"
 #include "hash_table.h"
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename V>
     struct directed_edge_t {

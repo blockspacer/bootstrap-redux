@@ -20,7 +20,7 @@
 
 #include <utility>
 #include <basecode/types.h>
-#include <basecode/data/trie_map.h>
+#include <basecode/adt/trie_map.h>
 #include <basecode/memory/allocator.h>
 #include <basecode/workspace/session.h>
 
@@ -305,7 +305,7 @@ namespace basecode::language::core::ast {
         }
         entity_t parent;
         entity_list_t children;
-        data::trie_map_t<entity_t> identifiers;
+        adt::trie_map_t<entity_t> identifiers;
     };
 
     ///////////////////////////////////////////////////////////////////////////

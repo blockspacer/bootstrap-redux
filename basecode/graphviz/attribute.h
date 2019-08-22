@@ -19,7 +19,7 @@
 #pragma once
 
 #include <basecode/types.h>
-#include <basecode/data/string.h>
+#include <basecode/adt/string.h>
 
 namespace basecode::graphviz {
 
@@ -171,16 +171,16 @@ namespace basecode::graphviz {
             bool flag;
             int32_t integer;
             double floating_point;
-            data::string_t* string;
+            adt::string_t* string;
         } value;
     };
 
     struct enumeration_value_t final {
-        constexpr explicit enumeration_value_t(const char* name) : name(name) {
+        constexpr explicit enumeration_value_t(std::string_view name) : name(name) {
         }
-        const char* name;
+        std::string_view name;
     };
 
-    using attribute_value_list_t = data::array_t<attribute_value_t*>;
+    using attribute_value_list_t = adt::array_t<attribute_value_t*>;
 
 }

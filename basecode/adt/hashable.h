@@ -16,12 +16,18 @@
 //
 // ----------------------------------------------------------------------------
 
-#include "hashable.h"
+#pragma once
 
-namespace basecode::data {
+#include <cstdint>
+#include <string_view>
+#include <basecode/hashing/murmur.h>
 
-    template <> uint64_t hash_key(std::string_view key) {
-        return hashing::murmur::hash64(key.data(), key.length());
+namespace basecode::adt {
+
+    template <typename K> uint64_t hash_key(K key) {
+        return hashing::murmur::hash64(&key, sizeof(key));
     }
+
+    template <> uint64_t hash_key(std::string_view key);
 
 }

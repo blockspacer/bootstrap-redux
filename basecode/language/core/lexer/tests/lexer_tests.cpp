@@ -60,7 +60,7 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "$2334;\n"
             "$80;\n"
             "%1111_0000_1111_0101;\n"
@@ -74,7 +74,7 @@ namespace basecode {
             "6.022e23;\n"
             "6.022E23;\n"
             "1.6e-35;\n"
-            "1.6e-35i;\n";
+            "1.6e-35i;\n"sv;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
 
@@ -97,7 +97,7 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "// this is a line comment\n"
             "-- this is a another type of line comment\n"
             "/* this is a block comment with nested block comments\n"
@@ -107,7 +107,7 @@ namespace basecode {
             "       /* another level nested comment */\n"
             "       /* nesting is fun! */\n"
             "   */\n"
-            "*/\n"
+            "*/\n"sv
             ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -131,7 +131,7 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "{{\n"
             "   .local foo\n"
             "   move.qw foo, 256\n"
@@ -148,7 +148,7 @@ namespace basecode {
             "#rune \"\\xa9\";\n"
             "#rune \"\\ufffe\";\n"
             "#rune \"\\Ueeffaaff\";\n"
-            "#rune \"\\777\";\n"
+            "#rune \"\\777\";\n"sv
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -172,13 +172,13 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "#rune \"A\";\n"
             "#assert(1 == 1);\n"
             "#run some_user_proc();\n"
             "#foreign { \n };\n"
             "#run print(\"Hello, Sailor!\");\n"
-            "#eval 6 * 6 + 32;\n"
+            "#eval 6 * 6 + 32;\n"sv
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -202,10 +202,10 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "@no_fold b := 3 * 3;\n"
             "@library \"libopengl\";\n"
-            "@coroutine j :: proc();\n"
+            "@coroutine j :: proc();\n"sv
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -229,12 +229,12 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "@no_fold\n"
             "foo: u8 := 33;\n"
             "bar := foo * 16;\n"
             "print(\"bar := {bar}\\n\");\n"
-            "#type foo;\n"
+            "#type foo;\n"sv
             ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -260,9 +260,9 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "continueif: bool := false;\n"
-            "if_unexpected := if continueif break true;\n"
+            "if_unexpected := if continueif break true;\n"sv
             ;
             
         REQUIRE(buffer.load(r, session.intern_pool(), source));
@@ -286,8 +286,8 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
-            "123myVar: u8 := 1;\n"
+        const adt::string_t source =
+            "123myVar: u8 := 1;\n"sv
             ;
             
         REQUIRE(buffer.load(r, session.intern_pool(), source));

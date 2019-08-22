@@ -21,10 +21,10 @@
 #include <utility>
 #include <basecode/types.h>
 #include <basecode/utf8/rune.h>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include <basecode/memory/object_pool.h>
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename V>
     class trie_map_t final {
@@ -39,7 +39,7 @@ namespace basecode::data {
 
         struct tree_node_t final {
             explicit tree_node_t(memory::allocator_t* allocator) : children(allocator) {}
-            data::hash_table_t<utf8::rune_t, node_t*> children;
+            adt::hash_table_t<utf8::rune_t, node_t*> children;
         };
 
         explicit trie_map_t(

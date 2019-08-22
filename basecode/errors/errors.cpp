@@ -16,7 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include "errors.h"
 
 namespace basecode::errors {
@@ -29,7 +29,7 @@ namespace basecode::errors {
         }
 
         memory::allocator_t* allocator;
-        data::hash_table_t<error_decl_key_t, error_decl_t> decls;
+        adt::hash_table_t<error_decl_key_t, error_decl_t> decls;
     };
 
     error_system_t* g_error_system{};

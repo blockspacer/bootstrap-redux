@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <basecode/data/array.h>
-#include <basecode/data/string.h>
+#include <basecode/adt/array.h>
+#include <basecode/adt/string.h>
 #include "logger.h"
 
 namespace basecode::logging {
@@ -27,15 +27,15 @@ namespace basecode::logging {
     struct fake_log_entry_t final {
         fake_log_entry_t(
             log_level_t l,
-            data::string_t m): level(l),
+            adt::string_t m): level(l),
                                message(std::move(m)) {
         }
 
         log_level_t level;
-        data::string_t message;
+        adt::string_t message;
     };
 
-    using fake_log_entry_list_t = data::array_t<fake_log_entry_t>;
+    using fake_log_entry_list_t = adt::array_t<fake_log_entry_t>;
 
     class fake_logger_t : public logger_t {
     public:

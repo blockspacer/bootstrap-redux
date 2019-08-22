@@ -105,7 +105,7 @@ namespace basecode::language {
     struct block_comment_token_t final {
         explicit block_comment_token_t(memory::allocator_t* allocator) : children(allocator) {}
         std::string_view capture{};
-        data::array_t<block_comment_token_t> children;
+        adt::array_t<block_comment_token_t> children;
     };
 
 }

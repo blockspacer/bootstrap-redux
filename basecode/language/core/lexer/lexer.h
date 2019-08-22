@@ -20,9 +20,9 @@
 
 #include <utility>
 #include <basecode/types.h>
+#include <basecode/adt/trie_map.h>
 #include <basecode/errors/errors.h>
-#include <basecode/data/trie_map.h>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include <basecode/workspace/session.h>
 #include "token.h"
 
@@ -41,7 +41,7 @@ namespace basecode::language::core::lexer {
         tokenizer_t tokenizer{};
     };
 
-    using lexer_trie_t = data::trie_map_t<lexeme_t*>;
+    using lexer_trie_t = adt::trie_map_t<lexeme_t*>;
 
     using entity_maker_t = std::function<entt::entity (
         token_type_t type,

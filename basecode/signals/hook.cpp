@@ -16,7 +16,6 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <basecode/data/hash_table.h>
 #include "hook.h"
 
 namespace basecode::signals {

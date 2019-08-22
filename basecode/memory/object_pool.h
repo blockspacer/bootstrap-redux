@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <boost/any.hpp>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 #include "slab_allocator.h"
 
 namespace basecode::memory {
@@ -109,8 +109,8 @@ namespace basecode::memory {
 
     private:
         allocator_t* _backing;
-        data::hash_table_t<void*, destroyer_t> _objs;
-        data::hash_table_t<uint32_t, slab_allocator_t*> _pools;
+        adt::hash_table_t<void*, destroyer_t> _objs;
+        adt::hash_table_t<uint32_t, slab_allocator_t*> _pools;
     };
 
 }

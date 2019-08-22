@@ -18,11 +18,11 @@
 
 #include <fmt/format.h>
 #include <catch2/catch.hpp>
-#include <basecode/data/set.h>
-#include <basecode/data/bst.h>
-#include <basecode/data/array.h>
-#include <basecode/data/stack.h>
-#include <basecode/data/red_black_tree.h>
+#include <basecode/adt/set.h>
+#include <basecode/adt/array.h>
+#include <basecode/adt/stack.h>
+#include <basecode/adt/binary_tree.h>
+#include <basecode/adt/red_black_tree.h>
 
 namespace basecode {
 
@@ -45,7 +45,7 @@ namespace basecode {
 
     using namespace std::literals;
     using namespace basecode;
-    using namespace basecode::data;
+    using namespace basecode::adt;
 
     TEST_CASE("set_t with small initializer list") {
         set_t<int32_t> set_of_integers{0, 1, 2, 3, 4, 5, 6, 7, 8};
@@ -193,7 +193,7 @@ namespace basecode {
     }
 
     TEST_CASE("bst_t basics") {
-        bst_t tree{50, 30, 20, 40, 70, 60, 80};
+        binary_tree_t tree{50, 30, 20, 40, 70, 60, 80};
 
         REQUIRE(!tree.empty());
         REQUIRE(tree.size() == 7);
@@ -204,7 +204,7 @@ namespace basecode {
     }
 
     TEST_CASE("bst_t with custom range") {
-        bst_t<range_t> tree;
+        binary_tree_t<range_t> tree;
 
         tree.insert(range_t{1, 10});
         tree.insert(range_t{20, 33});

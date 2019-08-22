@@ -16,13 +16,17 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <sstream>
 #include <fmt/format.h>
+#include <basecode/formatters/formatters.h>
 #include "transforms.h"
 
 namespace basecode::strings {
 
-    std::string word_wrap(
-            std::string text,
+    // XXX: FIX THIS
+    //
+    void word_wrap(
+            adt::string_t& text,
             size_t width,
             size_t right_pad,
             const char& fill) {
@@ -38,8 +42,7 @@ namespace basecode::strings {
                 ++line_end;
             else if (std::isspace(text[line_end])) {
                 text[line_end++] = '\n';
-                for (size_t i = 0; i < right_pad; i++)
-                    text.insert(line_end++, 1, fill);
+                text.insert(line_end++, right_pad, fill);
             } else {
                 auto end = line_end;
                 while (end > line_begin && !std::isspace(text[end]))
@@ -48,28 +51,28 @@ namespace basecode::strings {
                 if (end != line_begin) {
                     line_end = end;
                     text[line_end++] = '\n';
-                    for (size_t i = 0; i < right_pad; i++)
-                        text.insert(line_end++, 1, fill);
+                    text.insert(line_end++, right_pad, fill);
                 } else {
                     text.insert(line_end++, 1, '\n');
-                    for (size_t i = 0; i < right_pad; i++)
-                        text.insert(line_end++, 1, fill);
+                    text.insert(line_end++, right_pad, fill);
                 }
             }
 
             line_begin = line_end;
         }
-
-        return text;
     }
 
-    std::string remove_underscores(const std::string_view& value) {
+    // XXX: FIX THIS
+    //
+    adt::string_t remove_underscores(const std::string_view& value) {
         fmt::memory_buffer buffer{};
         for (const auto& c : value)
             if (c != '_') fmt::format_to(buffer, "{}", c);
         return fmt::to_string(buffer);
     }
 
+    // XXX: FIX THIS
+    //
     std::pair<std::string, std::string> size_to_units(size_t size) {
         auto i = 0;
         const char* units[] = {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
@@ -78,32 +81,44 @@ namespace basecode::strings {
             i++;
         }
         return std::make_pair(
-            i > 1 ? fmt::format("{}.{}", i, size) : fmt::format("{}", size),
+            i > 1 ?
+            fmt::format("{}.{}", i, size) :
+            fmt::format("{}", size),
             units[i]);
     }
 
-    std::string list_to_string(const string_list_t& list, const char& sep) {
+    // XXX: FIX THIS
+    //
+    adt::string_t list_to_string(const string_list_t& list, const char& sep) {
         fmt::memory_buffer buffer{};
-
         for (size_t i = 0; i < list.size(); i++) {
             if (i > 0)
                 fmt::format_to(buffer, "{}", sep);
             fmt::format_to(buffer, "{}", list[i]);
         }
-
         return fmt::to_string(buffer);
     }
 
-    string_list_t string_to_list(const std::string& value, const char& sep) {
-        string_list_t list;
+    string_list_t string_to_list(const adt::string_t& value, const char& sep) {
+        string_list_t list{};
 
-        std::istringstream f(value);
+        std::istringstream f(value.as_std_string());
         std::string s;
         while (std::getline(f, s, sep)) {
             list.add(s);
         }
 
         return list;
+    }
+
+    adt::string_t pad_to(const adt::string_t& str, const size_t num, const char padding) {
+        if (num > str.size()) {
+            auto padded = str;
+            padded.insert(0, num - padded.size(), padding);
+            return padded;
+        } else {
+            return str;
+        }
     }
 
 }

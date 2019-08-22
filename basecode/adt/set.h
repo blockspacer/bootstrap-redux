@@ -27,7 +27,7 @@
 #include "array.h"
 #include "hashable.h"
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename T, std::uint32_t Initial_Size = 16>
     class set_t final {

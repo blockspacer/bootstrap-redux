@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <string>
+#include <basecode/adt/string.h>
 #include "allocator.h"
 
 namespace basecode::memory {
@@ -35,7 +35,7 @@ namespace basecode::memory {
     public:
         slab_allocator_t(
             allocator_t* backing,
-            std::string name,
+            adt::string_t name,
             uint32_t size,
             uint32_t align = default_align);
 
@@ -46,6 +46,8 @@ namespace basecode::memory {
             uint32_t align = default_align) override;
 
         void deallocate(void* p) override;
+
+        [[nodiscard]] std::string_view name() const;
 
         std::optional<uint32_t> total_allocated() override;
 
@@ -63,7 +65,7 @@ namespace basecode::memory {
     private:
         slab_t* _back{};
         slab_t* _front{};
-        std::string _name;
+        adt::string_t _name;
         allocator_t* _backing;
         uint32_t _buffer_size;
         uint32_t _buffer_align;

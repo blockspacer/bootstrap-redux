@@ -22,7 +22,7 @@
 namespace basecode::numbers {
 
     conversion_result_t parse_double(std::string_view value, double& out) {
-        const char* s = strings::remove_underscores(value).c_str();
+        const char* s = strings::remove_underscores(value).begin();
         char* end;
         errno = 0;
         out = strtod(s, &end);
@@ -34,7 +34,7 @@ namespace basecode::numbers {
     }
 
     conversion_result_t parse_integer(std::string_view value, uint8_t radix, int32_t& out) {
-        const char* s = strings::remove_underscores(value).c_str();
+        const char* s = strings::remove_underscores(value).begin();
         char* end;
         errno = 0;
         out = strtol(s, &end, radix);
@@ -49,7 +49,7 @@ namespace basecode::numbers {
     }
 
     conversion_result_t parse_integer(std::string_view value, uint8_t radix, int64_t& out) {
-        const char* s = strings::remove_underscores(value).c_str();
+        const char* s = strings::remove_underscores(value).begin();
         char* end;
         errno = 0;
         out = strtoll(s, &end, radix);

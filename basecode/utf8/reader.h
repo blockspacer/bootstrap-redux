@@ -21,7 +21,7 @@
 #include <stack>
 #include <string_view>
 #include <basecode/result.h>
-#include <basecode/data/stack.h>
+#include <basecode/adt/stack.h>
 #include "rune.h"
 
 namespace basecode::utf8 {
@@ -71,8 +71,8 @@ namespace basecode::utf8 {
         size_t _index{};
         std::string_view _slice;
         memory::allocator_t* _allocator;
-        data::stack_t<size_t> _mark_stack;
-        data::stack_t<uint32_t> _width_stack;
+        adt::stack_t<size_t> _mark_stack;
+        adt::stack_t<uint32_t> _width_stack;
     };
 
 }

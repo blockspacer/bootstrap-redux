@@ -18,14 +18,14 @@
 
 #pragma once
 
-#include <string>
+#include <basecode/adt/string.h>
 #include "allocator.h"
 
 namespace basecode::memory {
 
     class proxy_allocator_t : public allocator_t {
     public:
-        proxy_allocator_t(std::string name, allocator_t* backing);
+        proxy_allocator_t(adt::string_t name, allocator_t* backing);
 
         ~proxy_allocator_t() override;
 
@@ -35,12 +35,14 @@ namespace basecode::memory {
 
         void deallocate(void* p) override;
 
+        [[nodiscard]] std::string_view name() const;
+
         std::optional<uint32_t> total_allocated() override;
 
         std::optional<uint32_t> allocated_size(void *p) override;
 
     private:
-        std::string _name;
+        adt::string_t _name;
         allocator_t* _backing{};
     };
 

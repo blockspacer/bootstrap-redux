@@ -25,7 +25,7 @@
 #include <basecode/numbers/bytes.h>
 #include <basecode/memory/system.h>
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename T, std::uint32_t Initial_Capacity = 16>
     class array_t final {

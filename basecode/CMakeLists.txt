@@ -20,17 +20,17 @@ add_library(
         defer.h
         result.h result_message.h
 
-        data/bst.h
-        data/set.h
-        data/array.h
-        data/stack.h
-        data/queue.h
-        data/trie_map.h
-        data/hash_table.h
-        data/red_black_tree.h
-        data/directed_graph.h
-        data/string.cpp data/string.h
-        data/hashable.cpp data/hashable.h
+        adt/set.h
+        adt/array.h
+        adt/stack.h
+        adt/queue.h
+        adt/trie_map.h
+        adt/hash_table.h
+        adt/binary_tree.h
+        adt/red_black_tree.h
+        adt/directed_graph.h
+        adt/string.cpp adt/string.h
+        adt/hashable.cpp adt/hashable.h
 
         types.cpp types.h
 
@@ -111,7 +111,7 @@ target_link_libraries(
         mstch
 )
 
-add_subdirectory(data/tests)
+add_subdirectory(adt/tests)
 add_subdirectory(memory/tests)
 add_subdirectory(graphviz/tests)
 add_subdirectory(language/core/lexer/tests)

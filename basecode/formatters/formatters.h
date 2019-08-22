@@ -22,7 +22,7 @@
 #include <basecode/types.h>
 #include <basecode/result.h>
 #include <basecode/utf8/rune.h>
-#include <basecode/data/string.h>
+#include <basecode/adt/string.h>
 #include <basecode/language/common.h>
 #include <basecode/language/core/lexer/token.h>
 #include <basecode/language/assembly/lexer/token.h>
@@ -87,7 +87,7 @@ namespace fmt {
     };
 
     template<>
-    struct formatter<data::string_t> {
+    struct formatter<adt::string_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {
             return ctx.begin();
@@ -95,7 +95,7 @@ namespace fmt {
 
         template<typename FormatContext>
         auto format(
-                const data::string_t& str,
+                const adt::string_t& str,
                 FormatContext& ctx) {
             return format_to(
                 ctx.out(),

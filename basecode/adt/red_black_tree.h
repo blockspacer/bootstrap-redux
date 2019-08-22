@@ -24,7 +24,7 @@
 #include <basecode/memory/system.h>
 #include <basecode/memory/allocator.h>
 
-namespace basecode::data {
+namespace basecode::adt {
 
     template <typename K>
     class red_black_tree_t final {

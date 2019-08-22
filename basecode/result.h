@@ -22,7 +22,7 @@
 #include <vector>
 #include <utility>
 #include <fmt/format.h>
-#include <basecode/data/array.h>
+#include <basecode/adt/array.h>
 #include "result_message.h"
 
 namespace basecode {
@@ -100,7 +100,7 @@ namespace basecode {
             return false;
         }
 
-        [[nodiscard]] inline const data::array_t<result_message_t>& messages() const {
+        [[nodiscard]] inline const adt::array_t<result_message_t>& messages() const {
             return _messages;
         }
 
@@ -114,7 +114,7 @@ namespace basecode {
 
     private:
         bool _success = true;
-        data::array_t<result_message_t> _messages;
+        adt::array_t<result_message_t> _messages;
     };
 
 }

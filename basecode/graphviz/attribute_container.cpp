@@ -125,7 +125,7 @@ namespace basecode::graphviz {
         return true;
     }
 
-    bool attribute_container_t::get_value(result_t& r, attribute_type_t attr, data::string_t& v) {
+    bool attribute_container_t::get_value(result_t& r, attribute_type_t attr, adt::string_t& v) {
         if (!_model->is_attribute_valid(r, _type, attr)) return false;
 
         auto wrapper = _values.find(attr);
@@ -137,7 +137,7 @@ namespace basecode::graphviz {
         return true;
     }
 
-    bool attribute_container_t::set_value(result_t& r, attribute_type_t attr, const data::string_t& v) {
+    bool attribute_container_t::set_value(result_t& r, attribute_type_t attr, const adt::string_t& v) {
         if (!_model->is_attribute_valid(r, _type, attr)) return false;
 
         auto wrapper = _values.find(attr);
@@ -148,7 +148,7 @@ namespace basecode::graphviz {
             _values.insert(attr, wrapper);
         }
 
-        auto str = _storage.construct<data::string_t>(_allocator);
+        auto str = _storage.construct<adt::string_t>(_allocator);
         *str = v;
         wrapper->value.string = str;
 
@@ -182,7 +182,7 @@ namespace basecode::graphviz {
             _values.insert(attr, wrapper);
         }
 
-        auto str = _storage.construct<data::string_t>(_allocator);
+        auto str = _storage.construct<adt::string_t>(_allocator);
         *str = v.name;
         wrapper->value.string = str;
 

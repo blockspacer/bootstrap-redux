@@ -19,13 +19,14 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <memory>
 #include <cstdint>
 #include <sstream>
 #include <iomanip>
 #include <fmt/format.h>
+#include <basecode/adt/string.h>
 #include <basecode/utf8/reader.h>
+#include <basecode/formatters/formatters.h>
 
 namespace basecode::terminal {
 
@@ -56,7 +57,7 @@ namespace basecode::terminal {
         return "\033[0m"sv;
     }
 
-    std::string color_code(colors_t fg_color, colors_t bg_color);
+    adt::string_t color_code(colors_t fg_color, colors_t bg_color);
 
     class stream_t {
     public:
@@ -80,13 +81,9 @@ namespace basecode::terminal {
 
         virtual stream_t* underline(bool enabled) = 0;
 
-        [[nodiscard]] virtual std::string format() const = 0;
-
-        virtual stream_t* append(const std::string& value) = 0;
+        [[nodiscard]] virtual adt::string_t format() const = 0;
 
         virtual stream_t* append(const std::string_view& value) = 0;
-
-        virtual stream_t* append(const std::string& value, ssize_t width) = 0;
 
         virtual stream_t* append(const std::string_view& value, ssize_t width) = 0;
     };
@@ -130,22 +127,12 @@ namespace basecode::terminal {
             return dynamic_cast<stream_t*>(this);
         }
 
-        [[nodiscard]] std::string format() const override {
+        [[nodiscard]] adt::string_t format() const override {
             return fmt::to_string(_buffer);
-        }
-
-        stream_t* append(const std::string& value) override {
-            fmt::format_to(_buffer, "{}", value);
-            return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* append(const std::string_view& value) override {
             fmt::format_to(_buffer, "{}", value);
-            return dynamic_cast<stream_t*>(this);
-        }
-
-        stream_t* append(const std::string& value, ssize_t width) override {
-            fmt::format_to(_buffer, "{:<{}}", value, width);
             return dynamic_cast<stream_t*>(this);
         }
 
@@ -219,22 +206,12 @@ namespace basecode::terminal {
             return dynamic_cast<stream_t*>(this);
         }
 
-        [[nodiscard]] std::string format() const override {
+        [[nodiscard]] adt::string_t format() const override {
             return fmt::to_string(_buffer);
-        }
-
-        stream_t* append(const std::string& value) override {
-            fmt::format_to(_buffer, "{}", value);
-            return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* append(const std::string_view& value) override {
             fmt::format_to(_buffer, "{}", value);
-            return dynamic_cast<stream_t*>(this);
-        }
-
-        stream_t* append(const std::string& value, ssize_t width) override {
-            fmt::format_to(_buffer, "{:<{}}", value, width);
             return dynamic_cast<stream_t*>(this);
         }
 
@@ -259,12 +236,12 @@ namespace basecode::terminal {
 
         [[nodiscard]] bool enabled() const;
 
-        [[nodiscard]] std::string colorize(
+        [[nodiscard]] adt::string_t colorize(
             std::string_view text,
             colors_t fg_color,
             colors_t bg_color = colors_t::default_color) const;
 
-        [[nodiscard]] std::string colorize_range(
+        [[nodiscard]] adt::string_t colorize_range(
             utf8::reader_t& reader,
             size_t begin,
             size_t end,

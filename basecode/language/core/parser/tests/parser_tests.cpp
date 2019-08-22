@@ -36,7 +36,7 @@ namespace basecode {
 
         defer(fmt::print("{}", r));
 
-        const std::string source =
+        const adt::string_t source =
             "@no_fold \"foo\";\n"
             "true;\n"
             "false;\n"
@@ -47,7 +47,7 @@ namespace basecode {
             "foo[2 * 2] := 66;\n"
             "2 == 2 && 3 == 1;\n"
             "2 == 2 || 3 == 3;\n"
-            "a, b, c := 3, 4, 2;\n"
+            "a, b, c := 3, 4, 2;\n"sv
         ;
 
         REQUIRE(buffer.load(r, session.intern_pool(), source));

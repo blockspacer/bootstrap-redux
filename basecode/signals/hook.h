@@ -20,7 +20,7 @@
 
 #include <csignal>
 #include <basecode/result.h>
-#include <basecode/data/hash_table.h>
+#include <basecode/adt/hash_table.h>
 
 namespace basecode::signals {
 
@@ -37,10 +37,10 @@ namespace basecode::signals {
         explicit action_t(memory::allocator_t* allocator) : handlers(allocator) {
         }
         struct sigaction sigact{};
-        data::array_t<handler_t*> handlers;
+        adt::array_t<handler_t*> handlers;
     };
 
-    using action_map_t = data::hash_table_t<int, action_t>;
+    using action_map_t = adt::hash_table_t<int, action_t>;
 
     void shutdown();
 

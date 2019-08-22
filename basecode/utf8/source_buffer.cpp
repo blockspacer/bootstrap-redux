@@ -41,7 +41,7 @@ namespace basecode::utf8 {
     bool source_buffer_t::load(
             result_t& r,
             strings::pool_t& pool,
-            const std::string& buffer) {
+            const adt::string_t& buffer) {
         if (_buffer) {
             _allocator->deallocate(_buffer);
             _buffer_size = 0;
@@ -52,7 +52,7 @@ namespace basecode::utf8 {
 
         _buffer_size = buffer.size() + 1;
         _buffer = (char*)_allocator->allocate(_buffer_size);
-        std::memcpy(_buffer, buffer.data(), buffer.size());
+        std::memcpy(_buffer, buffer.begin(), buffer.size());
         _buffer[_buffer_size - 1] = '\n';
 
         auto mem = _allocator->allocate(
@@ -83,7 +83,7 @@ namespace basecode::utf8 {
             return false;
         }
 
-        return load(r, pool, stream.str());
+        return load(r, pool, (adt::string_t)stream.str());
     }
 
     void source_buffer_t::push_mark() {

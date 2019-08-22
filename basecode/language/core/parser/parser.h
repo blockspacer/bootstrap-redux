@@ -19,7 +19,7 @@
 #pragma once
 
 #include <basecode/types.h>
-#include <basecode/data/stack.h>
+#include <basecode/adt/stack.h>
 #include <basecode/errors/errors.h>
 #include <basecode/workspace/session.h>
 #include <basecode/language/core/ast/ast.h>
@@ -142,13 +142,13 @@ namespace basecode::language::core::parser {
         entity_list_t _tokens;
         workspace::session_t& _session;
         utf8::source_buffer_t& _buffer;
-        data::stack_t<entity_t> _scopes;
-        data::stack_t<entity_t> _blocks;
-        data::stack_t<entity_t> _parents;
+        adt::stack_t<entity_t> _scopes;
+        adt::stack_t<entity_t> _blocks;
+        adt::stack_t<entity_t> _parents;
         production_rule_t* _comma_rule{};
-        data::array_t<production_rule_t*> _rules;
+        adt::array_t<production_rule_t*> _rules;
         memory::frame_allocator_t<4096> _frame_allocator;
-        data::hash_table_t<lexer::token_type_t, production_rule_t*> _rule_table;
+        adt::hash_table_t<lexer::token_type_t, production_rule_t*> _rule_table;
     };
 
 }

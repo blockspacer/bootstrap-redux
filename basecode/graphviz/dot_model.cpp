@@ -235,8 +235,8 @@ namespace basecode::graphviz {
         return true;
     }
 
-    data::string_t dot_model_t::escape_chars(const data::string_t& value) {
-        data::string_t buffer(value.allocator());
+    adt::string_t dot_model_t::escape_chars(const adt::string_t& value) {
+        adt::string_t buffer(value.allocator());
         buffer.reserve(value.size() * 2);
         for (size_t i = 0 ; i < value.size(); i++) {
             const auto& c = value[i];

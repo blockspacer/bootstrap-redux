@@ -21,7 +21,7 @@
 namespace basecode::memory {
 
     proxy_allocator_t::proxy_allocator_t(
-            std::string name,
+            adt::string_t name,
             allocator_t* backing) : _name(std::move(name)),
                                     _backing(backing) {
     }
@@ -38,6 +38,10 @@ namespace basecode::memory {
 
     void proxy_allocator_t::deallocate(void* p) {
         _backing->deallocate(p);
+    }
+
+    std::string_view proxy_allocator_t::name() const {
+        return _name.slice();
     }
 
     std::optional<uint32_t> proxy_allocator_t::total_allocated() {
