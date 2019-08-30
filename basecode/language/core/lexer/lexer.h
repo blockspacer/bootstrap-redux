@@ -93,7 +93,6 @@ namespace basecode::language::core::lexer {
                 Args&&... args) {
             errors::add_source_highlighted_error(
                 r,
-                _session.intern_pool(),
                 code,
                 _buffer,
                 make_location(start_pos, _buffer.pos() - start_pos),

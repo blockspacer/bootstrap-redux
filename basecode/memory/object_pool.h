@@ -55,6 +55,10 @@ namespace basecode::memory {
         }
 
         ~object_pool_t() {
+            if (!_released) release();
+        }
+
+        void release() {
             const auto& objs = _objs.values();
             for (auto obj : objs)
                 obj->destroy(obj->p);
@@ -64,6 +68,8 @@ namespace basecode::memory {
                 slab->~slab_allocator_t();
                 _backing->deallocate(slab);
             }
+
+            _released = true;
         }
 
         template <typename T>
@@ -89,10 +95,10 @@ namespace basecode::memory {
                     sizeof(slab_allocator_t),
                     alignof(slab_allocator_t));
                 slab = new (mem) slab_allocator_t(
-                    _backing,
                     typeid(T).name(),
                     sizeof(T),
-                    alignof(T));
+                    alignof(T),
+                    _backing);
                 _pools.insert(type_id, slab);
             }
             auto mem = slab->allocate();
@@ -108,6 +114,7 @@ namespace basecode::memory {
         }
 
     private:
+        bool _released{};
         allocator_t* _backing;
         adt::hash_table_t<void*, destroyer_t> _objs;
         adt::hash_table_t<uint32_t, slab_allocator_t*> _pools;

@@ -20,7 +20,7 @@
 #include <basecode/errors/errors.h>
 #include <basecode/numbers/bytes.h>
 #include <basecode/numbers/parse.h>
-#include <basecode/formatters/formatters.h>
+#include <basecode/format/format.h>
 #include "lexer.h"
 
 namespace basecode::language::core::lexer {

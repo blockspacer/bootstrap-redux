@@ -21,23 +21,23 @@
 namespace basecode::graphviz {
 
     graph_t::graph_t(
-            memory::allocator_t* allocator,
             model_t* model,
             graph_type_t type,
             std::string_view name,
-            graph_t* parent) : _model(model),
-                               _parent(parent),
-                               _type(type),
-                               _edges(allocator),
-                               _nodes(allocator),
-                               _name(name),
-                               _subgraphs(allocator),
-                               _storage(allocator),
-                               _allocator(allocator),
-                               _attributes(
-                                   allocator,
-                                   model,
-                                   !parent ? component_type_t::graph : component_type_t::subgraph) {
+            graph_t* parent,
+            memory::allocator_t* allocator) : _model(model),
+                                              _parent(parent),
+                                              _type(type),
+                                              _edges(allocator),
+                                              _nodes(allocator),
+                                              _name(name),
+                                              _subgraphs(allocator),
+                                              _storage(allocator),
+                                              _allocator(allocator),
+                                              _attributes(
+                                                  allocator,
+                                                  model,
+                                                  !parent ? component_type_t::graph : component_type_t::subgraph) {
         assert(_allocator);
     }
 
@@ -74,7 +74,7 @@ namespace basecode::graphviz {
     }
 
     graph_t* graph_t::make_subgraph(graph_type_t type, std::string_view name) {
-        auto graph = _storage.construct<graph_t>(_allocator, _model, type, name);
+        auto graph = _storage.construct<graph_t>(_model, type, name, this, _allocator);
         _subgraphs.add(graph);
         return graph;
     }

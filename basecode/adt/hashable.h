@@ -21,12 +21,15 @@
 #include <cstdint>
 #include <string_view>
 #include <basecode/hashing/murmur.h>
+#include "string.h"
 
 namespace basecode::adt {
 
     template <typename K> uint64_t hash_key(K key) {
         return hashing::murmur::hash64(&key, sizeof(key));
     }
+
+    template <> uint64_t hash_key(string_t key);
 
     template <> uint64_t hash_key(std::string_view key);
 

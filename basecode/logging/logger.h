@@ -21,7 +21,7 @@
 #include <string>
 #include <cstdint>
 #include <string_view>
-#include <fmt/format.h>
+#include <basecode/format/format.h>
 
 namespace basecode::logging {
 
@@ -44,32 +44,32 @@ namespace basecode::logging {
 
         template <typename... Args>
         void info(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::info, fmt::format(format, args...));
+            on_log(log_level_t::info, format::format(format, args...));
         }
 
         template <typename... Args>
         void warn(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::warn, fmt::format(format, args...));
+            on_log(log_level_t::warn, format::format(format, args...));
         }
 
         template <typename... Args>
         void debug(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::debug, fmt::format(format, args...));
+            on_log(log_level_t::debug, format::format(format, args...));
         }
 
         template <typename... Args>
         void trace(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::trace, fmt::format(format, args...));
+            on_log(log_level_t::trace, format::format(format, args...));
         }
 
         template <typename... Args>
         void error(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::error, fmt::format(format, args...));
+            on_log(log_level_t::error, format::format(format, args...));
         }
 
         template <typename... Args>
         void critical(std::string_view format, const Args& ... args) {
-            on_log(log_level_t::critical, fmt::format(format, args...));
+            on_log(log_level_t::critical, format::format(format, args...));
         }
 
     protected:

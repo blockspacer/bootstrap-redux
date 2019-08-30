@@ -23,10 +23,9 @@
 #include <cstdint>
 #include <sstream>
 #include <iomanip>
-#include <fmt/format.h>
 #include <basecode/adt/string.h>
 #include <basecode/utf8/reader.h>
-#include <basecode/formatters/formatters.h>
+#include <basecode/format/format.h>
 
 namespace basecode::terminal {
 
@@ -77,9 +76,9 @@ namespace basecode::terminal {
 
         virtual stream_t* reverse(bool enabled) = 0;
 
-        virtual fmt::memory_buffer& underlying() = 0;
-
         virtual stream_t* underline(bool enabled) = 0;
+
+        virtual format::memory_buffer_t& underlying() = 0;
 
         [[nodiscard]] virtual adt::string_t format() const = 0;
 
@@ -90,12 +89,12 @@ namespace basecode::terminal {
 
     class ascii_stream_t : public stream_t {
     public:
-        explicit ascii_stream_t(fmt::memory_buffer& buffer) : _buffer(buffer) {
+        explicit ascii_stream_t(format::memory_buffer_t& buffer) : _buffer(buffer) {
         }
 
         stream_t* color(
-                colors_t bg,
-                colors_t fg) override {
+            colors_t bg,
+            colors_t fg) override {
             return dynamic_cast<stream_t*>(this);
         }
 
@@ -119,7 +118,7 @@ namespace basecode::terminal {
             return dynamic_cast<stream_t*>(this);
         }
 
-        fmt::memory_buffer& underlying() override {
+        format::memory_buffer_t& underlying() override {
             return _buffer;
         }
 
@@ -128,100 +127,100 @@ namespace basecode::terminal {
         }
 
         [[nodiscard]] adt::string_t format() const override {
-            return fmt::to_string(_buffer);
+            return format::to_string(_buffer);
         }
 
         stream_t* append(const std::string_view& value) override {
-            fmt::format_to(_buffer, "{}", value);
+            format::format_to(_buffer, "{}", value);
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* append(const std::string_view& value, ssize_t width) override {
-            fmt::format_to(_buffer, "{:<{}}", value, width);
+            format::format_to(_buffer, "{:<{}}", value, width);
             return dynamic_cast<stream_t*>(this);
         }
 
     private:
-        fmt::memory_buffer& _buffer;
+        format::memory_buffer_t& _buffer;
     };
 
     class ansi_stream_t : public stream_t {
     public:
-        explicit ansi_stream_t(fmt::memory_buffer& buffer) : _buffer(buffer) {
+        explicit ansi_stream_t(format::memory_buffer_t& buffer) : _buffer(buffer) {
         }
 
         stream_t* color(
-                colors_t bg,
-                colors_t fg) override {
-            fmt::format_to(_buffer, "{}", color_code(fg, bg));
+            colors_t bg,
+            colors_t fg) override {
+            format::format_to(_buffer, "{}", color_code(fg, bg));
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* color_reset() override {
-            fmt::format_to(_buffer, "{}", color_code_reset());
+            format::format_to(_buffer, "{}", color_code_reset());
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* dim(bool enabled) override {
             if (enabled)
-                fmt::format_to(_buffer, "\033[2m");
+                format::format_to(_buffer, "\033[2m");
             else
-                fmt::format_to(_buffer, "\033[22m");
+                format::format_to(_buffer, "\033[22m");
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* bold(bool enabled) override {
             if (enabled)
-                fmt::format_to(_buffer, "\033[1m");
+                format::format_to(_buffer, "\033[1m");
             else
-                fmt::format_to(_buffer, "\033[21m");
+                format::format_to(_buffer, "\033[21m");
             return dynamic_cast<stream_t*>(this);
         }
 
-        fmt::memory_buffer& underlying() override {
+        format::memory_buffer_t& underlying() override {
             return _buffer;
         }
 
         stream_t* blink(bool enabled) override {
             if (enabled)
-                fmt::format_to(_buffer, "\033[5m");
+                format::format_to(_buffer, "\033[5m");
             else
-                fmt::format_to(_buffer, "\033[25m");
+                format::format_to(_buffer, "\033[25m");
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* reverse(bool enabled) override {
             if (enabled)
-                fmt::format_to(_buffer, "\033[7m");
+                format::format_to(_buffer, "\033[7m");
             else
-                fmt::format_to(_buffer, "\033[27m");
+                format::format_to(_buffer, "\033[27m");
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* underline(bool enabled) override {
             if (enabled)
-                fmt::format_to(_buffer, "\033[4m");
+                format::format_to(_buffer, "\033[4m");
             else
-                fmt::format_to(_buffer, "\033[24m");
+                format::format_to(_buffer, "\033[24m");
             return dynamic_cast<stream_t*>(this);
         }
 
         [[nodiscard]] adt::string_t format() const override {
-            return fmt::to_string(_buffer);
+            return format::to_string(_buffer);
         }
 
         stream_t* append(const std::string_view& value) override {
-            fmt::format_to(_buffer, "{}", value);
+            format::format_to(_buffer, "{}", value);
             return dynamic_cast<stream_t*>(this);
         }
 
         stream_t* append(const std::string_view& value, ssize_t width) override {
-            fmt::format_to(_buffer, "{:<{}}", value, width);
+            format::format_to(_buffer, "{:<{}}", value, width);
             return dynamic_cast<stream_t*>(this);
         }
 
     private:
-        fmt::memory_buffer& _buffer;
+        format::memory_buffer_t& _buffer;
     };
 
     using stream_unique_ptr_t = std::unique_ptr<stream_t>;
@@ -248,7 +247,7 @@ namespace basecode::terminal {
             colors_t fg_color,
             colors_t bg_color = colors_t::default_color) const;
 
-        [[nodiscard]] stream_unique_ptr_t use_memory_buffer(fmt::memory_buffer& buffer) const;
+        [[nodiscard]] stream_unique_ptr_t use_memory_buffer(format::memory_buffer_t& buffer) const;
 
     private:
         bool _enabled;

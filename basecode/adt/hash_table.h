@@ -109,7 +109,7 @@ namespace basecode::adt {
             return false;
         }
 
-        decltype(auto) find(K key) {
+        decltype(auto) find(K key) const {
             size_t hash = hash_key(key) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
@@ -278,7 +278,7 @@ namespace basecode::adt {
                 array_t<hash_pair_t>& pairs,
                 uint32_t bucket_start_index,
                 hash_bucket_t** target_bucket,
-                hash_pair_t** target_pair) {
+                hash_pair_t** target_pair) const {
             for (size_t i = bucket_start_index; i < buckets.size(); i++) {
                 auto& bucket = buckets[i];
                 if (bucket.state != hash_bucket_state_t::s_filled) {
@@ -305,7 +305,7 @@ namespace basecode::adt {
                 size_t hash,
                 K key,
                 hash_bucket_t** target_bucket,
-                hash_pair_t** target_pair) {
+                hash_pair_t** target_pair) const {
             for (size_t i = bucket_start_index; i < _buckets.size(); i++) {
                 auto& bucket = _buckets[i];
                 switch (bucket.state) {
@@ -315,8 +315,8 @@ namespace basecode::adt {
                         if (bucket.hash == hash) {
                             auto& pair = _pairs[i];
                             if (pair.key == key) {
-                                *target_pair = &pair;
-                                *target_bucket = &bucket;
+                                *target_pair = const_cast<hash_pair_t*>(&pair);
+                                *target_bucket = const_cast<hash_bucket_t*>(&bucket);
                                 return true;
                             }
                         }
@@ -336,8 +336,8 @@ namespace basecode::adt {
                         if (bucket.hash == hash) {
                             auto& pair = _pairs[i];
                             if (pair.key == key) {
-                                *target_pair = &pair;
-                                *target_bucket = &bucket;
+                                *target_pair = const_cast<hash_pair_t*>(&pair);
+                                *target_bucket = const_cast<hash_bucket_t*>(&bucket);
                                 return true;
                             }
                         }

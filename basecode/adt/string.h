@@ -80,6 +80,8 @@ namespace basecode::adt {
 
         void append(char value);
 
+        const char* c_str() const;
+
         char* erase(const char* it);
 
         char& operator[](size_t index);
@@ -114,8 +116,6 @@ namespace basecode::adt {
 
         [[nodiscard]] const char* begin() const;
 
-        [[nodiscard]] const char* c_str() const;
-
         bool operator==(const char* other) const;
 
         const char& operator[](size_t index) const;
@@ -141,6 +141,8 @@ namespace basecode::adt {
         bool operator==(const std::string_view& other) const;
 
         char* erase(const char* it_begin, const char* it_end);
+
+        [[nodiscard]] std::string_view slice(uint32_t start, uint32_t len) const;
 
     private:
         void grow(uint32_t min_capacity = 32);

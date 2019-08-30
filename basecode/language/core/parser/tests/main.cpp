@@ -22,25 +22,40 @@
 #include <basecode/signals/hook.h>
 #include <basecode/memory/system.h>
 #include <basecode/errors/errors.h>
+#include <basecode/context/context.h>
+#include <basecode/logging/fake_logger.h>
+#include <basecode/memory/trace_allocator.h>
 
+#define TRACE_ALLOCATOR 0
 using namespace basecode;
 
 int main(int argc, char** argv) {
+    int rc = 0;
+
     memory::initialize();
-    context::initialize(memory::default_scratch_allocator());
+    defer(memory::shutdown());
 
-    result_t r;
-    if (!errors::initialize(r))  return 1;
+    {
+        memory::allocator_t* default_allocator{};
+#if TRACE_ALLOCATOR
+        memory::trace_allocator_t tracer(memory::default_scratch_allocator());
+        default_allocator = &tracer;
+#else
+        default_allocator = memory::default_scratch_allocator();
+#endif
+        logging::fake_logger_t fake_logger(default_allocator);
+        context::initialize(default_allocator, &fake_logger);
 
-    if (!signals::initialize(r)) return 1;
+        result_t r;
+        if (!errors::initialize(r)) return 1;
+        if (!signals::initialize(r)) return 1;
 
-    defer({
-        signals::shutdown();
+        rc = Catch::Session().run(argc, argv);
+
         errors::shutdown();
+        signals::shutdown();
         context::shutdown();
-        memory::shutdown();
-    });
+    }
 
-    auto result = Catch::Session().run(argc, argv);
-    return (result < 0xff ? result : 0xff);
+    return (rc < 0xff ? rc : 0xff);
 }

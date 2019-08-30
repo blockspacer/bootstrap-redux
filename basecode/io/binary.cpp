@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <fstream>
-#include <fmt/format.h>
+#include <basecode/errors/errors.h>
 #include "binary.h"
 
 namespace basecode::io::binary {
@@ -35,9 +35,7 @@ namespace basecode::io::binary {
                 file.close();
             }
         } catch (std::exception& e) {
-            r.error(
-                "P001",
-                fmt::format("unable to read_binary from file: {}", e.what()));
+            errors::add_error(r, errors::io::unable_to_read_file, e.what());
             return false;
         }
         return true;
@@ -56,9 +54,7 @@ namespace basecode::io::binary {
                 file.close();
             }
         } catch (std::exception& e) {
-            r.error(
-                "P001",
-                fmt::format("unable to write_binary to file: {}", e.what()));
+            errors::add_error(r, errors::io::unable_to_write_file, e.what());
             return false;
         }
         return true;

@@ -20,7 +20,6 @@
 
 #include <functional>
 #include <string_view>
-#include <fmt/format.h>
 #include <basecode/utf8/reader.h>
 
 namespace basecode::strings {
@@ -29,7 +28,7 @@ namespace basecode::strings {
     public:
         explicit escape_parser_t(utf8::reader_t& reader);
 
-        bool parse(result_t& r, fmt::memory_buffer& stream);
+        bool parse(result_t& r, format::memory_buffer_t& stream);
 
     private:
         using predicate_t = std::function<bool (utf8::rune_t&)>;

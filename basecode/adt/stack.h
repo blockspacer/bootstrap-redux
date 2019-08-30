@@ -65,8 +65,14 @@ namespace basecode::adt {
             }
         }
 
-        const T* top() const {
-            return _values.empty() ? nullptr : &_values[_values.size() - 1];
+        decltype(auto) top() const {
+            if constexpr (std::is_pointer<T>::value) {
+                const T r = _values.empty() ? nullptr : _values[_values.size() - 1];
+                return r;
+            } else {
+                const T* r = _values.empty() ? nullptr : &_values[_values.size() - 1];
+                return r;
+            }
         }
 
         void push(const T& value) {

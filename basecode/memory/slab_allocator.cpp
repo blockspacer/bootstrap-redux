@@ -23,13 +23,13 @@
 namespace basecode::memory {
 
     slab_allocator_t::slab_allocator_t(
-            allocator_t* backing,
             adt::string_t name,
             uint32_t size,
-            uint32_t align) : _name(std::move(name)),
-                              _backing(backing),
-                              _buffer_size(size),
-                              _buffer_align(align) {
+            uint32_t align,
+            allocator_t* backing) : _name(std::move(name)),
+                                    _backing(backing),
+                                    _buffer_size(std::max<uint32_t>(size, 8)),
+                                    _buffer_align(std::max<uint32_t>(align, 4)) {
         const auto slab_size = sizeof(slab_t) + alignof(slab_t);
         _maximum_buffers = (os_page_size() - slab_size) / _buffer_size;
     }

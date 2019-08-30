@@ -162,10 +162,7 @@ namespace basecode::graphviz {
         if (!wrapper)
             return false;
 
-        std::string_view slice(
-            wrapper->value.string->begin(),
-            wrapper->value.string->size());
-        enumeration_value_t temp(slice.data());
+        enumeration_value_t temp(wrapper->value.string->c_str());
         v = temp;
 
         return true;

@@ -42,10 +42,9 @@ namespace basecode::adt {
             adt::hash_table_t<utf8::rune_t, node_t*> children;
         };
 
-        explicit trie_map_t(
-                memory::allocator_t* allocator = context::current()->allocator) : _tree_root(allocator),
-                                                                                  _storage(allocator),
-                                                                                  _allocator(allocator) {
+        explicit trie_map_t(memory::allocator_t* allocator = context::current()->allocator) : _tree_root(allocator),
+                                                                                              _storage(allocator),
+                                                                                              _allocator(allocator) {
             assert(_allocator);
         }
 

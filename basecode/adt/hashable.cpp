@@ -20,6 +20,10 @@
 
 namespace basecode::adt {
 
+    template <> uint64_t hash_key(string_t key) {
+        return hashing::murmur::hash64(key.begin(), key.size());
+    }
+
     template <> uint64_t hash_key(std::string_view key) {
         return hashing::murmur::hash64(key.data(), key.length());
     }

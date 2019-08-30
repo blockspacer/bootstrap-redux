@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <basecode/format/format.h>
 #include "fake_logger.h"
 
 namespace basecode::logging {
@@ -43,7 +44,7 @@ namespace basecode::logging {
     }
 
     void fake_logger_t::on_log(log_level_t level, std::string_view message) {
-        fmt::print("[{}] {}\n", log_level_name(level), message);
+        format::print("[{}] {}\n", log_level_name(level), message);
         _entries.emplace(level, message);
     }
 

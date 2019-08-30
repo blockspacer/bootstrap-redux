@@ -36,14 +36,12 @@ namespace basecode::graphviz {
         using metadata_table_t = adt::hash_table_t<attribute_type_t, metadata_t>;
 
     public:
-        dot_model_t(
-            memory::allocator_t* allocator,
-            strings::pool_t& intern_pool);
+        explicit dot_model_t(memory::allocator_t* allocator = context::current()->allocator);
 
         bool serialize(
             result_t& r,
             graph_t& graph,
-            fmt::memory_buffer& buffer) override;
+            format::memory_buffer_t& buffer) override;
 
         bool is_attribute_valid(
             result_t& r,
@@ -58,19 +56,18 @@ namespace basecode::graphviz {
         bool serialize_attribute(
             result_t& r,
             attribute_value_t* attr,
-            fmt::memory_buffer& buffer);
+            format::memory_buffer_t& buffer);
 
         bool serialize_attributes(
             result_t& r,
             const attribute_value_list_t& attrs,
             std::string_view separator,
-            fmt::memory_buffer& buffer);
+            format::memory_buffer_t& buffer);
 
         adt::string_t escape_chars(const adt::string_t& value);
 
     private:
         metadata_table_t _attributes;
-        strings::pool_t& _intern_pool;
         memory::allocator_t* _allocator;
     };
 

@@ -260,6 +260,7 @@ namespace basecode::adt {
         char* new_data{};
         if (new_capacity > 0) {
             new_data = (char*)_allocator->allocate(new_capacity * sizeof(char));
+            std::memset(new_data, 0, new_capacity * sizeof(char));
             if (_data)
                 std::memcpy(new_data, _data, _size * sizeof(char));
         }
@@ -352,6 +353,10 @@ namespace basecode::adt {
             (_size - offset - count) * sizeof(char));
         _size -= count;
         return _data + offset;
+    }
+
+    std::string_view string_t::slice(uint32_t start, uint32_t len) const {
+        return std::string_view(_data + start, len);
     }
 
 }

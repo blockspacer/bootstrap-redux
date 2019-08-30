@@ -68,12 +68,10 @@ namespace basecode::utf8 {
 
         bool load(
             result_t& r,
-            strings::pool_t& pool,
             const adt::string_t& buffer);
 
         bool load(
             result_t& r,
-            strings::pool_t& pool,
             const path_t& path);
 
         void push_mark();

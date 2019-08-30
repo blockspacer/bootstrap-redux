@@ -16,7 +16,6 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <fmt/format.h>
 #include <basecode/numbers/bytes.h>
 #include "common.h"
 

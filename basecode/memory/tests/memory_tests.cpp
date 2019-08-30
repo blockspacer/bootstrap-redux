@@ -16,7 +16,6 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <fmt/format.h>
 #include <catch2/catch.hpp>
 #include <basecode/memory/system.h>
 #include <basecode/memory/object_pool.h>
@@ -30,8 +29,7 @@ namespace basecode {
     using namespace basecode::memory;
 
     TEST_CASE("slab_allocator_t") {
-        trace_allocator_t tracer(memory::default_scratch_allocator());
-        slab_allocator_t block1(&tracer, "block1", 64);
+        slab_allocator_t block1("block1", 64);
 
         void* blocks[128];
         for (size_t i = 0; i < 128; i++) {

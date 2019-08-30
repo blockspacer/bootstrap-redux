@@ -37,8 +37,16 @@ namespace basecode::memory {
     allocator_t* default_allocator();
 
     template <typename T, typename... Args>
+    T* construct_with_allocator(
+        allocator_t* allocator,
+        Args&&... args) {
+        auto mem = allocator->allocate(sizeof(T), alignof(T));
+        return new (mem) T(std::forward<Args>(args)...);
+    }
+
+    template <typename T, typename... Args>
     T* construct(Args&&... args) {
-        return construct<T>(
+        return construct_with_allocator<T>(
             context::current()->allocator,
             std::forward<Args>(args)...);
     }
@@ -49,12 +57,6 @@ namespace basecode::memory {
     void destroy(allocator_t* allocator, T* obj) {
         obj->~T();
         allocator->deallocate(obj);
-    }
-
-    template <typename T, typename... Args>
-    T* construct(allocator_t* allocator, Args&&... args) {
-        auto mem = allocator->allocate(sizeof(T), alignof(T));
-        return new (mem) T(std::forward<Args>(args)...);
     }
 
     void initialize(uint32_t scratch_buffer_size = 4*1024*1024);

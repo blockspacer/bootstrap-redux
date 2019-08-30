@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <cstdint>
+#include <cassert>
 #include "context.h"
 
 namespace basecode::context {
@@ -28,10 +29,12 @@ namespace basecode::context {
     thread_local context_t* t_stack[stack_size];
 
     void pop() {
-        if (t_index < stack_size) t_index++;
+        assert(t_index < stack_size);
+        t_index++;
     }
 
     void shutdown() {
+        pop();
     }
 
     void initialize(
@@ -41,13 +44,14 @@ namespace basecode::context {
         t_default.logger = logger;
         push(&t_default);
     }
-    
+
     context_t* current() {
         return t_stack[t_index];
     }
 
     void push(context_t* ctx) {
-        if (t_index > 0) t_stack[--t_index] = ctx;
+        assert(t_index > 0);
+        t_stack[--t_index] = ctx;
     }
 
 }

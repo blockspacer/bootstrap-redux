@@ -29,8 +29,10 @@ namespace basecode::memory {
             size_t debug_heap_size) : _debug_heap(create_mspace(debug_heap_size, 0)),
                                       _backing(backing),
                                       _debug_allocator(_debug_heap) {
+        format::allocator_t alloc(&_debug_allocator);
+        _buffer = memory::construct_with_allocator<format::memory_buffer_t>(&_debug_allocator, alloc);
         _stream_factory.enabled(true);
-        _stream = _stream_factory.use_memory_buffer(_buffer);
+        _stream = _stream_factory.use_memory_buffer(*_buffer);
     }
 
     trace_allocator_t::~trace_allocator_t() {
@@ -39,8 +41,9 @@ namespace basecode::memory {
             debug_context.allocator = &_debug_allocator;
             context::push(&debug_context);
 
-            fmt::print("{}\n", _stream->format());
+            format::print("{}\n", _stream->format());
         }
+        memory::destroy(&_debug_allocator, _buffer);
         destroy_mspace(_debug_heap);
     }
 

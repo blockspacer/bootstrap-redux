@@ -176,9 +176,9 @@ namespace basecode::graphviz {
     };
 
     struct enumeration_value_t final {
-        constexpr explicit enumeration_value_t(std::string_view name) : name(name) {
+        constexpr explicit enumeration_value_t(const char* name) : name(name) {
         }
-        std::string_view name;
+        const char* name;
     };
 
     using attribute_value_list_t = adt::array_t<attribute_value_t*>;

@@ -34,10 +34,10 @@ namespace basecode::memory {
 
     public:
         slab_allocator_t(
-            allocator_t* backing,
             adt::string_t name,
             uint32_t size,
-            uint32_t align = default_align);
+            uint32_t align = default_align,
+            allocator_t* backing = context::current()->allocator);
 
         ~slab_allocator_t() override;
 

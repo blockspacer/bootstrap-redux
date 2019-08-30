@@ -16,7 +16,6 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <fmt/format.h>
 #include <catch2/catch.hpp>
 #include <basecode/adt/set.h>
 #include <basecode/adt/array.h>

@@ -72,7 +72,7 @@ namespace basecode::adt {
             init();
         }
 
-        bool has(T&& value) {
+        bool has(const T& value) {
             size_t hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
@@ -87,7 +87,7 @@ namespace basecode::adt {
                 &target_pair);
         }
 
-        bool insert(T&& value) {
+        bool insert(const T& value) {
             if (_size * 3 > _buckets.size() * 2)
                 rehash(_buckets.size() * 2);
 
@@ -126,7 +126,7 @@ namespace basecode::adt {
             return true;
         }
 
-        bool remove(T&& value) {
+        bool remove(const T& value) {
             auto hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
@@ -149,7 +149,7 @@ namespace basecode::adt {
             return false;
         }
 
-        uint32_t count(T&& value) {
+        uint32_t count(const T& value) {
             size_t hash = hash_key(value) & hash_mask;
             auto bucket_start_index = hash % _buckets.size();
 
@@ -166,18 +166,32 @@ namespace basecode::adt {
             return target_value->count;
         }
 
-        array_t<T> elements() const {
-            array_t<T> list(_allocator);
-            list.resize(_size);
+        decltype(auto) elements() const {
+            if constexpr (std::is_pointer<T>::value) {
+                array_t<T> list(_allocator);
+                list.resize(_size);
 
-            size_t i = 0, j = 0;
-            for (const auto& b : _buckets) {
-                if (b.state == hash_bucket_state_t::s_filled)
-                    list[j++] = _values[i].value;
-                ++i;
+                size_t i = 0, j = 0;
+                for (const auto& b : _buckets) {
+                    if (b.state == hash_bucket_state_t::s_filled)
+                        list[j++] = _values[i].value;
+                    ++i;
+                }
+
+                return list;
+            } else {
+                array_t<T*> list(_allocator);
+                list.resize(_size);
+
+                size_t i = 0, j = 0;
+                for (const auto& b : _buckets) {
+                    if (b.state == hash_bucket_state_t::s_filled)
+                        list[j++] = const_cast<T*>(&_values[i].value);
+                    ++i;
+                }
+
+                return list;
             }
-
-            return list;
         }
 
         void reserve(uint32_t new_size) {
@@ -246,11 +260,11 @@ namespace basecode::adt {
         }
 
         bool find_available_bucket_and_value(
-            array_t<hash_bucket_t>& buckets,
-            array_t<hash_value_t>& values,
-            uint32_t bucket_start_index,
-            hash_bucket_t** target_bucket,
-            hash_value_t** target_value) {
+                array_t<hash_bucket_t>& buckets,
+                array_t<hash_value_t>& values,
+                uint32_t bucket_start_index,
+                hash_bucket_t** target_bucket,
+                hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < buckets.size(); i++) {
                 auto& bucket = buckets[i];
                 if (bucket.state != hash_bucket_state_t::s_filled) {
@@ -273,11 +287,11 @@ namespace basecode::adt {
         }
 
         bool find_bucket_and_pair_by_matching_value(
-            uint32_t bucket_start_index,
-            size_t hash,
-            T value,
-            hash_bucket_t** target_bucket,
-            hash_value_t** target_value) {
+                uint32_t bucket_start_index,
+                size_t hash,
+                T value,
+                hash_bucket_t** target_bucket,
+                hash_value_t** target_value) {
             for (size_t i = bucket_start_index; i < _buckets.size(); i++) {
                 auto& bucket = _buckets[i];
                 switch (bucket.state) {

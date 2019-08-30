@@ -18,7 +18,7 @@
 
 #include <catch2/catch.hpp>
 #include <basecode/defer.h>
-#include <basecode/formatters/formatters.h>
+#include <basecode/format/format.h>
 #include <basecode/language/core/lexer/lexer.h>
 #include <basecode/language/core/parser/parser.h>
 
@@ -50,7 +50,7 @@ namespace basecode {
             "a, b, c := 3, 4, 2;\n"sv
         ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);

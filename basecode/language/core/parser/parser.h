@@ -97,7 +97,6 @@ namespace basecode::language::core::parser {
                 Args&&... args) {
             errors::add_source_highlighted_error(
                 r,
-                _session.intern_pool(),
                 code,
                 _buffer,
                 loc,

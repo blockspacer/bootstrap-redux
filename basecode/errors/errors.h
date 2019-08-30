@@ -19,7 +19,6 @@
 #pragma once
 
 #include <locale>
-#include <fmt/format.h>
 #include <basecode/types.h>
 #include <basecode/strings/pool.h>
 #include <basecode/hashing/murmur.h>
@@ -31,7 +30,7 @@ namespace basecode::errors {
     using error_code_t = uint32_t;
 
     struct error_decl_key_t final {
-        std::string locale;
+        string_t locale;
         error_code_t code;
 
         bool operator==(const error_decl_key_t& other) const {
@@ -40,14 +39,21 @@ namespace basecode::errors {
     };
 
     struct error_decl_t final {
-        std::string code{};
-        std::string message{};
-        std::string details{};
+        string_t code{};
+        string_t message{};
+        string_t details{};
     };
+
+    using error_decl_init_list_t = std::initializer_list<std::pair<error_decl_key_t, error_decl_t>>;
 
     error_decl_t* find_decl(error_code_t code);
 
     ///////////////////////////////////////////////////////////////////////////
+
+    namespace io {
+        static constexpr error_code_t unable_to_read_file = 1000;
+        static constexpr error_code_t unable_to_write_file = 1001;
+    }
 
     namespace lexer {
         static constexpr error_code_t unescaped_quote = 122;
@@ -93,6 +99,15 @@ namespace basecode::errors {
         static constexpr error_code_t unable_to_open_file = 300;
     }
 
+    namespace utf8_module {
+        static constexpr error_code_t at_end_of_buffer = 302;
+        static constexpr error_code_t illegal_encoding = 304;
+        static constexpr error_code_t unable_to_open_file = 300;
+        static constexpr error_code_t illegal_nul_character = 303;
+        static constexpr error_code_t at_beginning_of_buffer = 301;
+        static constexpr error_code_t illegal_byte_order_mark = 305;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     bool shutdown();
@@ -101,12 +116,13 @@ namespace basecode::errors {
         result_t& r,
         memory::allocator_t* allocator = memory::default_allocator());
 
+    strings::pool_t& pool();
+
     ///////////////////////////////////////////////////////////////////////////
 
     template <typename... Args>
-    void add_error(
+        void add_error(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             const source_location_t& loc,
             Args&&... args) {
@@ -114,8 +130,8 @@ namespace basecode::errors {
         assert(decl != nullptr);
 
         if (sizeof...(args) > 0) {
-            auto formatted_message = intern_pool.intern(fmt::format(
-                decl->message,
+            auto formatted_message = pool().intern(format::format(
+                decl->message.slice(),
                 std::forward<Args>(args)...));
             r.error(decl->code, formatted_message, loc, decl->details);
         } else {
@@ -126,7 +142,6 @@ namespace basecode::errors {
     template <typename... Args>
     void add_warning(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             const source_location_t& loc,
             Args&&... args) {
@@ -134,8 +149,8 @@ namespace basecode::errors {
         assert(decl != nullptr);
 
         if (sizeof...(args) > 0) {
-            auto formatted_message = intern_pool.intern(fmt::format(
-                decl->message,
+            auto formatted_message = pool().intern(format::format(
+                decl->message.slice(),
                 std::forward<Args>(args)...));
             r.warning(decl->code, formatted_message, loc, decl->details);
         } else {
@@ -146,15 +161,14 @@ namespace basecode::errors {
     template <typename... Args>
     void add_info(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
         if (sizeof...(args) > 0) {
-            auto formatted_message = intern_pool.intern(fmt::format(
-                decl->message,
+            auto formatted_message = pool().intern(format::format(
+                decl->message.slice(),
                 std::forward<Args>(args)...));
             r.info(decl->code, formatted_message, {}, decl->details);
         } else {
@@ -165,15 +179,14 @@ namespace basecode::errors {
     template <typename... Args>
     void add_error(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
         if (sizeof...(args) > 0) {
-            auto formatted_message = intern_pool.intern(fmt::format(
-                decl->message,
+            auto formatted_message = pool().intern(format::format(
+                decl->message.slice(),
                 std::forward<Args>(args)...));
             r.error(decl->code, formatted_message, {}, decl->details);
         } else {
@@ -184,15 +197,14 @@ namespace basecode::errors {
     template <typename... Args>
     void add_warning(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             Args&&... args) {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
         if (sizeof...(args) > 0) {
-            auto formatted_message = intern_pool.intern(fmt::format(
-                decl->message,
+            auto formatted_message = pool().intern(format::format(
+                decl->message.slice(),
                 std::forward<Args>(args)...));
             r.warning(decl->code, formatted_message, {}, decl->details);
         } else {
@@ -203,7 +215,6 @@ namespace basecode::errors {
     template <typename... Args>
     void add_source_highlighted_error(
             result_t& r,
-            strings::pool_t& intern_pool,
             error_code_t code,
             utf8::source_buffer_t& buffer,
             const source_location_t& loc,
@@ -211,18 +222,23 @@ namespace basecode::errors {
         auto decl = find_decl(code);
         assert(decl != nullptr);
 
-        auto message = decl->message;
-        if (sizeof...(args) > 0)
-            message = fmt::format(message, std::forward<Args>(args)...);
+        auto intern_pool = pool();
 
-        fmt::memory_buffer stream;
+        string_t message = decl->message;
+        if (sizeof...(args) > 0) {
+            message = format::format(
+                message.slice(),
+                std::forward<Args>(args)...);
+        }
+
+        format::memory_buffer_t stream;
         terminal::stream_factory_t term{};
         term.enabled(true);
 
         const auto number_of_lines = buffer.number_of_lines();
         const auto target_line = loc.start.line;
         const auto message_indicator = term.colorize(
-            fmt::format("^ {}", message),
+            format::format("^ {}", message),
             terminal::colors_t::red);
 
         auto start_line = loc.start.line - 4;
@@ -243,7 +259,7 @@ namespace basecode::errors {
             if (!source_text.empty()) {
                 if (i == target_line) {
                     utf8::reader_t reader(buffer.allocator(), source_text);
-                    fmt::format_to(
+                    format::format_to(
                         stream,
                         "{:8d}: {}\n{}{}",
                         i + 1,
@@ -256,23 +272,23 @@ namespace basecode::errors {
                         std::string(10 + loc.start.column, ' '),
                         message_indicator);
                 } else {
-                    fmt::format_to(stream, "{:8d}: {}", i + 1, source_text);
+                    format::format_to(stream, "{:8d}: {}", i + 1, source_text);
                 }
             }
             if (i < static_cast<int32_t>(stop_line - 2))
-                fmt::format_to(stream, "\n");
+                format::format_to(stream, "\n");
         }
 
         auto& path = buffer.path();
         if (!path.empty()) {
-            message = fmt::format(
+            message = (string_t) format::format(
                 "({}@{}:{}) {}",
                 path.filename().string(),
                 loc.start.line + 1,
                 loc.start.column + 1,
                 message);
         } else {
-            message = fmt::format(
+            message = (string_t) format::format(
                 "((anonymous source)@{}:{}) {}",
                 loc.start.line + 1,
                 loc.start.column + 1,
@@ -280,7 +296,7 @@ namespace basecode::errors {
         }
 
         auto interned_message = intern_pool.intern(message);
-        auto interned_details = intern_pool.intern(fmt::to_string(stream));
+        auto interned_details = intern_pool.intern(format::to_string(stream));
         r.error(decl->code, interned_message, loc, interned_details);
     }
 

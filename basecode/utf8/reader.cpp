@@ -16,6 +16,7 @@
 //
 // ----------------------------------------------------------------------------
 
+#include <basecode/errors/errors.h>
 #include "reader.h"
 
 namespace basecode::utf8 {
@@ -95,7 +96,7 @@ namespace basecode::utf8 {
 
     rune_t reader_t::prev(result_t& r) {
         if (_index == 0 || _width_stack.empty()) {
-            r.error("S003", "at beginning of buffer");
+            errors::add_error(r, errors::utf8_module::at_beginning_of_buffer);
             return rune_invalid;
         }
         _index = *_width_stack.top();
@@ -106,7 +107,7 @@ namespace basecode::utf8 {
 
     bool reader_t::move_prev(result_t& r) {
         if (_index == 0 || _width_stack.empty()) {
-            r.error("S003", "at beginning of buffer");
+            errors::add_error(r, errors::utf8_module::at_beginning_of_buffer);
             return false;
         }
 
@@ -118,7 +119,7 @@ namespace basecode::utf8 {
 
     bool reader_t::move_next(result_t& r) {
         if (eof()) {
-            r.error("S003", "at end of buffer");
+            errors::add_error(r, errors::utf8_module::at_end_of_buffer);
             return false;
         }
 
@@ -138,7 +139,7 @@ namespace basecode::utf8 {
         uint8_t ch = _slice[_index];
         auto rune = rune_t(ch);
         if (ch == 0) {
-            r.error("S003", "illegal character NUL");
+            errors::add_error(r, errors::utf8_module::illegal_nul_character);
             return rune_invalid;
         } else if (ch >= 0x80) {
             auto cp = decode(
@@ -147,10 +148,10 @@ namespace basecode::utf8 {
             width = cp.width;
             rune = cp.value;
             if (rune == rune_invalid && width == 1) {
-                r.error("S001", "illegal utf-8 encoding");
+                errors::add_error(r, errors::utf8_module::illegal_encoding);
                 return rune_invalid;
             } else if (rune == rune_bom && _index > 0) {
-                r.error("S002", "illegal byte order mark");
+                errors::add_error(r, errors::utf8_module::illegal_byte_order_mark);
                 return rune_invalid;
             }
         }

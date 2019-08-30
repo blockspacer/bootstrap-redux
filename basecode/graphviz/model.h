@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <fmt/format.h>
 #include <basecode/result.h>
+#include <basecode/format/format.h>
 #include "attribute.h"
 
 namespace basecode::graphviz {
@@ -33,7 +33,7 @@ namespace basecode::graphviz {
         virtual bool serialize(
             result_t& r,
             graph_t& graph,
-            fmt::memory_buffer& buffer) = 0;
+            format::memory_buffer_t& buffer) = 0;
 
         virtual bool is_attribute_valid(
             result_t& r,

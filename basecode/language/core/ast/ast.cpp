@@ -17,9 +17,9 @@
 // ----------------------------------------------------------------------------
 
 #include <basecode/io/text.h>
+#include <basecode/format/format.h>
 #include <basecode/graphviz/graph.h>
 #include <basecode/graphviz/dot_model.h>
-#include <basecode/formatters/formatters.h>
 #include <basecode/language/core/lexer/token.h>
 #include "ast.h"
 
@@ -90,7 +90,7 @@ namespace basecode::language::core::ast {
         auto& registry = session.registry();
         auto& intern_pool = session.intern_pool();
 
-        auto node_name = intern_pool.intern(fmt::format("id_{}", entity));
+        auto node_name = intern_pool.intern(format::format("id_{}", entity));
         auto node = graph.make_node(node_name);
 
         auto& node_attrs = node->attributes();
@@ -257,25 +257,25 @@ namespace basecode::language::core::ast {
                     graphviz::attribute_type_t::fillcolor,
                     graphviz::enumeration_value_t("bisque"));
                 ports.emplace(
-                    fmt::format("\\{{ type: {}", number_type_to_name(number_token.type)).c_str(),
+                    format::format("\\{{ type: {}", number_type_to_name(number_token.type)).c_str(),
                     session.allocator());
 
                 ports.emplace(
-                    fmt::format("radix: {}", number_token.radix).c_str(),
+                    format::format("radix: {}", number_token.radix).c_str(),
                     session.allocator());
 
                 ports.emplace(
-                    fmt::format("size: {}", number_size_to_name(number_token.size)).c_str(),
+                    format::format("size: {}", number_size_to_name(number_token.size)).c_str(),
                     session.allocator());
 
                 if (number_token.type == number_type_t::floating_point) {
                     ports.emplace(
-                        fmt::format("imaginary: {}", number_token.imaginary).c_str(),
+                        format::format("imaginary: {}", number_token.imaginary).c_str(),
                         session.allocator());
                 }
 
                 ports.emplace(
-                    fmt::format("signed: {} \\}}", number_token.is_signed).c_str(),
+                    format::format("signed: {} \\}}", number_token.is_signed).c_str(),
                     session.allocator());
                 break;
             }
@@ -344,15 +344,15 @@ namespace basecode::language::core::ast {
                 break;
         }
 
-        fmt::memory_buffer label{};
+        format::memory_buffer_t label{};
         for (size_t i = 0; i < ports.size(); i++) {
             const auto& port = ports[i];
-            fmt::format_to(label, "{}", port);
+            format::format_to(label, "{}", port);
             if (i < ports.size() - 1)
-                fmt::format_to(label, "\\|");
+                format::format_to(label, "\\|");
         }
 
-        auto label_str = fmt::to_string(label);
+        auto label_str = format::to_string(label);
         node_attrs.set_value(
             r,
             graphviz::attribute_type_t::label,
@@ -366,18 +366,17 @@ namespace basecode::language::core::ast {
             workspace::session_t& session,
             const path_t& path,
             entity_t root) {
-        graphviz::dot_model_t model(
-            session.allocator(),
-            session.intern_pool());
+        graphviz::dot_model_t model(session.allocator());
 
         if (!model.initialize(r))
             return false;
 
         graphviz::graph_t graph(
-            session.allocator(),
             &model,
             graphviz::graph_type_t::directed,
-            "test");
+            "test",
+            nullptr,
+            session.allocator());
 
         auto& graph_attrs = graph.attributes();
         graph_attrs.set_value(
@@ -391,11 +390,11 @@ namespace basecode::language::core::ast {
 
         create_dot_node(r, session, graph, root);
 
-        fmt::memory_buffer buffer{};
+        format::memory_buffer_t buffer{};
         if (!model.serialize(r, graph, buffer))
             return false;
 
-        return io::text::write(r, path, fmt::to_string(buffer));
+        return io::text::write(r, path, format::to_string(buffer));
     }
 
 }

@@ -17,14 +17,11 @@
 // ----------------------------------------------------------------------------
 
 #include <sstream>
-#include <fmt/format.h>
-#include <basecode/formatters/formatters.h>
+#include <basecode/format/format.h>
 #include "transforms.h"
 
 namespace basecode::strings {
 
-    // XXX: FIX THIS
-    //
     void word_wrap(
             adt::string_t& text,
             size_t width,
@@ -62,50 +59,53 @@ namespace basecode::strings {
         }
     }
 
-    // XXX: FIX THIS
-    //
-    adt::string_t remove_underscores(const std::string_view& value) {
-        fmt::memory_buffer buffer{};
-        for (const auto& c : value)
-            if (c != '_') fmt::format_to(buffer, "{}", c);
-        return fmt::to_string(buffer);
-    }
+    unitized_byte_size_t size_to_units(size_t size) {
+        static const char* units[] = {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
 
-    // XXX: FIX THIS
-    //
-    std::pair<std::string, std::string> size_to_units(size_t size) {
         auto i = 0;
-        const char* units[] = {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
         while (size > 1024) {
             size /= 1024;
             i++;
         }
-        return std::make_pair(
-            i > 1 ?
-            fmt::format("{}.{}", i, size) :
-            fmt::format("{}", size),
-            units[i]);
+
+        return unitized_byte_size_t{
+            i > 1 ? format::format("{}.{}", i, size) : format::format("{}", size),
+            units[i]
+        };
     }
 
-    // XXX: FIX THIS
-    //
+    adt::string_t remove_underscores(const std::string_view& value) {
+        format::memory_buffer_t buffer{};
+        for (const auto& c : value)
+            if (c != '_') format::format_to(buffer, "{}", c);
+        return format::to_string(buffer);
+    }
+
     adt::string_t list_to_string(const string_list_t& list, const char& sep) {
-        fmt::memory_buffer buffer{};
+        format::memory_buffer_t buffer{};
         for (size_t i = 0; i < list.size(); i++) {
             if (i > 0)
-                fmt::format_to(buffer, "{}", sep);
-            fmt::format_to(buffer, "{}", list[i]);
+                format::format_to(buffer, "{}", sep);
+            format::format_to(buffer, "{}", list[i]);
         }
-        return fmt::to_string(buffer);
+        return format::to_string(buffer);
     }
 
     string_list_t string_to_list(const adt::string_t& value, const char& sep) {
         string_list_t list{};
 
-        std::istringstream f(value.as_std_string());
-        std::string s;
-        while (std::getline(f, s, sep)) {
-            list.add(s);
+        uint32_t curr_pos = 0;
+        uint32_t start_pos = 0;
+        for (const auto& c : value) {
+            if (c == sep) {
+                list.add(value.slice(start_pos, curr_pos - start_pos));
+                start_pos = curr_pos;
+            }
+            ++curr_pos;
+        }
+
+        if (curr_pos > start_pos) {
+            list.add(value.slice(start_pos, curr_pos - start_pos));
         }
 
         return list;

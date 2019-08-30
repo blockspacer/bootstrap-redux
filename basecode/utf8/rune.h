@@ -22,7 +22,6 @@
 #include <string>
 #include <cstdint>
 #include <utf8proc.h>
-#include <fmt/format.h>
 
 namespace basecode::utf8 {
 

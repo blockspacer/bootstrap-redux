@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(basecode-data-tests)
+project(basecode-adt-tests)
 
-add_executable(${PROJECT_NAME} main.cpp data_tests.cpp)
+add_executable(${PROJECT_NAME} main.cpp adt_tests.cpp)
 target_link_libraries(${PROJECT_NAME} basecode)
 
 enable_testing()

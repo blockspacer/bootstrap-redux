@@ -45,7 +45,7 @@ namespace basecode::adt {
         using walk_callback_t = std::function<bool (node_t*)>;
 
         explicit red_black_tree_t(
-                memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
+            memory::allocator_t* allocator = context::current()->allocator) : _allocator(allocator) {
             assert(_allocator);
         }
 
@@ -123,9 +123,7 @@ namespace basecode::adt {
 
     private:
         node_t* make_node(const K& key) {
-            auto mem = _allocator->allocate(
-                sizeof(node_t),
-                alignof(node_t));
+            auto mem = _allocator->allocate(sizeof(node_t), alignof(node_t));
             auto node = new (mem) node_t();
             node->key = key;
             _size++;

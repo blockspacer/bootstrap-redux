@@ -21,9 +21,7 @@
 namespace basecode::workspace {
 
     session_t::session_t(
-            const session_options_t& options) : _intern_pool(
-                                                    &_intern_allocator,
-                                                    options.intern_string_block_size),
+            const session_options_t& options) : _intern_pool(&_intern_allocator),
                                                 _allocator(options.allocator),
                                                 _options(options),
                                                 _intern_allocator(options.allocator) {

@@ -40,7 +40,6 @@ namespace basecode::utf8 {
 
     bool source_buffer_t::load(
             result_t& r,
-            strings::pool_t& pool,
             const adt::string_t& buffer) {
         if (_buffer) {
             _allocator->deallocate(_buffer);
@@ -69,7 +68,6 @@ namespace basecode::utf8 {
 
     bool source_buffer_t::load(
             result_t& r,
-            strings::pool_t& pool,
             const path_t& path) {
         _path = path;
 
@@ -77,13 +75,12 @@ namespace basecode::utf8 {
         if (!io::text::read(r, _path.string(), stream)) {
             errors::add_error(
                 r,
-                pool,
-                errors::source_buffer::unable_to_open_file,
+                errors::utf8_module::unable_to_open_file,
                 _path.string());
             return false;
         }
 
-        return load(r, pool, (adt::string_t)stream.str());
+        return load(r, (adt::string_t)stream.str());
     }
 
     void source_buffer_t::push_mark() {
@@ -97,7 +94,7 @@ namespace basecode::utf8 {
     void source_buffer_t::dump_lines() {
         for (size_t i = 0; i < number_of_lines(); i++) {
             auto line = line_by_number(i);
-            fmt::print("{}\n", substring(line->begin, line->end));
+            format::print("{}\n", substring(line->begin, line->end));
         }
     }
 

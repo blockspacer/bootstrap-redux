@@ -17,58 +17,55 @@
 // ----------------------------------------------------------------------------
 
 #include <basecode/errors/errors.h>
-#include <basecode/formatters/formatters.h>
+#include <basecode/format/format.h>
 #include "graph.h"
 #include "dot_model.h"
 #include "attribute.h"
 
 namespace basecode::graphviz {
 
-    dot_model_t::dot_model_t(
-            memory::allocator_t* allocator,
-            strings::pool_t& intern_pool) : _attributes(allocator),
-                                            _intern_pool(intern_pool),
-                                            _allocator(allocator) {
+    dot_model_t::dot_model_t(memory::allocator_t* allocator) : _attributes(allocator),
+                                                               _allocator(allocator) {
         assert(_allocator);
     }
 
     bool dot_model_t::serialize(
             result_t& r,
             graph_t& graph,
-            fmt::memory_buffer& buffer) {
+            format::memory_buffer_t& buffer) {
         const auto node_connector = graph.type() == graph_type_t::directed ? "->" : "--";
 
         if (graph.type() == graph_type_t::directed) {
-            fmt::format_to(buffer, "digraph {} {{\n", graph.name());
+            format::format_to(buffer, "digraph {} {{\n", graph.name());
         } else {
-            fmt::format_to(buffer, "graph {} {{\n", graph.name());
+            format::format_to(buffer, "graph {} {{\n", graph.name());
         }
 
         for (auto attr : graph.attributes().values()) {
-            fmt::format_to(buffer, "\t");
+            format::format_to(buffer, "\t");
             if (!serialize_attribute(r, attr, buffer))
                 return false;
-            fmt::format_to(buffer, ";\n");
+            format::format_to(buffer, ";\n");
         }
 
-        fmt::format_to(buffer, "\n");
+        format::format_to(buffer, "\n");
 
         for (auto node : graph.nodes()) {
-            fmt::format_to(buffer, "\t{}", node->name());
+            format::format_to(buffer, "\t{}", node->name());
             const auto& node_attrs = node->attributes().values();
             if (!node_attrs.empty()) {
-                fmt::format_to(buffer, " [ ");
+                format::format_to(buffer, " [ ");
                 if (!serialize_attributes(r, node_attrs, ", "sv, buffer))
                     return false;
-                fmt::format_to(buffer, " ]");
+                format::format_to(buffer, " ]");
             }
-            fmt::format_to(buffer, ";\n");
+            format::format_to(buffer, ";\n");
         }
 
-        fmt::format_to(buffer, "\n");
+        format::format_to(buffer, "\n");
 
         for (auto edge : graph.edges()) {
-            fmt::format_to(
+            format::format_to(
                 buffer,
                 "\t{} {} {}",
                 edge->first()->name(),
@@ -76,15 +73,15 @@ namespace basecode::graphviz {
                 edge->second()->name());
             const auto& edge_attrs = edge->attributes().values();
             if (!edge_attrs.empty()) {
-                fmt::format_to(buffer, " [ ");
+                format::format_to(buffer, " [ ");
                 if (!serialize_attributes(r, edge_attrs, ", "sv, buffer))
                     return false;
-                fmt::format_to(buffer, " ]");
+                format::format_to(buffer, " ]");
             }
-            fmt::format_to(buffer, ";\n");
+            format::format_to(buffer, ";\n");
         }
 
-        fmt::format_to(buffer, "\n}}");
+        format::format_to(buffer, "\n}}");
 
         return true;
     }
@@ -97,7 +94,6 @@ namespace basecode::graphviz {
         if (!metadata) {
             errors::add_error(
                 r,
-                _intern_pool,
                 errors::graphviz::attribute_type_not_found);
             return false;
         }
@@ -106,7 +102,6 @@ namespace basecode::graphviz {
         if (!valid) {
             errors::add_error(
                 r,
-                _intern_pool,
                 errors::graphviz::invalid_attribute_for_component,
                 metadata->name,
                 component_type_to_name(component));
@@ -176,23 +171,23 @@ namespace basecode::graphviz {
             result_t& r,
             const attribute_value_list_t& attrs,
             std::string_view separator,
-            fmt::memory_buffer& buffer) {
+            format::memory_buffer_t& buffer) {
         for (size_t i = 0; i < attrs.size(); i++) {
             if (!serialize_attribute(r, attrs[i], buffer))
                 return false;
             if (i < attrs.size() - 1)
-                fmt::format_to(buffer, "{}", separator);
+                format::format_to(buffer, "{}", separator);
         }
         return true;
     }
 
     bool dot_model_t::serialize_attribute(
-            result_t& r,
-            attribute_value_t* attr,
-            fmt::memory_buffer& buffer) {
+        result_t& r,
+        attribute_value_t* attr,
+        format::memory_buffer_t& buffer) {
         switch (attr->value_type) {
             case attribute_value_type_t::string: {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}=\"{}\"",
                     attribute_type_to_name(attr->type),
@@ -200,7 +195,7 @@ namespace basecode::graphviz {
                 break;
             }
             case attribute_value_type_t::boolean: {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}={}",
                     attribute_type_to_name(attr->type),
@@ -208,7 +203,7 @@ namespace basecode::graphviz {
                 break;
             }
             case attribute_value_type_t::integer: {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}={}",
                     attribute_type_to_name(attr->type),
@@ -216,7 +211,7 @@ namespace basecode::graphviz {
                 break;
             }
             case attribute_value_type_t::enumeration: {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}={}",
                     attribute_type_to_name(attr->type),
@@ -224,7 +219,7 @@ namespace basecode::graphviz {
                 break;
             }
             case attribute_value_type_t::floating_point: {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}={}",
                     attribute_type_to_name(attr->type),

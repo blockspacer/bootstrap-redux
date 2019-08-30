@@ -18,8 +18,7 @@
 
 #include <catch2/catch.hpp>
 #include <basecode/defer.h>
-#include <basecode/formatters/formatters.h>
-#include <basecode/memory/trace_allocator.h>
+#include <basecode/format/format.h>
 #include <basecode/language/core/lexer/lexer.h>
 
 namespace basecode {
@@ -36,29 +35,22 @@ namespace basecode {
         for (auto entity : tokens) {
             const auto& token = registry.get<lexer::token_t>(entity);
             const auto& source_location = registry.get<source_location_t>(entity);
-            fmt::print("token = {}", token);
+            format::print("token = {}", token);
             if (registry.has<number_token_t>(entity)) {
                 const auto& number_token = registry.get<number_token_t>(entity);
-                fmt::print(", number_token = {}", number_token);
+                format::print(", number_token = {}", number_token);
             }
-            fmt::print(", location = {}\n", source_location);
+            format::print(", location = {}\n", source_location);
         }
     }
 
     TEST_CASE("lexer_t::tokenize number literals") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
-//        workspace::session_options_t options{
-//            .allocator = memory::default_allocator()
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "$2334;\n"
@@ -76,7 +68,7 @@ namespace basecode {
             "1.6e-35;\n"
             "1.6e-35i;\n"sv;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -86,16 +78,12 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize comment literals") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "// this is a line comment\n"
@@ -110,7 +98,7 @@ namespace basecode {
             "*/\n"sv
             ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -120,16 +108,12 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize string literals") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "{{\n"
@@ -151,7 +135,7 @@ namespace basecode {
             "#rune \"\\777\";\n"sv
         ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -161,16 +145,12 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize directives") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "#rune \"A\";\n"
@@ -181,7 +161,7 @@ namespace basecode {
             "#eval 6 * 6 + 32;\n"sv
         ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -191,16 +171,12 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize attributes") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "@no_fold b := 3 * 3;\n"
@@ -208,7 +184,7 @@ namespace basecode {
             "@coroutine j :: proc();\n"sv
         ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -218,16 +194,12 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize identifiers") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "@no_fold\n"
@@ -237,7 +209,7 @@ namespace basecode {
             "#type foo;\n"sv
             ;
 
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -249,23 +221,19 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize keywords don't match inside identifiers") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "continueif: bool := false;\n"
             "if_unexpected := if continueif break true;\n"sv
             ;
             
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -275,22 +243,18 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize identifiers can't start with numbers") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         const adt::string_t source =
             "123myVar: u8 := 1;\n"sv
             ;
             
-        REQUIRE(buffer.load(r, session.intern_pool(), source));
+        REQUIRE(buffer.load(r, source));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);
@@ -300,19 +264,15 @@ namespace basecode {
     }
 
     TEST_CASE("lexer_t::tokenize large sample source") {
-//        memory::trace_allocator_t debug_allocator(memory::default_scratch_allocator());
-//        workspace::session_options_t options{
-//            .allocator = &debug_allocator
-//        };
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
         result_t r(options.allocator);
 
-        defer(fmt::print("{}", r));
+        defer(format::print("{}", r));
 
         path_t file("../tests/sdl.bc");
-        REQUIRE(buffer.load(r, session.intern_pool(), file));
+        REQUIRE(buffer.load(r, file));
 
         entity_list_t tokens{};
         lexer::lexer_t lexer(session, buffer);

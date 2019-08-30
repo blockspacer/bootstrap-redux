@@ -28,16 +28,11 @@ namespace basecode::strings {
 
     class pool_t final {
     public:
-        explicit pool_t(
-            memory::allocator_t* allocator,
-            uint32_t block_size = 64*1024);
+        explicit pool_t(memory::allocator_t* allocator = context::current()->allocator);
 
         std::string_view intern(std::string_view value);
 
-        std::string_view intern(const std::string& value);
-
     private:
-        uint32_t _block_size;
         memory::allocator_t* _allocator;
         adt::hash_table_t<std::string_view, void*> _index;
     };

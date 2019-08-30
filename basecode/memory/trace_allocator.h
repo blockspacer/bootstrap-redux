@@ -44,8 +44,8 @@ namespace basecode::memory {
     private:
         mspace _debug_heap{};
         allocator_t* _backing{};
-        fmt::memory_buffer _buffer{};
         dl_allocator_t _debug_allocator;
+        format::memory_buffer_t* _buffer{};
         terminal::stream_unique_ptr_t _stream{};
         terminal::stream_factory_t _stream_factory{};
     };

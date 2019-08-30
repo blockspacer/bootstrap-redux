@@ -17,7 +17,7 @@
 // ----------------------------------------------------------------------------
 
 #include <fstream>
-#include <fmt/format.h>
+#include <basecode/errors/errors.h>
 #include "text.h"
 
 namespace basecode::io::text {
@@ -33,9 +33,7 @@ namespace basecode::io::text {
                 file.close();
             }
         } catch (std::exception& e) {
-            r.error(
-                "P001",
-                fmt::format("unable to read_text from file: {}", e.what()));
+            errors::add_error(r, errors::io::unable_to_read_file, e.what());
             return false;
         }
         return true;
@@ -52,9 +50,7 @@ namespace basecode::io::text {
                 file.close();
             }
         } catch (std::exception& e) {
-            r.error(
-                "P001",
-                fmt::format("unable to write_text to file: {}", e.what()));
+            errors::add_error(r, errors::io::unable_to_write_file, e.what());
             return false;
         }
         return true;
@@ -63,17 +59,15 @@ namespace basecode::io::text {
     bool write(
             result_t& r,
             const path_t& path,
-            const std::string& text) {
+            const string_t& text) {
         try {
             std::ofstream file(path.string(), std::ios::out);
             if (file.is_open()) {
-                file << text;
+                file << text.c_str();
                 file.close();
             }
         } catch (std::exception& e) {
-            r.error(
-                "P001",
-                fmt::format("unable to write_text to file: {}", e.what()));
+            errors::add_error(r, errors::io::unable_to_write_file, e.what());
             return false;
         }
         return true;

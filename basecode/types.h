@@ -31,9 +31,9 @@ namespace basecode {
     using path_t = boost::filesystem::path;
 
     // string type aliases
-    using string_t = adt::array_t<char>;
-    using string_list_t = adt::array_t<adt::string_t>;
+    using string_t = adt::string_t;
     using slice_list_t = adt::array_t<std::string_view>;
+    using string_list_t = adt::array_t<adt::string_t>;
 
     // time type aliases
     using time_point_t = std::chrono::system_clock::time_point;

@@ -21,7 +21,7 @@
 namespace basecode::terminal {
 
     adt::string_t color_code(colors_t fg_color, colors_t bg_color) {
-        return fmt::format(
+        return format::format(
             "\033[1;{};{}m",
             (uint32_t) fg_color,
             ((uint32_t) bg_color) + 10);
@@ -30,12 +30,12 @@ namespace basecode::terminal {
     ///////////////////////////////////////////////////////////////////////////
 
     adt::string_t stream_factory_t::colorize(
-            std::string_view text,
-            colors_t fg_color,
-            colors_t bg_color) const {
+        std::string_view text,
+        colors_t fg_color,
+        colors_t bg_color) const {
         if (!_enabled)
             return text;
-        return fmt::format(
+        return format::format(
             "{}{}{}",
             color_code(fg_color, bg_color),
             text,
@@ -56,11 +56,11 @@ namespace basecode::terminal {
             size_t end,
             colors_t fg_color,
             colors_t bg_color) const {
-        fmt::memory_buffer buffer{};
+        format::memory_buffer_t buffer{};
 
         if (!_enabled) {
-            fmt::format_to(buffer, "{}", reader.slice());
-            return fmt::to_string(buffer);
+            format::format_to(buffer, "{}", reader.slice());
+            return format::to_string(buffer);
         }
 
         auto j = 0;
@@ -72,7 +72,7 @@ namespace basecode::terminal {
                 break;
 
             if (begin == end && j == begin) {
-                fmt::format_to(
+                format::format_to(
                     buffer,
                     "{}{}{}",
                     color_code(fg_color, bg_color),
@@ -80,26 +80,26 @@ namespace basecode::terminal {
                     color_code_reset());
             } else {
                 if (j == begin) {
-                    fmt::format_to(buffer, "{}", color_code(fg_color, bg_color));
+                    format::format_to(buffer, "{}", color_code(fg_color, bg_color));
                     in_colored_range = true;
                 } else if (j == end) {
-                    fmt::format_to(buffer, "{}", color_code_reset());
+                    format::format_to(buffer, "{}", color_code_reset());
                     in_colored_range = false;
                 }
-                fmt::format_to(buffer, "{}", rune);
+                format::format_to(buffer, "{}", rune);
             }
 
             j++;
         }
 
         if (in_colored_range) {
-            fmt::format_to(buffer, "{}", color_code_reset());
+            format::format_to(buffer, "{}", color_code_reset());
         }
 
-        return fmt::to_string(buffer);
+        return format::to_string(buffer);
     }
 
-    stream_unique_ptr_t stream_factory_t::use_memory_buffer(fmt::memory_buffer& buffer) const {
+    stream_unique_ptr_t stream_factory_t::use_memory_buffer(format::memory_buffer_t& buffer) const {
         if (_enabled)
             return stream_unique_ptr_t(new ansi_stream_t(buffer));
         else

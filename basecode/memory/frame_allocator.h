@@ -22,13 +22,11 @@
 
 namespace basecode::memory {
 
-    template <std::size_t Frame_Size>
+    template <std::uint32_t Frame_Size = 4096>
     class frame_allocator_t : public allocator_t {
     public:
         explicit frame_allocator_t(
-                allocator_t* backing = default_allocator(),
-                uint32_t block_size = Frame_Size) : _block_size(block_size),
-                                                    _backing(backing) {
+            allocator_t* backing = context::current()->allocator) : _backing(backing) {
         }
 
         ~frame_allocator_t() override {
@@ -81,9 +79,9 @@ namespace basecode::memory {
     private:
         void* _block{};
         uint32_t _offset{};
-        uint32_t _block_size;
         allocator_t* _backing;
         uint32_t _total_allocated{};
+        const uint32_t _block_size = Frame_Size;
     };
 
 }

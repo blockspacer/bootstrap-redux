@@ -26,8 +26,7 @@
 namespace basecode::workspace {
 
     struct session_options_t final {
-        uint32_t intern_string_block_size = 64*1024;
-        memory::allocator_t* allocator = memory::default_scratch_allocator();
+        memory::allocator_t* allocator = context::current()->allocator;
     };
 
     class session_t final {
@@ -51,7 +50,7 @@ namespace basecode::workspace {
         strings::pool_t _intern_pool;
         memory::allocator_t* _allocator;
         const session_options_t& _options;
-        memory::frame_allocator_t<64 * 1024> _intern_allocator;
+        memory::frame_allocator_t<4096> _intern_allocator;
     };
 
 }

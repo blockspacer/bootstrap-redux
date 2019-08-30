@@ -33,7 +33,7 @@ namespace basecode::memory {
 
         void* allocate(
             uint32_t size,
-            uint32_t align) override;
+            uint32_t align = default_align) override;
 
         void deallocate(void* p) override;
 

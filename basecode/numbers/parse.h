@@ -31,14 +31,7 @@ namespace basecode::numbers {
         not_convertible
     };
 
-    static inline std::string_view conversion_result_to_name(conversion_result_t type) {
-        switch (type) {
-            case conversion_result_t::success:          return "success"sv;
-            case conversion_result_t::overflow:         return "overflow"sv;
-            case conversion_result_t::underflow:        return "underflow"sv;
-            case conversion_result_t::not_convertible:  return "not convertible"sv;
-        }
-    }
+    std::string_view conversion_result_to_name(conversion_result_t type);
 
     conversion_result_t parse_double(std::string_view value, double& out);
 

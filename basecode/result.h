@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <fmt/format.h>
 #include <basecode/adt/array.h>
 #include "result_message.h"
 

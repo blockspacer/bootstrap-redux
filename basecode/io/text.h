@@ -37,6 +37,6 @@ namespace basecode::io::text {
     bool write(
         result_t& r,
         const path_t& path,
-        const std::string& text);
+        const string_t& text);
 
 }

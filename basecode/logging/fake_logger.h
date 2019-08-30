@@ -28,7 +28,7 @@ namespace basecode::logging {
         fake_log_entry_t(
             log_level_t l,
             adt::string_t m): level(l),
-                               message(std::move(m)) {
+                              message(std::move(m)) {
         }
 
         log_level_t level;

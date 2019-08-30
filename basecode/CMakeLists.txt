@@ -36,6 +36,7 @@ add_library(
 
         memory/allocator.h
         memory/object_pool.h
+        memory/std_allocator.h
         memory/temp_allocator.h
         memory/frame_allocator.h
         memory/system.cpp memory/system.h
@@ -53,7 +54,8 @@ add_library(
         io/text.cpp io/text.h
         io/binary.cpp io/binary.h
 
-        formatters/formatters.h
+        format/formatters.h
+        format/format.cpp format/format.h
 
         graphviz/model.h
         graphviz/node.cpp graphviz/node.h

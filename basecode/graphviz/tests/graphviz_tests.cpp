@@ -18,9 +18,9 @@
 
 #include <catch2/catch.hpp>
 #include <basecode/defer.h>
+#include <basecode/format/format.h>
 #include <basecode/graphviz/graph.h>
 #include <basecode/graphviz/dot_model.h>
-#include <basecode/formatters/formatters.h>
 
 namespace basecode {
 
@@ -29,21 +29,13 @@ namespace basecode {
     using namespace basecode::graphviz;
 
     TEST_CASE("graph_t") {
-        auto allocator = memory::default_scratch_allocator();
+        result_t r{};
+        defer(format::print("{}", r));
 
-        strings::pool_t intern_pool(allocator);
-
-        result_t r(allocator);
-        defer(fmt::print("{}", r));
-
-        dot_model_t model(allocator, intern_pool);
+        dot_model_t model{};
         REQUIRE(model.initialize(r));
 
-        graph_t graph(
-            memory::default_scratch_allocator(),
-            &model,
-            graph_type_t::directed,
-            "test");
+        graph_t graph(&model, graph_type_t::directed,"test");
         auto& attrs = graph.attributes();
         REQUIRE(attrs.set_value(r, attribute_type_t::rankdir, enumeration_value_t("LR")));
         REQUIRE(attrs.set_value(r, attribute_type_t::fontsize, 22.0));
@@ -72,10 +64,10 @@ namespace basecode {
         auto edge2 = graph.make_edge(node1, node3);
         REQUIRE(edge2);
 
-        fmt::memory_buffer buffer{};
+        format::memory_buffer_t buffer{};
         REQUIRE(model.serialize(r, graph, buffer));
 
-        fmt::print("{}\n", fmt::to_string(buffer));
+        format::print("{}\n", format::to_string(buffer));
     }
 
 }

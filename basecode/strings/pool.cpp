@@ -21,11 +21,8 @@
 
 namespace basecode::strings {
 
-    pool_t::pool_t(
-            memory::allocator_t* allocator,
-            uint32_t block_size) : _block_size(block_size),
-                                   _allocator(allocator),
-                                   _index(memory::default_allocator()) {
+    pool_t::pool_t(memory::allocator_t* allocator) : _allocator(allocator),
+                                                     _index(memory::default_allocator()) {
     }
 
     std::string_view pool_t::intern(std::string_view value) {
@@ -40,10 +37,6 @@ namespace basecode::strings {
             return std::string_view(static_cast<char*>(data_ptr), value.length());
         }
         return std::string_view(static_cast<char*>(data), value.length());
-    }
-
-    std::string_view pool_t::intern(const std::string& value) {
-        return intern(std::string_view(value));
     }
 
 }

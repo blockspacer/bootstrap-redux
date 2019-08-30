@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <optional>
-#include <fmt/format.h>
+#include <algorithm>
 #include <initializer_list>
 #include <basecode/numbers/bytes.h>
 #include <basecode/memory/system.h>

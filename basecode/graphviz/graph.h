@@ -40,11 +40,11 @@ namespace basecode::graphviz {
     class graph_t final {
     public:
         graph_t(
-            memory::allocator_t* allocator,
             model_t* model,
             graph_type_t type,
             std::string_view name,
-            graph_t* parent = nullptr);
+            graph_t* parent = nullptr,
+            memory::allocator_t* allocator = context::current()->allocator);
 
         attribute_container_t& attributes();
 

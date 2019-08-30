@@ -23,6 +23,11 @@
 
 namespace basecode::strings {
 
+    struct unitized_byte_size_t {
+        adt::string_t value{};
+        adt::string_t units{};
+    };
+
     void word_wrap(
         adt::string_t& text,
         size_t width,
@@ -34,8 +39,7 @@ namespace basecode::strings {
         size_t num,
         char padding = ' ');
 
-    // XXX: FIX THIS
-    std::pair<std::string, std::string> size_to_units(size_t size);
+    unitized_byte_size_t size_to_units(size_t size);
 
     adt::string_t remove_underscores(const std::string_view& value);
 
