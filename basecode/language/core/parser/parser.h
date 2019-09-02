@@ -117,6 +117,11 @@ namespace basecode::language::core::parser {
             lexer::token_type_t token_type,
             const nud_callback_t& nud = {});
 
+        production_rule_t* postfix(
+            lexer::token_type_t token_type,
+            int32_t bp,
+            const led_callback_t& led = {});
+
         production_rule_t* literal(
             lexer::token_type_t token_type,
             ast::node_type_t node_type);

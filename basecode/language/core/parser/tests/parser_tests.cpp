@@ -66,9 +66,11 @@ namespace basecode {
             "x *:= 2;\n"sv
             "x /:= 2;\n"sv
             "x %:= 2;\n"sv
-            "x |:= %0000_1111;\n"sv
-            "x &:= %1111_0000;\n"sv
-        ;
+            "x |:= %0000_1111;\n"
+            "x &:= %1111_0000;\n"
+            "power := 2 ** 3 ** 4;\n"
+            "chr := ptr^;\n"sv
+            ;
 
         REQUIRE(buffer.load(r, source));
 

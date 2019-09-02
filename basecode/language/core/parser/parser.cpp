@@ -97,6 +97,29 @@ namespace basecode::language::core::parser {
         return s;
     }
 
+    production_rule_t* parser_t::postfix(
+            lexer::token_type_t token_type,
+            int32_t bp,
+            const led_callback_t& led) {
+        auto s = terminal(token_type, bp);
+        if (led) {
+            s->led = led;
+        } else {
+            s->led = [](context_t& ctx, entity_t lhs) {
+                auto ast_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    ast_node,
+                    ctx.allocator,
+                    ast::node_type_t::unary_operator,
+                    ctx.token,
+                    ctx.parent);
+                ctx.registry->assign<ast::unary_operator_t>(ast_node, lhs);
+                return ast_node;
+            };
+        }
+        return s;
+    }
+
     production_rule_t* parser_t::terminal(
             lexer::token_type_t token_type,
             int32_t bp) {
@@ -368,6 +391,8 @@ namespace basecode::language::core::parser {
         terminal(lexer::token_type_t::end_of_input);
         terminal(lexer::token_type_t::right_curly_brace);
 
+        postfix(lexer::token_type_t::caret, 80);
+
         prefix(lexer::token_type_t::minus);
         prefix(lexer::token_type_t::binary_not_operator);
         prefix(lexer::token_type_t::logical_not_operator);
@@ -406,17 +431,22 @@ namespace basecode::language::core::parser {
         constant(lexer::token_type_t::value_sink, ast::node_type_t::value_sink_literal);
         constant(lexer::token_type_t::uninitialized, ast::node_type_t::uninitialized_literal);
 
+        infix_right(lexer::token_type_t::exponent_operator, 75);
         infix_right(lexer::token_type_t::logical_or_operator, 30);
         infix_right(lexer::token_type_t::logical_and_operator, 30);
 
         infix(lexer::token_type_t::less_than, 40);
+        infix(lexer::token_type_t::in_operator, 40);
         infix(lexer::token_type_t::greater_than, 40);
         infix(lexer::token_type_t::equal_operator, 40);
         infix(lexer::token_type_t::not_equal_operator, 40);
+        infix(lexer::token_type_t::inclusive_range_operator, 40);
+        infix(lexer::token_type_t::exclusive_range_operator, 40);
         infix(lexer::token_type_t::less_than_equal_operator, 40);
         infix(lexer::token_type_t::greater_than_equal_operator, 40);
 
         infix(lexer::token_type_t::minus, 50);
+        infix(lexer::token_type_t::xor_operator, 70);
         infix(lexer::token_type_t::shl_operator, 70);
         infix(lexer::token_type_t::shr_operator, 70);
         infix(lexer::token_type_t::rol_operator, 70);
