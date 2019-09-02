@@ -146,7 +146,6 @@ namespace basecode::language::core::lexer {
                 {"-:="sv,         lexeme_t{.type = token_type_t::subtract_assignment_operator}},
                 {"|:="sv,         lexeme_t{.type = token_type_t::binary_or_assignment_operator}},
                 {"&:="sv,         lexeme_t{.type = token_type_t::binary_and_assignment_operator}},
-                {"~:="sv,         lexeme_t{.type = token_type_t::binary_not_assignment_operator}},
 
                 {"::"sv,          lexeme_t{.type = token_type_t::bind_operator}},
                 {"->"sv,          lexeme_t{.type = token_type_t::lambda_operator}},

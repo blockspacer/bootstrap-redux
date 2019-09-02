@@ -112,7 +112,6 @@ namespace basecode::language::core::lexer {
             case token_type_t::subtract_assignment_operator:    return "subtract_assignment_operator"sv;
             case token_type_t::binary_or_assignment_operator:   return "binary_or_assignment_operator"sv;
             case token_type_t::binary_and_assignment_operator:  return "binary_and_assignment_operator"sv;
-            case token_type_t::binary_not_assignment_operator:  return "binary_not_assignment_operator"sv;
             default:
                 return "unknown"sv;
         }

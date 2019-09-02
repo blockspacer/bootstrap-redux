@@ -48,5 +48,6 @@ namespace basecode {
     // entity aliases
     using entity_t = entt::entity;
     using entity_list_t = adt::array_t<entt::entity>;
+    [[maybe_unused]] constexpr entity_t null_entity = entt::null;
 
 }

@@ -116,7 +116,6 @@ namespace basecode::language::core::lexer {
         subtract_assignment_operator,
         binary_or_assignment_operator,
         binary_and_assignment_operator,
-        binary_not_assignment_operator,
     };
 
     std::string_view token_type_to_name(token_type_t type);

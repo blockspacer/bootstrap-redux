@@ -28,7 +28,7 @@ namespace basecode {
     using namespace basecode;
     using namespace basecode::language::core;
 
-    TEST_CASE("lexer_t::tokenize identifiers") {
+    TEST_CASE("parser_t::parse produces valid ast") {
         workspace::session_options_t options{};
         workspace::session_t session(options);
         utf8::source_buffer_t buffer(options.allocator);
@@ -42,12 +42,23 @@ namespace basecode {
             "false;\n"
             "nil;\n"
             "3.145;\n"
+            "-3.145;\n"
+            "h := -(3 * 3);\n"
+            "j := !true;\n"
+            "k := ~%1111_1111;\n"
             "a := 6 * (6 + 4);\n"
             "vec.x := 2.5;\n"
             "foo[2 * 2] := 66;\n"
             "2 == 2 && 3 == 1;\n"
             "2 == 2 || 3 == 3;\n"
             "a, b, c := 3, 4, 2;\n"sv
+            "x +:= 1;\n"sv
+            "x -:= 1;\n"sv
+            "x *:= 2;\n"sv
+            "x /:= 2;\n"sv
+            "x %:= 2;\n"sv
+            "x |:= %0000_1111;\n"sv
+            "x &:= %1111_0000;\n"sv
         ;
 
         REQUIRE(buffer.load(r, source));

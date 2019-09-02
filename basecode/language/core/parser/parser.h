@@ -40,10 +40,10 @@ namespace basecode::language::core::parser {
         nud_callback_t nud{};
         led_callback_t led{};
         lexer::token_type_t id{};
-
-        // XXX: need to think of a better way to do this
-        ast::node_type_t node_type{};
-        // XXX: fix this shit
+        union {
+            ast::node_type_t node_type;
+            lexer::token_type_t op_type;
+        } detail{};
     };
 
     class parser_t;
@@ -133,6 +133,10 @@ namespace basecode::language::core::parser {
             lexer::token_type_t token_type,
             int32_t bp,
             const led_callback_t& led = {});
+
+        production_rule_t* compound_assignment(
+            lexer::token_type_t token_type,
+            lexer::token_type_t op_type);
 
         production_rule_t* assignment(lexer::token_type_t token_type);
 

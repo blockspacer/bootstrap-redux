@@ -32,11 +32,13 @@ namespace basecode::language {
                 break;
             case number_size_t::dword:
                 token.value.f32 = (float)value;
-                token.is_signed = token.value.f32 < 0;
+                if (!token.is_signed)
+                    token.is_signed = token.value.f32 < 0;
                 break;
             case number_size_t::qword:
                 token.value.f64 = value;
-                token.is_signed = token.value.f64 < 0;
+                if (!token.is_signed)
+                    token.is_signed = token.value.f64 < 0;
                 break;
         }
     }

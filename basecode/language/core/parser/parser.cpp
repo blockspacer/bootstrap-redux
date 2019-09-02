@@ -118,7 +118,7 @@ namespace basecode::language::core::parser {
                         *ctx.r,
                         errors::parser::undefined_production_rule,
                         loc);
-                    return (entity_t)entt::null;
+                    return null_entity;
                 },
                 .led = [](context_t& ctx, entity_t lhs) {
                     const auto& loc = ctx.registry->get<source_location_t>(ctx.token);
@@ -126,7 +126,7 @@ namespace basecode::language::core::parser {
                         *ctx.r,
                         errors::parser::missing_operator_production_rule,
                         loc);
-                    return (entity_t)entt::null;
+                    return null_entity;
                 },
             };
 
@@ -146,12 +146,12 @@ namespace basecode::language::core::parser {
                 ctx.registry->assign<ast::node_t>(
                     ast_node,
                     ctx.allocator,
-                    ctx.rule->node_type,
+                    ctx.rule->detail.node_type,
                     ctx.token,
                     ctx.parent);
                 return ast_node;
             });
-        literal->node_type = node_type;
+        literal->detail.node_type = node_type;
         return literal;
     }
 
@@ -165,12 +165,12 @@ namespace basecode::language::core::parser {
                 ctx.registry->assign<ast::node_t>(
                     ast_node,
                     ctx.allocator,
-                    ctx.rule->node_type,
+                    ctx.rule->detail.node_type,
                     ctx.token,
                     ctx.parent);
                 return ast_node;
             });
-        constant->node_type = node_type;
+        constant->detail.node_type = node_type;
         return constant;
     }
 
@@ -229,32 +229,32 @@ namespace basecode::language::core::parser {
             module_node,
             _session.allocator(),
             ast::node_type_t::module,
-            entt::null,
-            entt::null);
+            null_entity,
+            null_entity);
 
         auto scope_node = registry.create();
         registry.assign<ast::node_t>(
             scope_node,
             _session.allocator(),
             ast::node_type_t::scope,
-            entt::null,
+            null_entity,
             module_node);
         registry.assign<ast::scope_t>(
             scope_node,
             _session.allocator(),
-            entt::null);
+            null_entity);
 
         auto block_node = registry.create();
         registry.assign<ast::node_t>(
             block_node,
             _session.allocator(),
             ast::node_type_t::block,
-            entt::null,
+            null_entity,
             module_node);
         registry.assign<ast::block_t>(
             block_node,
             _session.allocator(),
-            entt::null,
+            null_entity,
             scope_node);
 
         std::string_view name;
@@ -285,7 +285,7 @@ namespace basecode::language::core::parser {
                 stmt_entity,
                 _session.allocator(),
                 ast::node_type_t::statement,
-                entt::null,
+                null_entity,
                 *_parents.top());
 
             _parents.push(stmt_entity);
@@ -293,13 +293,13 @@ namespace basecode::language::core::parser {
 
             _comma_rule->lbp = 25;      // binding power for statements
             auto expr = expression(r);
-            if (expr == entt::null) {
+            if (expr == null_entity) {
                 const auto& loc = registry.get<source_location_t>(token());
                 add_source_highlighted_error(
                     r,
                     errors::parser::expected_expression,
                     loc);
-                return entt::null;
+                return null_entity;
             }
 
             auto terminator_token = token();
@@ -374,14 +374,28 @@ namespace basecode::language::core::parser {
 
         assignment(lexer::token_type_t::bind_operator);
         assignment(lexer::token_type_t::assignment_operator);
-        assignment(lexer::token_type_t::add_assignment_operator);
-        assignment(lexer::token_type_t::divide_assignment_operator);
-        assignment(lexer::token_type_t::modulo_assignment_operator);
-        assignment(lexer::token_type_t::subtract_assignment_operator);
-        assignment(lexer::token_type_t::multiply_assignment_operator);
-        assignment(lexer::token_type_t::binary_or_assignment_operator);
-        assignment(lexer::token_type_t::binary_and_assignment_operator);
-        assignment(lexer::token_type_t::binary_not_assignment_operator);
+
+        compound_assignment(
+            lexer::token_type_t::subtract_assignment_operator,
+            lexer::token_type_t::minus);
+        compound_assignment(
+            lexer::token_type_t::add_assignment_operator,
+            lexer::token_type_t::add_operator);
+        compound_assignment(
+            lexer::token_type_t::divide_assignment_operator,
+            lexer::token_type_t::divide_operator);
+        compound_assignment(
+            lexer::token_type_t::modulo_assignment_operator,
+            lexer::token_type_t::modulo_operator);
+        compound_assignment(
+            lexer::token_type_t::multiply_assignment_operator,
+            lexer::token_type_t::multiply_operator);
+        compound_assignment(
+            lexer::token_type_t::binary_or_assignment_operator,
+            lexer::token_type_t::binary_or_operator);
+        compound_assignment(
+            lexer::token_type_t::binary_and_assignment_operator,
+            lexer::token_type_t::binary_and_operator);
 
         infix_right(lexer::token_type_t::lambda_operator, 20);
         infix_right(lexer::token_type_t::associative_operator, 20);
@@ -404,7 +418,7 @@ namespace basecode::language::core::parser {
                     lhs,
                     ctx.parser->expression(*ctx.r));
                 if (!ctx.parser->advance(*ctx.r, lexer::token_type_t::right_bracket))
-                    return (entity_t)entt::null;
+                    return null_entity;
                 return ast_node;
             });
 
@@ -418,12 +432,12 @@ namespace basecode::language::core::parser {
                         *ctx.r,
                         errors::parser::member_select_operator_requires_identifier_lvalue,
                         loc);
-                    return (entity_t)entt::null;
+                    return null_entity;
                 }
 
                 auto rhs_token = ctx.parser->token();
                 if (!ctx.parser->advance(*ctx.r, lexer::token_type_t::identifier))
-                    return (entity_t)entt::null;
+                    return null_entity;
 
                 auto rhs_ident_node = ctx.registry->create();
                 ctx.registry->assign<ast::node_t>(
@@ -456,7 +470,7 @@ namespace basecode::language::core::parser {
             [](context_t& ctx) {
                 auto expr = ctx.parser->expression(*ctx.r);
                 if (!ctx.parser->advance(*ctx.r, lexer::token_type_t::right_paren))
-                    return (entity_t)entt::null;
+                    return null_entity;
                 return expr;
             });
 
@@ -488,6 +502,7 @@ namespace basecode::language::core::parser {
                     ast_node,
                     ctx.allocator,
                     ast::node_type_t::annotation,
+
                     ctx.token,
                     ctx.parent);
                 auto& annotation = ctx.registry->assign<ast::annotation_t>(ast_node);
@@ -523,8 +538,62 @@ namespace basecode::language::core::parser {
         _comma_rule->lbp = bp;
     }
 
+    production_rule_t* parser_t::compound_assignment(
+            lexer::token_type_t token_type,
+            lexer::token_type_t op_type) {
+        auto rule = infix(
+            token_type,
+            20,
+            [](context_t& ctx, entity_t lhs) {
+                auto rhs = ctx.parser->expression(
+                    *ctx.r,
+                    ctx.rule->lbp - 1);
+                if (rhs == null_entity)
+                    return null_entity;
+
+                const auto& rhs_node = ctx.registry->get<ast::node_t>(rhs);
+                if (rhs_node.type == ast::node_type_t::assignment_operator) {
+                    const auto& loc = ctx.registry->get<source_location_t>(rhs_node.token);
+                    ctx.parser->add_source_highlighted_error(
+                        *ctx.r,
+                        errors::parser::invalid_assignment_expression,
+                        loc);
+                    return null_entity;
+                }
+
+                const auto& token = ctx.registry->get<lexer::token_t>(ctx.token);
+                auto bin_op_token = ctx.registry->create();
+                ctx.registry->assign<lexer::token_t>(
+                    bin_op_token,
+                    ctx.rule->detail.op_type,
+                    std::string_view(token.value.data(), 1));
+
+                auto bin_op_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    bin_op_node,
+                    ctx.allocator,
+                    ast::node_type_t::binary_operator,
+                    bin_op_token,
+                    ctx.parent);
+                ctx.registry->assign<ast::binary_operator_t>(bin_op_node, lhs, rhs);
+
+                auto assignment_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    assignment_node,
+                    ctx.allocator,
+                    ast::node_type_t::assignment_operator,
+                    ctx.token,
+                    ctx.parent);
+
+                ctx.registry->assign<ast::assignment_operator_t>(assignment_node, lhs, bin_op_node);
+                return assignment_node;
+            });
+        rule->detail.op_type = op_type;
+        return rule;
+    }
+
     entity_t parser_t::expression(result_t& r, int32_t rbp) {
-        if (!has_more()) return entt::null;
+        if (!has_more()) return null_entity;
 
         auto current_rule = rule();
         auto current_token = token();
@@ -542,7 +611,7 @@ namespace basecode::language::core::parser {
         };
 
         if (!advance(r))
-            return entt::null;
+            return null_entity;
 
         auto lhs = current_rule->nud(ctx);
 
@@ -554,7 +623,7 @@ namespace basecode::language::core::parser {
             ctx.block = *_blocks.top();
             ctx.parent = *_parents.top();
 
-            if (!advance(r)) return entt::null;
+            if (!advance(r)) return null_entity;
 
             lhs = next_rule->led(ctx, lhs);
 
@@ -611,9 +680,8 @@ namespace basecode::language::core::parser {
                 auto rhs = ctx.parser->expression(
                     *ctx.r,
                     ctx.rule->lbp - 1);
-                if (rhs == entt::null) {
-                    return (entity_t)entt::null;
-                }
+                if (rhs == null_entity)
+                    return null_entity;
 
                 const auto& node = ctx.registry->get<ast::node_t>(rhs);
                 if (node.type == ast::node_type_t::assignment_operator) {
@@ -622,7 +690,7 @@ namespace basecode::language::core::parser {
                         *ctx.r,
                         errors::parser::invalid_assignment_expression,
                         loc);
-                    return (entity_t)entt::null;
+                    return null_entity;
                 }
 
                 ctx.registry->assign<ast::assignment_operator_t>(
