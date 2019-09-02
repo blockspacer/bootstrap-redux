@@ -72,6 +72,7 @@ namespace basecode::language::core::ast {
             case node_type_t::value_sink_literal:       return "value_sink_literal"sv;
             case node_type_t::assignment_operator:      return "assignment_operator"sv;
             case node_type_t::continue_expression:      return "continue_expression"sv;
+            case node_type_t::identifier_reference:     return "identifier_reference"sv;
             case node_type_t::variable_declaration:     return "variable_declaration"sv;
             case node_type_t::uninitialized_literal:    return "uninitialized_literal"sv;
             case node_type_t::fallthrough_expression:   return "fallthrough_expression"sv;
@@ -299,10 +300,22 @@ namespace basecode::language::core::ast {
                 break;
             }
             case node_type_t::identifier: {
+                const auto& identifier = registry.get<identifier_t>(entity);
                 node_attrs.set_value(
                     r,
                     graphviz::attribute_type_t::fillcolor,
                     graphviz::enumeration_value_t("aliceblue"));
+                auto scope_edge = graph.make_edge(
+                    node,
+                    graph.find_node(format::format("id_{}", identifier.scope)));
+                scope_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    "scope"sv);
+                scope_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::style,
+                    "dashed"sv);
                 break;
             }
             case node_type_t::nil_literal: {
@@ -377,6 +390,25 @@ namespace basecode::language::core::ast {
                         graphviz::attribute_type_t::label,
                         "rhs"sv);
                 }
+                break;
+            }
+            case node_type_t::identifier_reference: {
+                const auto& ref = registry.get<identifier_ref_t>(entity);
+                node_attrs.set_value(
+                    r,
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("skyblue2"));
+                auto definition_edge = graph.make_edge(
+                    node,
+                    graph.find_node(format::format("id_{}", ref.identifier)));
+                definition_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    "definition"sv);
+                definition_edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::style,
+                    "dashed"sv);
                 break;
             }
             case node_type_t::label:

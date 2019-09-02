@@ -52,6 +52,8 @@ namespace basecode::graphviz {
 
         node_t* make_node(std::string_view name);
 
+        node_t* find_node(std::string_view name);
+
         [[nodiscard]] std::string_view name() const;
 
         [[nodiscard]] const edge_list_t& edges() const;

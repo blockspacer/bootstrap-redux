@@ -578,6 +578,22 @@ namespace basecode::language::core::parser {
         prefix(
             lexer::token_type_t::identifier,
             [](context_t& ctx) {
+                auto& scope = ctx.registry->get<ast::scope_t>(ctx.scope);
+                auto& token = ctx.registry->get<lexer::token_t>(ctx.token);
+
+                auto var = scope.identifiers.search(token.value);
+                if (var) {
+                    auto ast_node = ctx.registry->create();
+                    ctx.registry->assign<ast::node_t>(
+                        ast_node,
+                        ctx.allocator,
+                        ast::node_type_t::identifier_reference,
+                        ctx.token,
+                        ctx.parent);
+                    ctx.registry->assign<ast::identifier_ref_t>(ast_node, *var);
+                    return ast_node;
+                }
+
                 auto ast_node = ctx.registry->create();
                 ctx.registry->assign<ast::node_t>(
                     ast_node,
@@ -589,9 +605,14 @@ namespace basecode::language::core::parser {
                     ast_node,
                     ctx.scope,
                     ctx.block);
-                auto& token = ctx.registry->get<lexer::token_t>(ctx.token);
-                auto& scope = ctx.registry->get<ast::scope_t>(ctx.scope);
+                ctx.registry->assign<ast::variable_decl_t>(
+                    ast_node,
+                    null_entity,
+                    ast_node,
+                    null_entity);
+
                 scope.identifiers.insert(token.value, ast_node);
+
                 return ast_node;
             });
 
@@ -805,8 +826,9 @@ namespace basecode::language::core::parser {
     bool parser_t::is_node_an_identifier(entity_t expr, source_location_t& loc) {
         auto& registry = _session.registry();
         if (!registry.has<ast::identifier_t>(expr)) {
-            const auto& node = registry.get<ast::node_t>(expr);
-            loc = registry.get<source_location_t>(node.token);
+            auto node = registry.try_get<ast::node_t>(expr);
+            if (node)
+                loc = registry.get<source_location_t>(node->token);
             return false;
         }
         return true;

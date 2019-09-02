@@ -74,6 +74,7 @@ namespace basecode::language::core::ast {
         value_sink_literal,
         assignment_operator,
         continue_expression,
+        identifier_reference,
         variable_declaration,
         uninitialized_literal,
         fallthrough_expression,
@@ -255,6 +256,10 @@ namespace basecode::language::core::ast {
         }
         entity_t scope;
         entity_t block;
+    };
+
+    struct identifier_ref_t final {
+        entity_t identifier{};
     };
 
     ///////////////////////////////////////////////////////////////////////////

@@ -67,6 +67,14 @@ namespace basecode::graphviz {
         return node;
     }
 
+    node_t* graph_t::find_node(std::string_view name) {
+        for (auto node : _nodes) {
+            if (node->name() == name)
+                return node;
+        }
+        return nullptr;
+    }
+
     edge_t* graph_t::make_edge(node_t* first, node_t* second) {
         auto edge = _storage.construct<edge_t>(_allocator, _model, first, second);
         _edges.add(edge);
