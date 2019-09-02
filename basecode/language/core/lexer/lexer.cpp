@@ -181,6 +181,7 @@ namespace basecode::language::core::lexer {
                 {"break"sv,       lexeme_t{.keyword = true, .type = token_type_t::break_keyword}},
                 {"union"sv,       lexeme_t{.keyword = true, .type = token_type_t::union_keyword}},
                 {"yield"sv,       lexeme_t{.keyword = true, .type = token_type_t::yield_keyword}},
+                {"?"sv,           lexeme_t{.keyword = true, .type = token_type_t::uninitialized}},
                 {"struct"sv,      lexeme_t{.keyword = true, .type = token_type_t::struct_keyword}},
                 {"return"sv,      lexeme_t{.keyword = true, .type = token_type_t::return_keyword}},
                 {"switch"sv,      lexeme_t{.keyword = true, .type = token_type_t::switch_keyword}},

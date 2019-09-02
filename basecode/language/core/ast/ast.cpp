@@ -69,13 +69,14 @@ namespace basecode::language::core::ast {
             case node_type_t::family_expression:        return "family_expression"sv;
             case node_type_t::switch_expression:        return "switch_expression"sv;
             case node_type_t::bitcast_expression:       return "bitcast_expression"sv;
-            case node_type_t::type_decl_operator:       return "type_decl_operator"sv;
-            case node_type_t::value_sink_operator:      return "value_sink_operator"sv;
+            case node_type_t::value_sink_literal:       return "value_sink_literal"sv;
             case node_type_t::assignment_operator:      return "assignment_operator"sv;
             case node_type_t::continue_expression:      return "continue_expression"sv;
             case node_type_t::variable_declaration:     return "variable_declaration"sv;
+            case node_type_t::uninitialized_literal:    return "uninitialized_literal"sv;
             case node_type_t::fallthrough_expression:   return "fallthrough_expression"sv;
             case node_type_t::initializer_expression:   return "initializer_expression"sv;
+            case node_type_t::type_annotation_operator: return "type_annotation_operator"sv;
             default: return "unknown"sv;
         }
     }
@@ -87,6 +88,8 @@ namespace basecode::language::core::ast {
             workspace::session_t& session,
             graphviz::graph_t& graph,
             entity_t entity) {
+        if (entity == null_entity) return nullptr;
+
         auto& registry = session.registry();
         auto& intern_pool = session.intern_pool();
 
@@ -113,6 +116,39 @@ namespace basecode::language::core::ast {
             ports.emplace(token.value, session.allocator());
         }
 
+        for (auto comment : ast_node.comments) {
+            auto comment_node = create_dot_node(r, session, graph, comment);
+            if (comment_node != nullptr) {
+                auto edge = graph.make_edge(node, comment_node);
+                edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    "comment"sv);
+            }
+        }
+
+        for (auto directive : ast_node.directives) {
+            auto directive_node = create_dot_node(r, session, graph, directive);
+            if (directive_node != nullptr) {
+                auto edge = graph.make_edge(node, directive_node);
+                edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    "directive"sv);
+            }
+        }
+
+        for (auto annotation : ast_node.annotations) {
+            auto annotation_node = create_dot_node(r, session, graph, annotation);
+            if (annotation_node != nullptr) {
+                auto edge = graph.make_edge(node, annotation_node);
+                edge->attributes().set_value(
+                    r,
+                    graphviz::attribute_type_t::label,
+                    "annotation"sv);
+            }
+        }
+
         switch (ast_node.type) {
             case node_type_t::block: {
                 node_attrs.set_value(
@@ -121,10 +157,12 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("azure3"));
                 const auto& block_node = registry.get<block_t>(entity);
                 auto scope_node = create_dot_node(r, session, graph, block_node.scope);
-                graph.make_edge(node, scope_node);
+                if (scope_node != nullptr)
+                    graph.make_edge(node, scope_node);
                 for (auto stmt : block_node.children) {
                     auto stmt_node = create_dot_node(r, session, graph, stmt);
-                    graph.make_edge(node, stmt_node);
+                    if (stmt_node != nullptr)
+                        graph.make_edge(node, stmt_node);
                 }
                 break;
             }
@@ -142,7 +180,8 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("deepskyblue3"));
                 const auto& module_node = registry.get<module_t>(entity);
                 auto block_node = create_dot_node(r, session, graph, module_node.block);
-                graph.make_edge(node, block_node);
+                if (block_node != nullptr)
+                    graph.make_edge(node, block_node);
                 break;
             }
             case node_type_t::statement: {
@@ -152,7 +191,8 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("darkolivegreen1"));
                 const auto& stmt_node = registry.get<statement_t>(entity);
                 auto expr_node = create_dot_node(r, session, graph, stmt_node.expr);
-                graph.make_edge(node, expr_node);
+                if (expr_node != nullptr)
+                    graph.make_edge(node, expr_node);
                 break;
             }
             case node_type_t::directive: {
@@ -162,17 +202,22 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("gold"));
                 const auto& directive_node = registry.get<directive_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, directive_node.lhs);
+                if (lhs_expr != nullptr) {
+                    auto lhs_edge = graph.make_edge(node, lhs_expr);
+                    lhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "lhs"sv);
+                }
+
                 auto rhs_expr = create_dot_node(r, session, graph, directive_node.rhs);
-                auto lhs_edge = graph.make_edge(node, lhs_expr);
-                lhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "lhs"sv);
-                auto rhs_edge = graph.make_edge(node, rhs_expr);
-                rhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "rhs"sv);
+                if (rhs_expr != nullptr) {
+                    auto rhs_edge = graph.make_edge(node, rhs_expr);
+                    rhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "rhs"sv);
+                }
                 break;
             }
             case node_type_t::annotation: {
@@ -182,17 +227,35 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("goldenrod"));
                 const auto& annotation_node = registry.get<annotation_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, annotation_node.lhs);
+                if (lhs_expr != nullptr) {
+                    auto lhs_edge = graph.make_edge(node, lhs_expr);
+                    lhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "lhs"sv);
+                }
                 auto rhs_expr = create_dot_node(r, session, graph, annotation_node.rhs);
-                auto lhs_edge = graph.make_edge(node, lhs_expr);
-                lhs_edge->attributes().set_value(
+                if (rhs_expr != nullptr) {
+                    auto rhs_edge = graph.make_edge(node, rhs_expr);
+                    rhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "rhs"sv);
+                }
+                break;
+            }
+            case node_type_t::line_comment: {
+                node_attrs.set_value(
                     r,
-                    graphviz::attribute_type_t::label,
-                    "lhs"sv);
-                auto rhs_edge = graph.make_edge(node, rhs_expr);
-                rhs_edge->attributes().set_value(
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("thistle"));
+                break;
+            }
+            case node_type_t::block_comment: {
+                node_attrs.set_value(
                     r,
-                    graphviz::attribute_type_t::label,
-                    "rhs"sv);
+                    graphviz::attribute_type_t::fillcolor,
+                    graphviz::enumeration_value_t("thistle3"));
                 break;
             }
             case node_type_t::unary_operator: {
@@ -202,11 +265,13 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("cyan"));
                 const auto& unary_op_node = registry.get<unary_operator_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, unary_op_node.lhs);
-                auto lhs_edge = graph.make_edge(node, lhs_expr);
-                lhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "lhs"sv);
+                if (lhs_expr != nullptr) {
+                    auto lhs_edge = graph.make_edge(node, lhs_expr);
+                    lhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "lhs"sv);
+                }
                 break;
             }
             case node_type_t::binary_operator: {
@@ -216,17 +281,21 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("cornsilk3"));
                 const auto& bin_op_node = registry.get<binary_operator_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, bin_op_node.lhs);
+                if (lhs_expr != nullptr) {
+                    auto lhs_edge = graph.make_edge(node, lhs_expr);
+                    lhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "lhs"sv);
+                }
                 auto rhs_expr = create_dot_node(r, session, graph, bin_op_node.rhs);
-                auto lhs_edge = graph.make_edge(node, lhs_expr);
-                lhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "lhs"sv);
-                auto rhs_edge = graph.make_edge(node, rhs_expr);
-                rhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "rhs"sv);
+                if (rhs_expr != nullptr) {
+                    auto rhs_edge = graph.make_edge(node, rhs_expr);
+                    rhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "rhs"sv);
+                }
                 break;
             }
             case node_type_t::identifier: {
@@ -293,23 +362,25 @@ namespace basecode::language::core::ast {
                     graphviz::enumeration_value_t("darkseagreen1"));
                 const auto& assignment_op_node = registry.get<assignment_operator_t>(entity);
                 auto lhs_expr = create_dot_node(r, session, graph, assignment_op_node.lhs);
+                if (lhs_expr != nullptr) {
+                    auto lhs_edge = graph.make_edge(node, lhs_expr);
+                    lhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "lhs"sv);
+                }
                 auto rhs_expr = create_dot_node(r, session, graph, assignment_op_node.rhs);
-                auto lhs_edge = graph.make_edge(node, lhs_expr);
-                lhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "lhs"sv);
-                auto rhs_edge = graph.make_edge(node, rhs_expr);
-                rhs_edge->attributes().set_value(
-                    r,
-                    graphviz::attribute_type_t::label,
-                    "rhs"sv);
+                if (rhs_expr != nullptr) {
+                    auto rhs_edge = graph.make_edge(node, rhs_expr);
+                    rhs_edge->attributes().set_value(
+                        r,
+                        graphviz::attribute_type_t::label,
+                        "rhs"sv);
+                }
                 break;
             }
             case node_type_t::label:
             case node_type_t::expression:
-            case node_type_t::line_comment:
-            case node_type_t::block_comment:
             case node_type_t::block_literal:
             case node_type_t::ns_expression:
             case node_type_t::if_expression:
@@ -335,12 +406,13 @@ namespace basecode::language::core::ast {
             case node_type_t::family_expression:
             case node_type_t::switch_expression:
             case node_type_t::bitcast_expression:
-            case node_type_t::type_decl_operator:
-            case node_type_t::value_sink_operator:
+            case node_type_t::value_sink_literal:
             case node_type_t::continue_expression:
             case node_type_t::variable_declaration:
+            case node_type_t::uninitialized_literal:
             case node_type_t::fallthrough_expression:
             case node_type_t::initializer_expression:
+            case node_type_t::type_annotation_operator:
                 break;
         }
 

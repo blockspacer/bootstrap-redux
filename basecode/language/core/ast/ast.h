@@ -71,13 +71,14 @@ namespace basecode::language::core::ast {
         family_expression,
         switch_expression,
         bitcast_expression,
-        type_decl_operator,
-        value_sink_operator,
+        value_sink_literal,
         assignment_operator,
         continue_expression,
         variable_declaration,
+        uninitialized_literal,
         fallthrough_expression,
         initializer_expression,
+        type_annotation_operator,
     };
 
     std::string_view node_type_to_name(node_type_t type);
@@ -333,14 +334,6 @@ namespace basecode::language::core::ast {
     struct initializer_t final {
         entity_t expr{};
         initializer_type_t type{};
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    struct line_comment_t final {
-    };
-
-    struct block_comment_t final {
     };
 
     ///////////////////////////////////////////////////////////////////////////

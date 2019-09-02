@@ -292,17 +292,48 @@ namespace basecode::language::core::parser {
             defer(_parents.pop());
 
             _comma_rule->lbp = 25;      // binding power for statements
-            auto expr = expression(r);
-            if (expr == null_entity) {
-                const auto& loc = registry.get<source_location_t>(token());
-                add_source_highlighted_error(
-                    r,
-                    errors::parser::expected_expression,
-                    loc);
-                return null_entity;
+
+            auto expr = null_entity;
+            auto terminator_token = null_entity;
+            while (true) {
+                expr = expression(r);
+                if (expr == null_entity) {
+                    const auto& loc = registry.get<source_location_t>(token());
+                    add_source_highlighted_error(
+                        r,
+                        errors::parser::expected_expression,
+                        loc);
+                    return null_entity;
+                }
+                auto& expr_node = registry.get<ast::node_t>(expr);
+                auto& stmt_node = registry.get<ast::node_t>(stmt_entity);
+                switch (expr_node.type) {
+                    case ast::node_type_t::directive: {
+                        stmt_node.directives.add(expr);
+                        expr = null_entity;
+                        break;
+                    }
+                    case ast::node_type_t::annotation: {
+                        stmt_node.annotations.add(expr);
+                        expr = null_entity;
+                        break;
+                    }
+                    case ast::node_type_t::line_comment:
+                    case ast::node_type_t::block_comment: {
+                        stmt_node.comments.add(expr);
+                        expr = null_entity;
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+                terminator_token = token();
+                const auto& t = registry.get<lexer::token_t>(terminator_token);
+                if (t.type == lexer::token_type_t::semicolon)
+                    break;
             }
 
-            auto terminator_token = token();
             if (!advance(r, lexer::token_type_t::semicolon))
                 break;
 
@@ -340,6 +371,30 @@ namespace basecode::language::core::parser {
         prefix(lexer::token_type_t::minus);
         prefix(lexer::token_type_t::binary_not_operator);
         prefix(lexer::token_type_t::logical_not_operator);
+        prefix(
+            lexer::token_type_t::line_comment,
+            [](context_t& ctx) {
+                auto ast_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    ast_node,
+                    ctx.allocator,
+                    ast::node_type_t::line_comment,
+                    ctx.token,
+                    ctx.parent);
+                return ast_node;
+            });
+        prefix(
+            lexer::token_type_t::block_comment,
+            [](context_t& ctx) {
+                auto ast_node = ctx.registry->create();
+                ctx.registry->assign<ast::node_t>(
+                    ast_node,
+                    ctx.allocator,
+                    ast::node_type_t::block_comment,
+                    ctx.token,
+                    ctx.parent);
+                return ast_node;
+            });
 
         literal(lexer::token_type_t::block_literal, ast::node_type_t::block_literal);
         literal(lexer::token_type_t::number_literal, ast::node_type_t::number_literal);
@@ -348,6 +403,8 @@ namespace basecode::language::core::parser {
         constant(lexer::token_type_t::nil_keyword, ast::node_type_t::nil_literal);
         constant(lexer::token_type_t::true_keyword, ast::node_type_t::boolean_literal);
         constant(lexer::token_type_t::false_keyword, ast::node_type_t::boolean_literal);
+        constant(lexer::token_type_t::value_sink, ast::node_type_t::value_sink_literal);
+        constant(lexer::token_type_t::uninitialized, ast::node_type_t::uninitialized_literal);
 
         infix_right(lexer::token_type_t::logical_or_operator, 30);
         infix_right(lexer::token_type_t::logical_and_operator, 30);
@@ -370,7 +427,21 @@ namespace basecode::language::core::parser {
         infix(lexer::token_type_t::multiply_operator, 60);
         infix(lexer::token_type_t::binary_or_operator, 70);
         infix(lexer::token_type_t::binary_and_operator, 70);
-
+//        infix(
+//            lexer::token_type_t::block_comment,
+//            10,
+//            [](context_t& ctx, entity_t lhs) {
+//                auto& node = ctx.registry->get<ast::node_t>(lhs);
+//                auto ast_node = ctx.registry->create();
+//                ctx.registry->assign<ast::node_t>(
+//                    ast_node,
+//                    ctx.allocator,
+//                    ast::node_type_t::block_comment,
+//                    ctx.token,
+//                    ctx.parent);
+//                node.comments.add(ast_node);
+//                return ctx.parser->expression(*ctx.r, ctx.rule->lbp);
+//            });
 
         assignment(lexer::token_type_t::bind_operator);
         assignment(lexer::token_type_t::assignment_operator);

@@ -37,21 +37,30 @@ namespace basecode {
         defer(fmt::print("{}", r));
 
         const adt::string_t source =
+            "// this is a line comment\n"
+            "// which should accumulate into the first statement, below.\n"
+            "-- testing alternate line comment syntax\n"
             "@no_fold \"foo\";\n"
+            "-- constants\n"
             "true;\n"
             "false;\n"
             "nil;\n"
+            "/* floating point number literals */\n"
             "3.145;\n"
             "-3.145;\n"
+            "-- unary operators\n"
             "h := -(3 * 3);\n"
-            "j := !true;\n"
+            "j := /* will become false */ !true;\n"
             "k := ~%1111_1111;\n"
+            "/* binary operators */\n"
             "a := 6 * (6 + 4);\n"
             "vec.x := 2.5;\n"
             "foo[2 * 2] := 66;\n"
             "2 == 2 && 3 == 1;\n"
             "2 == 2 || 3 == 3;\n"
+            "// multiple assignment\n"
             "a, b, c := 3, 4, 2;\n"sv
+            "/* compound assignments */\n"
             "x +:= 1;\n"sv
             "x -:= 1;\n"sv
             "x *:= 2;\n"sv

@@ -65,6 +65,7 @@ namespace basecode::language::core::lexer {
         shr_operator,
         rol_operator,
         ror_operator,
+        uninitialized,
         yield_keyword,
         union_keyword,
         break_keyword,
