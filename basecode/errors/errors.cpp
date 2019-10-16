@@ -59,13 +59,13 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = io::unable_to_read_file, .locale = "en_US"},
-                {.code = "I001", .message = "unable to read file: {}"}
+                {.code = io::unable_to_read_file, .locale = "en_US"sv},
+                {.code = "I001"sv, .message = "unable to read file: {}"sv}
             },
 
             {
-                {.code = io::unable_to_write_file, .locale = "en_US"},
-                {.code = "I002", .message = "unable to write file: {}"}
+                {.code = io::unable_to_write_file, .locale = "en_US"sv},
+                {.code = "I002"sv, .message = "unable to write file: {}"sv}
             },
 
             // ----------------------
@@ -73,108 +73,108 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = lexer::unable_to_convert_integer_value, .locale = "en_US"},
-                {.code = "L001", .message = "unable to convert integer value {} because {}"}
+                {.code = lexer::unable_to_convert_integer_value, .locale = "en_US"sv},
+                {.code = "L001"sv, .message = "unable to convert integer value {} because {}"sv}
             },
 
             {
-                {.code = lexer::unable_to_narrow_integer_value, .locale = "en_US"},
-                {.code = "L002", .message = "unable to narrow integer value"}
+                {.code = lexer::unable_to_narrow_integer_value, .locale = "en_US"sv},
+                {.code = "L002"sv, .message = "unable to narrow integer value"sv}
             },
 
             {
-                {.code = lexer::unable_to_convert_floating_point_value, .locale = "en_US"},
-                {.code = "L003", .message = "unable to convert floating point value {} because {}"}
+                {.code = lexer::unable_to_convert_floating_point_value, .locale = "en_US"sv},
+                {.code = "L003"sv, .message = "unable to convert floating point value {} because {}"sv}
             },
 
             {
-                {.code = lexer::unable_to_narrow_floating_point_value, .locale = "en_US"},
-                {.code = "L004", .message = "unable to narrow floating point value"}
+                {.code = lexer::unable_to_narrow_floating_point_value, .locale = "en_US"sv},
+                {.code = "L004"sv, .message = "unable to narrow floating point value"sv}
             },
 
             {
-                {.code = lexer::invalid_identifier_start_character, .locale = "en_US"},
-                {.code = "L005", .message = "identifiers must start with _ or a letter; found: {}"}
+                {.code = lexer::invalid_identifier_start_character, .locale = "en_US"sv},
+                {.code = "L005"sv, .message = "identifiers must start with _ or a letter; found: {}"sv}
             },
 
             {
-                {.code = lexer::expected_identifier, .locale = "en_US"},
-                {.code = "L006", .message = "expected identifier"}
+                {.code = lexer::expected_identifier, .locale = "en_US"sv},
+                {.code = "L006"sv, .message = "expected identifier"sv}
             },
 
             {
-                {.code = lexer::unexpected_end_of_input, .locale = "en_US"},
-                {.code = "L007", .message = "unexpected end of input"}
+                {.code = lexer::unexpected_end_of_input, .locale = "en_US"sv},
+                {.code = "L007"sv, .message = "unexpected end of input"sv}
             },
 
             {
-                {.code = lexer::unexpected_decimal_point, .locale = "en_US"},
-                {.code = "L008", .message = "unexpected decimal point"}
+                {.code = lexer::unexpected_decimal_point, .locale = "en_US"sv},
+                {.code = "L008"sv, .message = "unexpected decimal point"sv}
             },
 
             {
-                {.code = lexer::expected_closing_single_quote, .locale = "en_US"},
-                {.code = "L009", .message = "expected closing ' but found: {}"}
+                {.code = lexer::expected_closing_single_quote, .locale = "en_US"sv},
+                {.code = "L009"sv, .message = "expected closing ' but found: {}"sv}
             },
 
             {
-                {.code = lexer::expected_directive_prefix, .locale = "en_US"},
-                {.code = "L010", .message = "expected directive prefix: #"}
+                {.code = lexer::expected_directive_prefix, .locale = "en_US"sv},
+                {.code = "L010"sv, .message = "expected directive prefix: #"sv}
             },
 
             {
-                {.code = lexer::expected_annotation_prefix, .locale = "en_US"},
-                {.code = "L011", .message = "expected annotation prefix: @"}
+                {.code = lexer::expected_annotation_prefix, .locale = "en_US"sv},
+                {.code = "L011"sv, .message = "expected annotation prefix: @"sv}
             },
 
             {
-                {.code = lexer::exponent_notation_not_valid_for_integers, .locale = "en_US"},
-                {.code = "L012", .message = "exponent notation is not valid for integer literals"}
+                {.code = lexer::exponent_notation_not_valid_for_integers, .locale = "en_US"sv},
+                {.code = "L012"sv, .message = "exponent notation is not valid for integer literals"sv}
             },
 
             {
-                {.code = lexer::unexpected_letter_after_decimal_number_literal, .locale = "en_US"},
-                {.code = "L013", .message = "unexpected letter immediately after decimal number"}
+                {.code = lexer::unexpected_letter_after_decimal_number_literal, .locale = "en_US"sv},
+                {.code = "L013"sv, .message = "unexpected letter immediately after decimal number"sv}
             },
 
             {
-                {.code = lexer::expected_hex_literal_prefix, .locale = "en_US"},
-                {.code = "L014", .message = "expected hex prefix: $"}
+                {.code = lexer::expected_hex_literal_prefix, .locale = "en_US"sv},
+                {.code = "L014"sv, .message = "expected hex prefix: $"sv}
             },
 
             {
-                {.code = lexer::unexpected_letter_after_hexadecimal_number_literal, .locale = "en_US"},
-                {.code = "L015", .message = "unexpected letter immediately after hexadecimal number"}
+                {.code = lexer::unexpected_letter_after_hexadecimal_number_literal, .locale = "en_US"sv},
+                {.code = "L015"sv, .message = "unexpected letter immediately after hexadecimal number"sv}
             },
 
             {
-                {.code = lexer::expected_octal_literal_prefix, .locale = "en_US"},
-                {.code = "L016", .message = "expected octal prefix: @"}
+                {.code = lexer::expected_octal_literal_prefix, .locale = "en_US"sv},
+                {.code = "L016"sv, .message = "expected octal prefix: @"sv}
             },
 
             {
-                {.code = lexer::unexpected_letter_after_octal_number_literal, .locale = "en_US"},
-                {.code = "L017", .message = "unexpected letter immediately after octal number"}
+                {.code = lexer::unexpected_letter_after_octal_number_literal, .locale = "en_US"sv},
+                {.code = "L017"sv, .message = "unexpected letter immediately after octal number"sv}
             },
 
             {
-                {.code = lexer::expected_binary_literal_prefix, .locale = "en_US"},
-                {.code = "L018", .message = "expected binary prefix: %"}
+                {.code = lexer::expected_binary_literal_prefix, .locale = "en_US"sv},
+                {.code = "L018"sv, .message = "expected binary prefix: %"sv}
             },
 
             {
-                {.code = lexer::unexpected_letter_after_binary_number_literal, .locale = "en_US"},
-                {.code = "L019", .message = "unexpected letter or non-binary digit immediately after binary number"}
+                {.code = lexer::unexpected_letter_after_binary_number_literal, .locale = "en_US"sv},
+                {.code = "L019"sv, .message = "unexpected letter or non-binary digit immediately after binary number"sv}
             },
 
             {
-                {.code = lexer::expected_closing_block_literal, .locale = "en_US"},
-                {.code = "L020", .message = "expected }} but found: {}"}
+                {.code = lexer::expected_closing_block_literal, .locale = "en_US"sv},
+                {.code = "L020"sv, .message = "expected }} but found: {}"sv}
             },
 
             {
-                {.code = lexer::unescaped_quote, .locale = "en_US"},
-                {.code = "L021", .message = "an unescaped quote was detected"}
+                {.code = lexer::unescaped_quote, .locale = "en_US"sv},
+                {.code = "L021"sv, .message = "an unescaped quote was detected"sv}
             },
 
             // ----------------------
@@ -182,43 +182,43 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = parser::invalid_token, .locale = "en_US"},
-                {.code = "P001", .message = "a token has not been properly configured for parsing"}
+                {.code = parser::invalid_token, .locale = "en_US"sv},
+                {.code = "P001"sv, .message = "a token has not been properly configured for parsing"sv}
             },
 
             {
-                {.code = parser::undefined_production_rule, .locale = "en_US"},
-                {.code = "P002", .message = "undefined production rule"}
+                {.code = parser::undefined_production_rule, .locale = "en_US"sv},
+                {.code = "P002"sv, .message = "undefined production rule"sv}
             },
 
             {
-                {.code = parser::missing_operator_production_rule, .locale = "en_US"},
-                {.code = "P003", .message = "missing operator production rule"}
+                {.code = parser::missing_operator_production_rule, .locale = "en_US"sv},
+                {.code = "P003"sv, .message = "missing operator production rule"sv}
             },
 
             {
-                {.code = parser::unexpected_token, .locale = "en_US"},
-                {.code = "P004", .message = "expected token {} but encountered {}"}
+                {.code = parser::unexpected_token, .locale = "en_US"sv},
+                {.code = "P004"sv, .message = "expected token {} but encountered {}"sv}
             },
 
             {
-                {.code = parser::member_select_operator_requires_identifier_lvalue, .locale = "en_US"},
-                {.code = "P005", .message = "member select requires identifier lvalue"}
+                {.code = parser::member_select_operator_requires_identifier_lvalue, .locale = "en_US"sv},
+                {.code = "P005"sv, .message = "member select requires identifier lvalue"sv}
             },
 
             {
-                {.code = parser::member_select_operator_requires_identifier_rvalue, .locale = "en_US"},
-                {.code = "P006", .message = "member select requires identifier rvalue"}
+                {.code = parser::member_select_operator_requires_identifier_rvalue, .locale = "en_US"sv},
+                {.code = "P006"sv, .message = "member select requires identifier rvalue"sv}
             },
 
             {
-                {.code = parser::expected_expression, .locale = "en_US"},
-                {.code = "P007", .message = "expected expression"}
+                {.code = parser::expected_expression, .locale = "en_US"sv},
+                {.code = "P007"sv, .message = "expected expression"sv}
             },
 
             {
-                {.code = parser::invalid_assignment_expression, .locale = "en_US"},
-                {.code = "P008", .message = "invalid assignment expression"}
+                {.code = parser::invalid_assignment_expression, .locale = "en_US"sv},
+                {.code = "P008"sv, .message = "invalid assignment expression"sv}
             },
 
             // ----------------------
@@ -226,13 +226,13 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = graphviz::attribute_type_not_found, .locale = "en_US"},
-                {.code = "G001", .message = "attribute type not found"}
+                {.code = graphviz::attribute_type_not_found, .locale = "en_US"sv},
+                {.code = "G001"sv, .message = "attribute type not found"sv}
             },
 
             {
-                {.code = graphviz::invalid_attribute_for_component, .locale = "en_US"},
-                {.code = "G002", .message = "invalid attriubte '{}' for component '{}'"}
+                {.code = graphviz::invalid_attribute_for_component, .locale = "en_US"sv},
+                {.code = "G002"sv, .message = "invalid attriubte '{}' for component '{}'"sv}
             },
 
             // ----------------------
@@ -240,8 +240,8 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = source_buffer::unable_to_open_file, .locale = "en_US"},
-                {.code = "S001", .message = "unable to open source file: {}"}
+                {.code = source_buffer::unable_to_open_file, .locale = "en_US"sv},
+                {.code = "S001"sv, .message = "unable to open source file: {}"sv}
             },
 
             // ----------------------
@@ -249,33 +249,33 @@ namespace basecode::errors {
             // ----------------------
 
             {
-                {.code = utf8_module::unable_to_open_file, .locale = "en_US"},
-                {.code = "S001", .message = "unable to open source file: {}"}
+                {.code = utf8_module::unable_to_open_file, .locale = "en_US"sv},
+                {.code = "S001"sv, .message = "unable to open source file: {}"sv}
             },
 
             {
-                {.code = utf8_module::at_end_of_buffer, .locale = "en_US"},
-                {.code = "S002", .message = "at end of buffer"}
+                {.code = utf8_module::at_end_of_buffer, .locale = "en_US"sv},
+                {.code = "S002"sv, .message = "at end of buffer"sv}
             },
 
             {
-                {.code = utf8_module::at_beginning_of_buffer, .locale = "en_US"},
-                {.code = "S003", .message = "at beginning of buffer"}
+                {.code = utf8_module::at_beginning_of_buffer, .locale = "en_US"sv},
+                {.code = "S003"sv, .message = "at beginning of buffer"sv}
             },
 
             {
-                {.code = utf8_module::illegal_encoding, .locale = "en_US"},
-                {.code = "S004", .message = "illegal utf-8 encoding"}
+                {.code = utf8_module::illegal_encoding, .locale = "en_US"sv},
+                {.code = "S004"sv, .message = "illegal utf-8 encoding"sv}
             },
 
             {
-                {.code = utf8_module::illegal_nul_character, .locale = "en_US"},
-                {.code = "S005", .message = "illegal nul character"}
+                {.code = utf8_module::illegal_nul_character, .locale = "en_US"sv},
+                {.code = "S005"sv, .message = "illegal nul character"sv}
             },
 
             {
-                {.code = utf8_module::illegal_byte_order_mark, .locale = "en_US"},
-                {.code = "S006", .message = "illegal byte-order mark"}
+                {.code = utf8_module::illegal_byte_order_mark, .locale = "en_US"sv},
+                {.code = "S006"sv, .message = "illegal byte-order mark"sv}
             }
         };
 
@@ -290,10 +290,11 @@ namespace basecode::errors {
             g_error_system->pool_allocator);
 
         setlocale(LC_ALL, "");
-        string_t locale = setlocale(LC_CTYPE, nullptr);
-        auto parts = strings::string_to_list(locale, '.');
+        const auto lc = setlocale(LC_CTYPE, nullptr);
+        string_t locale(lc, strlen(lc));
+        const auto& parts = strings::string_to_list(locale, '.');
         if (parts.empty()) {
-            g_error_system->locale = "en_US";
+            g_error_system->locale = "en_US"sv;
         } else {
             g_error_system->locale = parts[0];
         }
@@ -313,7 +314,7 @@ namespace basecode::errors {
 }
 
 template<>
-uint64_t basecode::adt::hash_key(basecode::errors::error_decl_key_t key) {
-    const auto composite_key = fmt::format("{}:{}", key.locale, key.code);
-    return hashing::murmur::hash64(composite_key.data(), composite_key.size());
+uint64_t basecode::adt::hash_key(const basecode::errors::error_decl_key_t& key) {
+    const auto composite_key = format::format("{}:{}"sv, key.locale, key.code);
+    return hashing::murmur::hash64(composite_key.begin(), composite_key.size());
 }

@@ -121,7 +121,7 @@ namespace basecode::errors {
     ///////////////////////////////////////////////////////////////////////////
 
     template <typename... Args>
-        void add_error(
+    void add_error(
             result_t& r,
             error_code_t code,
             const source_location_t& loc,
@@ -304,6 +304,6 @@ namespace basecode::errors {
 
 namespace basecode::adt {
 
-    template <> uint64_t hash_key(basecode::errors::error_decl_key_t key);
+    template <> uint64_t hash_key(const basecode::errors::error_decl_key_t& key);
 
 }

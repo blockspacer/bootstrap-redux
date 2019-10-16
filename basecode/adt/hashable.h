@@ -25,12 +25,12 @@
 
 namespace basecode::adt {
 
-    template <typename K> uint64_t hash_key(K key) {
+    template <typename K> uint64_t hash_key(const K& key) {
         return hashing::murmur::hash64(&key, sizeof(key));
     }
 
-    template <> uint64_t hash_key(string_t key);
+    template <> uint64_t hash_key(const string_t& key);
 
-    template <> uint64_t hash_key(std::string_view key);
+    template <> uint64_t hash_key(const std::string_view& key);
 
 }

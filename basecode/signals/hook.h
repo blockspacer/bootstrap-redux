@@ -34,7 +34,7 @@ namespace basecode::signals {
     };
 
     struct action_t final {
-        explicit action_t(memory::allocator_t* allocator) : handlers(allocator) {
+        explicit action_t(memory::allocator_t* allocator = context::current()->allocator) : handlers(allocator) {
         }
         struct sigaction sigact{};
         adt::array_t<handler_t*> handlers;

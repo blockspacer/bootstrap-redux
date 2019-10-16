@@ -19,6 +19,7 @@
 #pragma once
 
 #include <basecode/adt/string.h>
+#include <basecode/context/context.h>
 #include "allocator.h"
 
 namespace basecode::memory {

@@ -23,7 +23,7 @@
 namespace basecode::strings {
 
     void word_wrap(
-            adt::string_t& text,
+            string_t& text,
             size_t width,
             size_t right_pad,
             const char& fill) {
@@ -59,8 +59,54 @@ namespace basecode::strings {
         }
     }
 
+    bool for_each_line(
+            const string_t& buffer,
+            const line_callback_t& callback) {
+        int32_t i = 0;
+        int32_t start_pos = 0;
+
+        while (i < buffer.size()) {
+            if (buffer[i] == '\n') {
+                if (!callback(buffer.slice(start_pos, i - start_pos)))
+                    return false;
+                start_pos = i + 1;
+            }
+            ++i;
+        }
+
+        if (i > start_pos)
+            if (!callback(buffer.slice(start_pos, i - start_pos)))
+                return false;
+
+        return true;
+    }
+
+    bool string_to_hash_table(
+            const string_t& value,
+            string_map_t& result_table,
+            const char& sep) {
+        return for_each_line(
+            value,
+            [&](std::string_view slice) {
+                const auto parts = string_to_list(slice, sep);
+                if (parts.size() == 2)
+                    result_table.insert(parts[0], parts[1]);
+                return true;
+            });
+    }
+
     unitized_byte_size_t size_to_units(size_t size) {
-        static const char* units[] = {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+        static std::string_view units[] = {
+            "bytes"sv,
+            "KB"sv,
+            "MB"sv,
+            "GB"sv,
+            "TB"sv,
+            "PB"sv,
+            "EB"sv,
+            "ZB"sv,
+            "YB"sv
+        };
 
         auto i = 0;
         while (size > 1024) {
@@ -69,19 +115,21 @@ namespace basecode::strings {
         }
 
         return unitized_byte_size_t{
-            i > 1 ? format::format("{}.{}", i, size) : format::format("{}", size),
+            i > 1 ?
+            format::format("{}.{}", i, size) :
+            format::format("{}", size),
             units[i]
         };
     }
 
-    adt::string_t remove_underscores(const std::string_view& value) {
+    string_t remove_underscores(const std::string_view& value) {
         format::memory_buffer_t buffer{};
         for (const auto& c : value)
             if (c != '_') format::format_to(buffer, "{}", c);
         return format::to_string(buffer);
     }
 
-    adt::string_t list_to_string(const string_list_t& list, const char& sep) {
+    string_t list_to_string(const string_list_t& list, const char sep) {
         format::memory_buffer_t buffer{};
         for (size_t i = 0; i < list.size(); i++) {
             if (i > 0)
@@ -91,27 +139,33 @@ namespace basecode::strings {
         return format::to_string(buffer);
     }
 
-    string_list_t string_to_list(const adt::string_t& value, const char& sep) {
+    string_list_t string_to_list(const string_t& value, const char sep) {
         string_list_t list{};
 
         uint32_t curr_pos = 0;
         uint32_t start_pos = 0;
         for (const auto& c : value) {
             if (c == sep) {
-                list.add(value.slice(start_pos, curr_pos - start_pos));
-                start_pos = curr_pos;
+                const auto slice = value.slice(
+                    start_pos,
+                    curr_pos - start_pos);
+                list.add(slice);
+                start_pos = curr_pos + 1;
             }
             ++curr_pos;
         }
 
         if (curr_pos > start_pos) {
-            list.add(value.slice(start_pos, curr_pos - start_pos));
+            const auto slice = value.slice(
+                start_pos,
+                curr_pos - start_pos);
+            list.add(slice);
         }
 
         return list;
     }
 
-    adt::string_t pad_to(const adt::string_t& str, const size_t num, const char padding) {
+    string_t pad_to(const string_t& str, const size_t num, const char padding) {
         if (num > str.size()) {
             auto padded = str;
             padded.insert(0, num - padded.size(), padding);

@@ -25,14 +25,16 @@
 namespace basecode::logging {
 
     struct fake_log_entry_t final {
+        fake_log_entry_t() = default;
+
         fake_log_entry_t(
             log_level_t l,
-            adt::string_t m): level(l),
-                              message(std::move(m)) {
+            adt::string_t m): message(std::move(m)),
+                              level(l) {
         }
 
-        log_level_t level;
-        adt::string_t message;
+        string_t message{};
+        log_level_t level{};
     };
 
     using fake_log_entry_list_t = adt::array_t<fake_log_entry_t>;

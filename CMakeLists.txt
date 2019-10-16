@@ -42,6 +42,13 @@ else ()
     message(FATAL_ERROR "${PROJECT_NAME} unknown compiler: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+    set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+endif()
+
 # dummy target used for file copies
 add_custom_target(dummy-target ALL DEPENDS custom-output)
 add_custom_command(OUTPUT custom-output COMMAND ${CMAKE_COMMAND} -E echo DEPENDS always-rebuild)
@@ -138,11 +145,7 @@ add_executable(tinycc ext/tinycc-mob/tcc.c)
 target_link_libraries(tinycc tcc)
 
 # entt
-include_directories(ext/entt-master/single_include)
-
-# mstch
-add_subdirectory(ext/mstch-1.0.2)
-include_directories(ext/mstch-1.0.2/include)
+include_directories(ext/entt-3.1.1/single_include)
 
 # our project-level includes
 include_directories(${PROJECT_SOURCE_DIR})

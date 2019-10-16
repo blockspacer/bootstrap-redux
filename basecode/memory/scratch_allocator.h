@@ -19,15 +19,16 @@
 #pragma once
 
 #include <string_view>
-#include "system_allocator.h"
+#include <basecode/context/context.h>
+#include "allocator.h"
 
 namespace basecode::memory {
 
     class scratch_allocator_t : public allocator_t {
     public:
-        scratch_allocator_t(
-            allocator_t* backing,
-            uint32_t size);
+        explicit scratch_allocator_t(
+            uint32_t size,
+            allocator_t* backing = context::current()->allocator);
 
         ~scratch_allocator_t() override;
 

@@ -102,6 +102,21 @@ namespace fmt {
     };
 
     template<>
+    struct formatter<entt::entity> {
+        template<typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) {
+            return ctx.begin();
+        }
+
+        template<typename FormatContext>
+        auto format(
+                const entt::entity& entity,
+                FormatContext& ctx) {
+            return format_to(ctx.out(), "entity_{}", (uint32_t) entity);
+        }
+    };
+
+    template<>
     struct formatter<source_location_t> {
         template<typename ParseContext>
         constexpr auto parse(ParseContext& ctx) {

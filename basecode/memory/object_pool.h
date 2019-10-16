@@ -32,7 +32,7 @@ namespace basecode::memory {
             inline static uint32_t identifier;
 
             template<typename...>
-            inline static const auto inner = identifier++;
+            inline static const uint32_t inner = identifier++;
 
         public:
             using family_type = uint32_t;
@@ -94,8 +94,9 @@ namespace basecode::memory {
                 auto mem = _backing->allocate(
                     sizeof(slab_allocator_t),
                     alignof(slab_allocator_t));
+                auto type_name = typeid(T).name();
                 slab = new (mem) slab_allocator_t(
-                    typeid(T).name(),
+                    adt::string_t(type_name, strlen(type_name)),
                     sizeof(T),
                     alignof(T),
                     _backing);

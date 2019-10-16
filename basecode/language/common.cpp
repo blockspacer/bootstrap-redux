@@ -114,4 +114,22 @@ namespace basecode::language {
         return {};
     }
 
+    std::string_view number_size_to_name(number_size_t size) {
+        switch (size) {
+            case number_size_t::byte:  return "byte"sv;
+            case number_size_t::word:  return "word"sv;
+            case number_size_t::dword: return "dword"sv;
+            case number_size_t::qword: return "qword"sv;
+        }
+    }
+
+    std::string_view number_type_to_name(number_type_t type) {
+        switch (type) {
+            case number_type_t::none:           return "none"sv;
+            case number_type_t::integer:        return "integer"sv;
+            case number_type_t::arbitrary:      return "arbitrary"sv;
+            case number_type_t::floating_point: return "floating_point"sv;
+        }
+    }
+
 }

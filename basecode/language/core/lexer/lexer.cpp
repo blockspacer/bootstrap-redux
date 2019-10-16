@@ -541,7 +541,9 @@ namespace basecode::language::core::lexer {
         auto& registry = _session.registry();
         auto token = registry.create();
         registry.assign<token_t>(token, token_type_t::block_comment, capture);
-        auto& comment_token = registry.assign<block_comment_token_t>(token, _session.allocator());
+        auto& comment_token = registry.assign<block_comment_token_t>(
+            token,
+            _session.allocator());
         comment_token.capture = root.capture;
         comment_token.children = std::move(root.children);
         registry.assign<source_location_t>(

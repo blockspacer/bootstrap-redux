@@ -26,8 +26,9 @@ namespace basecode::memory {
     class temp_allocator_t : public allocator_t {
     public:
         explicit temp_allocator_t(
-                allocator_t* backing = default_scratch_allocator()) : _backing(backing),
-                                                                      _chunk_size(4*1024) {
+                allocator_t* backing = context::current()->allocator,
+                uint32_t chunk_size = 4 * 1024) : _backing(backing),
+                                                  _chunk_size(chunk_size) {
             _p = _start = _buffer;
             _end = _start + Buffer_Size;
             *(void**)_start = nullptr;
@@ -80,9 +81,9 @@ namespace basecode::memory {
         uint8_t* _p{};
         uint8_t* _end{};
         uint8_t* _start{};
-        uint32_t _chunk_size{};
+        uint32_t _chunk_size;
+        allocator_t* _backing;
         uint8_t _buffer[Buffer_Size]{};
-        allocator_t* _backing = nullptr;
     };
 
 }

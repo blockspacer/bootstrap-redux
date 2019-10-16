@@ -22,7 +22,7 @@
 namespace basecode::strings {
 
     pool_t::pool_t(memory::allocator_t* allocator) : _allocator(allocator),
-                                                     _index(memory::default_allocator()) {
+                                                     _index(context::current()->allocator) {
     }
 
     std::string_view pool_t::intern(std::string_view value) {

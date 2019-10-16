@@ -43,6 +43,8 @@ namespace basecode {
             data
         };
 
+        result_message_t() = default;
+
         result_message_t(
                 std::string_view code,
                 std::string_view message,
@@ -80,7 +82,7 @@ namespace basecode {
         }
 
     private:
-        types _type;
+        types _type{};
         std::string_view _code{};
         std::string_view _message{};
         std::string_view _details{};

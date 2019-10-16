@@ -41,7 +41,7 @@ namespace basecode::memory {
         value_type* allocate(std::size_t n) {
             return static_cast<value_type*>(_backing->allocate(
                 n * sizeof(value_type),
-                std::max<uint32_t>(4, alignof(value_type))));
+                alignof(value_type)));
         }
 
         void deallocate(value_type* p, std::size_t) noexcept {

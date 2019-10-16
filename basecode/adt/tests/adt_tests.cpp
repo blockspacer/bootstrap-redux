@@ -17,13 +17,17 @@
 // ----------------------------------------------------------------------------
 
 #include <catch2/catch.hpp>
+#include <basecode/types.h>
 #include <basecode/adt/set.h>
-#include <basecode/adt/array.h>
 #include <basecode/adt/stack.h>
+#include <basecode/adt/trie_map.h>
+#include <basecode/adt/multi_map.h>
 #include <basecode/adt/binary_tree.h>
 #include <basecode/adt/red_black_tree.h>
 
 namespace basecode {
+
+    using namespace std::literals;
 
     struct range_t final {
         int32_t begin;
@@ -42,8 +46,6 @@ namespace basecode {
         }
     };
 
-    using namespace std::literals;
-    using namespace basecode;
     using namespace basecode::adt;
 
     TEST_CASE("set_t with small initializer list") {
@@ -235,6 +237,61 @@ namespace basecode {
         REQUIRE(found1);
         REQUIRE(found1->key.begin == 187);
         REQUIRE(found1->key.end == 222);
+    }
+
+    TEST_CASE("multi_map_t basics") {
+        multi_map_t<string_t, int32_t> map;
+        const auto key1 = "key1"sv;
+        const auto key2 = "key2"sv;
+
+        map.insert(key1, 1);
+        map.insert(key1, 2);
+        map.insert(key1, 3);
+
+        REQUIRE(map.count(key1) == 3);
+        REQUIRE(map.size() == 1);
+
+        map.clear();
+        REQUIRE(map.size() == 0);
+
+        map.insert(key1, 1);
+        map.insert(key1, 2);
+        map.insert(key2, 3);
+        map.insert(key2, 4);
+
+        REQUIRE(map.size() == 2);
+    }
+
+    TEST_CASE("multi_map_t items") {
+        multi_map_t<string_t, int32_t> map;
+
+        const auto key1 = "key1"sv;
+
+        map.insert(key1, 1);
+        map.insert(key1, 2);
+        map.insert(key1, 3);
+
+        auto items = map.find(key1);
+        REQUIRE(items.size() == 3);
+        REQUIRE(*items[0] == 3);
+        REQUIRE(*items[1] == 2);
+        REQUIRE(*items[2] == 1);
+    }
+
+    TEST_CASE("trie_map_t") {
+        trie_map_t<int> map{};
+
+        map.insert("the", 1);
+        map.insert("a", 2);
+        map.insert("there", 3);
+        map.insert("answer", 4);
+        map.insert("any", 5);
+        map.insert("by", 6);
+        map.insert("bye", 7);
+        map.insert("their", 8);
+
+        const auto& pairs = map.pairs();
+        REQUIRE(pairs.size() == 8);
     }
 
 }

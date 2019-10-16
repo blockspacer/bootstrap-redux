@@ -30,9 +30,9 @@ namespace basecode::terminal {
     ///////////////////////////////////////////////////////////////////////////
 
     adt::string_t stream_factory_t::colorize(
-        std::string_view text,
-        colors_t fg_color,
-        colors_t bg_color) const {
+            std::string_view text,
+            colors_t fg_color,
+            colors_t bg_color) const {
         if (!_enabled)
             return text;
         return format::format(

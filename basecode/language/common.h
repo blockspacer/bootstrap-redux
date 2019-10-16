@@ -40,14 +40,7 @@ namespace basecode::language {
         floating_point
     };
 
-    static inline std::string_view number_type_to_name(number_type_t type) {
-        switch (type) {
-            case number_type_t::none:           return "none"sv;
-            case number_type_t::integer:        return "integer"sv;
-            case number_type_t::arbitrary:      return "arbitrary"sv;
-            case number_type_t::floating_point: return "floating_point"sv;
-        }
-    }
+    std::string_view number_type_to_name(number_type_t type);
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -58,14 +51,7 @@ namespace basecode::language {
         qword
     };
 
-    static inline std::string_view number_size_to_name(number_size_t size) {
-        switch (size) {
-            case number_size_t::byte:  return "byte"sv;
-            case number_size_t::word:  return "word"sv;
-            case number_size_t::dword: return "dword"sv;
-            case number_size_t::qword: return "qword"sv;
-        }
-    }
+    std::string_view number_size_to_name(number_size_t size);
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -102,8 +88,15 @@ namespace basecode::language {
 
     ///////////////////////////////////////////////////////////////////////////
 
+    // XXX: there's a limitation in adt::array_t now where non-default ctors
+    //      can't be used when the array capacity is increased.  need to figure
+    //      out how to properly forward custom ctor params from emplace through
+    //      the chain.  temporarily, i'm using the context's allocator which i can
+    //      ensure matches the instance we need.
     struct block_comment_token_t final {
-        explicit block_comment_token_t(memory::allocator_t* allocator) : children(allocator) {}
+        explicit block_comment_token_t(
+            memory::allocator_t* allocator = context::current()->allocator) : children(allocator) {
+        }
         std::string_view capture{};
         adt::array_t<block_comment_token_t> children;
     };

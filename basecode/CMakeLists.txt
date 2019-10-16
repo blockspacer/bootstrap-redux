@@ -15,6 +15,8 @@ configure_file (
 add_library(
         ${PROJECT_NAME}
 
+        ../ext/mustach-master/mustach.c ../ext/mustach-master/mustach.h
+
         context/context.cpp context/context.h
         
         defer.h
@@ -110,7 +112,6 @@ target_link_libraries(
         boost-system
         boost-filesystem
         tcc
-        mstch
 )
 
 add_subdirectory(adt/tests)

@@ -38,8 +38,8 @@ namespace basecode::memory {
 
     template <typename T, typename... Args>
     T* construct_with_allocator(
-        allocator_t* allocator,
-        Args&&... args) {
+            allocator_t* allocator,
+            Args&&... args) {
         auto mem = allocator->allocate(sizeof(T), alignof(T));
         return new (mem) T(std::forward<Args>(args)...);
     }

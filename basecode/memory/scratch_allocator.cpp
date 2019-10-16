@@ -21,8 +21,8 @@
 namespace basecode::memory {
 
     scratch_allocator_t::scratch_allocator_t(
-            allocator_t* backing,
-            uint32_t size) : _backing(backing) {
+            uint32_t size,
+            allocator_t* backing) : _backing(backing) {
         _begin = (uint8_t*)_backing->allocate(size);
         _end = _begin + size;
         _allocate = _begin;
@@ -45,7 +45,7 @@ namespace basecode::memory {
     void* scratch_allocator_t::allocate(
             uint32_t size,
             uint32_t align) {
-        assert(align % 4 == 0);
+        if (align < 4) align = 4;
         size = ((size + 3)/4)*4;
 
         auto p = _allocate;

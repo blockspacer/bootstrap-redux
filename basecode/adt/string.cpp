@@ -22,43 +22,26 @@ namespace basecode::adt {
 
     string_t::string_t(
             const char* value,
+            std::optional<int32_t> size,
             memory::allocator_t* allocator) : _allocator(allocator) {
         assert(_allocator);
         assert(value);
-        const auto n = strlen(value);
+        const auto n = size ? *size : strlen(value);
         grow(n);
         std::memcpy(_data, value, n * sizeof(char));
         _size = n;
-    }
-
-    string_t::string_t(
-            const std::string_view& value,
-            memory::allocator_t* allocator) : _allocator(allocator) {
-        assert(_allocator);
-        assert(!value.empty());
-        const auto n = value.size();
-        grow(n);
-        std::memcpy(_data, value.data(), n * sizeof(char));
-        _size = n;
-    }
-
-    string_t::string_t(memory::allocator_t* allocator) : _allocator(allocator) {
-        assert(_allocator);
     }
 
     string_t::string_t(string_t&& other) noexcept : _data(other._data),
                                                     _size(other._size),
                                                     _capacity(other._capacity),
                                                     _allocator(other._allocator) {
-        other._moved = true;
+        other._data = nullptr;
+        other._size = other._capacity = 0;
     }
 
-    string_t::string_t(const char* other) : _allocator(context::current()->allocator) {
+    string_t::string_t(memory::allocator_t* allocator) : _allocator(allocator) {
         assert(_allocator);
-        const auto n = strlen(other);
-        grow(n);
-        std::memcpy(_data, other, n * sizeof(char));
-        _size = n;
     }
 
     string_t::string_t(const string_t& other) : _allocator(other._allocator) {
@@ -69,10 +52,11 @@ namespace basecode::adt {
         _size = n;
     }
 
-    string_t::string_t(const std::string& other) : _allocator(context::current()->allocator) {
-        const auto n = other.size();
+    string_t::string_t(const char* other) : _allocator(context::current()->allocator) {
+        assert(_allocator);
+        const auto n = strlen(other);
         grow(n);
-        std::memcpy(_data, other.data(), n * sizeof(char));
+        std::memcpy(_data, other, n * sizeof(char));
         _size = n;
     }
 
@@ -84,9 +68,12 @@ namespace basecode::adt {
     }
 
     string_t::~string_t() {
-        if (_moved) return;
-        if (_data)
+        if (_data) {
             _allocator->deallocate(_data);
+            _data = nullptr;
+            _size = 0;
+            _capacity = 0;
+        }
     }
 
     void string_t::pop() {
@@ -164,6 +151,14 @@ namespace basecode::adt {
         return _data + _size;
     }
 
+    void string_t::append(const char* value) {
+        const auto n = strlen(value);
+        if (_size + n > _capacity) grow();
+        size_t i = 0;
+        while (i < n)
+            _data[_size++] = value[i++];
+    }
+
     void string_t::append(char value) {
         if (_size + 1 > _capacity) grow();
         _data[_size++] = value;
@@ -202,14 +197,6 @@ namespace basecode::adt {
         return _data + offset;
     }
 
-    void string_t::append(const char* value) {
-        const auto n = strlen(value);
-        if (_size + n > _capacity) grow();
-        size_t i = 0;
-        while (i < n)
-            _data[_size++] = value[i++];
-    }
-
     std::string_view string_t::slice() const {
         return std::string_view(_data, _size);
     }
@@ -218,8 +205,16 @@ namespace basecode::adt {
         return _data[index];
     }
 
+    string_t::operator std::string() const {
+        return std::string(_data, _size);
+    }
+
     void string_t::resize(uint32_t new_size) {
         if (new_size > _capacity) grow(new_size);
+        _size = new_size;
+    }
+
+    void string_t::truncate(uint32_t new_size) {
         _size = new_size;
     }
 
@@ -227,8 +222,16 @@ namespace basecode::adt {
         set_capacity(std::max(_capacity * 2 + 8, min_capacity));
     }
 
+    string_t::operator std::string_view() const {
+        return std::string_view(_data, _size);
+    }
+
     std::string string_t::as_std_string() const {
         return std::string(_data, _size);
+    }
+
+    void string_t::append(const string_t& value) {
+        append(value._data, value._size);
     }
 
     void string_t::reserve(uint32_t new_capacity) {
@@ -237,7 +240,6 @@ namespace basecode::adt {
     }
 
     string_t& string_t::operator=(const char* other) {
-        assert(!_moved);
         const auto n = strlen(other);
         if (!_allocator)
             _allocator = context::current()->allocator;
@@ -271,11 +273,12 @@ namespace basecode::adt {
     }
 
     bool string_t::operator==(const char* other) const {
+        const auto other_size = strlen(other);
+        if (_size != other_size) return false;
         return std::memcmp(_data, other, _size) == 0;
     }
 
     string_t& string_t::operator=(const string_t& other) {
-        assert(!_moved);
         if (this == &other) return *this;
         if (!_allocator)
             _allocator = other._allocator;
@@ -288,6 +291,18 @@ namespace basecode::adt {
 
     const char& string_t::operator[](size_t index) const {
         return _data[index];
+    }
+
+    bool string_t::operator<(const string_t& other) const {
+        return std::lexicographical_compare(
+            begin(), end(),
+            other.begin(), other.end());
+    }
+
+    bool string_t::operator>(const string_t& other) const {
+        return !std::lexicographical_compare(
+            begin(), end(),
+            other.begin(), other.end());
     }
 
     char* string_t::insert(const char* it, const char& v) {
@@ -316,21 +331,27 @@ namespace basecode::adt {
     }
 
     string_t& string_t::operator=(string_t&& other) noexcept {
-        assert(_allocator == other._allocator);
-        _allocator->deallocate(_data);
-        _data = other._data;
-        _size = other._size;
-        _capacity = other._capacity;
-        _allocator = other._allocator;
-        other._moved = true;
-        other._data = nullptr;
-        other._allocator = nullptr;
-        other._size = other._capacity = 0;
+        if (this != &other) {
+            assert(_allocator == other._allocator);
+            _allocator->deallocate(_data);
+            _data = other._data;
+            _size = other._size;
+            _capacity = other._capacity;
+            other._data = nullptr;
+            other._size = other._capacity = 0;
+        }
         return *this;
     }
 
+    int32_t string_t::append(const char* value, int32_t size) {
+        if (_size + size > _capacity)
+            grow(_size + size);
+        std::memcpy(_data + _size, value, size * sizeof(char));
+        _size += size;
+        return size;
+    }
+
     string_t& string_t::operator=(const std::string_view& other) {
-        assert(!_moved);
         const auto n = other.size();
         if (!_allocator)
             _allocator = context::current()->allocator;

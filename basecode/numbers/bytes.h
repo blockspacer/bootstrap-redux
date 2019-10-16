@@ -27,9 +27,25 @@ namespace basecode::numbers {
         return static_cast<uint64_t>(1) << n;
     }
 
+    inline uint8_t to_hex(uint8_t x) {
+        return x + (x > 9 ? ('A' - 10) : '0');
+    }
+
     template <typename T>
     inline T twos_complement(T value) {
         return ~value + 1;
+    }
+
+    inline uint8_t from_hex(uint8_t ch) {
+        if (ch <= '9' && ch >= '0')
+            ch -= '0';
+        else if (ch <= 'f' && ch >= 'a')
+            ch -= 'a' - 10;
+        else if (ch <= 'F' && ch >= 'A')
+            ch -= 'A' - 10;
+        else
+            ch = 0;
+        return ch;
     }
 
     template <typename T>

@@ -23,28 +23,39 @@
 
 namespace basecode::strings {
 
+    using line_callback_t = std::function<bool (std::string_view)>;
+
     struct unitized_byte_size_t {
-        adt::string_t value{};
-        adt::string_t units{};
+        string_t value{};
+        string_t units{};
     };
 
     void word_wrap(
-        adt::string_t& text,
+        string_t& text,
         size_t width,
         size_t right_pad = 0,
         const char& fill = ' ');
 
-    adt::string_t pad_to(
-        const adt::string_t& str,
+    string_t pad_to(
+        const string_t& str,
         size_t num,
         char padding = ' ');
 
+    bool for_each_line(
+        const string_t& buffer,
+        const line_callback_t& callback);
+
+    bool string_to_hash_table(
+        const string_t& value,
+        string_map_t& result_table,
+        const char& sep = ',');
+
     unitized_byte_size_t size_to_units(size_t size);
 
-    adt::string_t remove_underscores(const std::string_view& value);
+    string_t remove_underscores(const std::string_view& value);
 
-    adt::string_t list_to_string(const string_list_t& list, const char& sep = ',');
+    string_t list_to_string(const string_list_t& list, const char sep = ',');
 
-    string_list_t string_to_list(const adt::string_t& value, const char& sep = ',');
+    string_list_t string_to_list(const string_t& value, const char sep = ',');
 
 }

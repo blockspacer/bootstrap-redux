@@ -110,11 +110,12 @@ namespace basecode::language::core::ast {
         adt::array_t<adt::string_t> ports(session.allocator());
 
         auto& ast_node = registry.get<node_t>(entity);
-        ports.emplace(node_type_to_name(ast_node.type), session.allocator());
+        const auto node_type_name = node_type_to_name(ast_node.type);
+        ports.emplace(node_type_name.data(), node_type_name.length(), session.allocator());
 
         if (ast_node.token != entt::null) {
             auto token = registry.get<lexer::token_t>(ast_node.token);
-            ports.emplace(token.value, session.allocator());
+            ports.emplace(token.value.data(), token.value.length(), session.allocator());
         }
 
         for (auto comment : ast_node.comments) {
@@ -338,26 +339,46 @@ namespace basecode::language::core::ast {
                     r,
                     graphviz::attribute_type_t::fillcolor,
                     graphviz::enumeration_value_t("bisque"));
+                const auto type = format::format(
+                    "\\{{ type: {}",
+                    number_type_to_name(number_token.type));
                 ports.emplace(
-                    format::format("\\{{ type: {}", number_type_to_name(number_token.type)).c_str(),
+                    type.begin(),
+                    type.size(),
                     session.allocator());
 
+                const auto radix = format::format(
+                    "radix: {}",
+                    number_token.radix);
                 ports.emplace(
-                    format::format("radix: {}", number_token.radix).c_str(),
+                    radix.begin(),
+                    radix.size(),
                     session.allocator());
 
+                const auto size = format::format(
+                    "size: {}",
+                    number_size_to_name(number_token.size));
                 ports.emplace(
-                    format::format("size: {}", number_size_to_name(number_token.size)).c_str(),
+                    size.begin(),
+                    size.size(),
                     session.allocator());
 
                 if (number_token.type == number_type_t::floating_point) {
+                    const auto imaginary = format::format(
+                        "imaginary: {}",
+                        number_token.imaginary);
                     ports.emplace(
-                        format::format("imaginary: {}", number_token.imaginary).c_str(),
+                        imaginary.begin(),
+                        imaginary.size(),
                         session.allocator());
                 }
 
+                const auto signed_flag = format::format(
+                    "signed: {} \\}}",
+                    number_token.is_signed);
                 ports.emplace(
-                    format::format("signed: {} \\}}", number_token.is_signed).c_str(),
+                    signed_flag.begin(),
+                    signed_flag.size(),
                     session.allocator());
                 break;
             }

@@ -29,7 +29,7 @@ namespace basecode {
     using namespace basecode::memory;
 
     TEST_CASE("slab_allocator_t") {
-        slab_allocator_t block1("block1", 64);
+        slab_allocator_t block1("block1"sv, 64);
 
         void* blocks[128];
         for (size_t i = 0; i < 128; i++) {
@@ -50,8 +50,7 @@ namespace basecode {
             float x{}, y{};
         };
 
-        trace_allocator_t tracer(memory::default_scratch_allocator());
-        object_pool_t pool(&tracer);
+        object_pool_t pool{};
 
         auto r1 = pool.construct<rect_t>();
         REQUIRE(r1);

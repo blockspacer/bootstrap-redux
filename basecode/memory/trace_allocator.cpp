@@ -25,10 +25,10 @@ using namespace std::literals;
 namespace basecode::memory {
 
     trace_allocator_t::trace_allocator_t(
-            allocator_t* backing,
-            size_t debug_heap_size) : _debug_heap(create_mspace(debug_heap_size, 0)),
-                                      _backing(backing),
-                                      _debug_allocator(_debug_heap) {
+        allocator_t* backing,
+        size_t debug_heap_size) : _debug_heap(create_mspace(debug_heap_size, 0)),
+                                  _backing(backing),
+                                  _debug_allocator(_debug_heap) {
         format::allocator_t alloc(&_debug_allocator);
         _buffer = memory::construct_with_allocator<format::memory_buffer_t>(&_debug_allocator, alloc);
         _stream_factory.enabled(true);
@@ -48,8 +48,8 @@ namespace basecode::memory {
     }
 
     void* trace_allocator_t::allocate(
-        uint32_t size,
-        uint32_t align) {
+            uint32_t size,
+            uint32_t align) {
         boost::stacktrace::stacktrace trace(2, 2);
 
         {

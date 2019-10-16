@@ -60,8 +60,8 @@ namespace basecode::memory {
         g_globals.default_allocator = new (p) dl_allocator_t();
         p += sizeof(dl_allocator_t);
         g_globals.default_scratch_allocator = new (p) scratch_allocator_t(
-            g_globals.default_allocator,
-            scratch_buffer_size);
+            scratch_buffer_size,
+            g_globals.default_allocator);
     }
 
 }

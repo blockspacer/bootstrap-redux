@@ -33,7 +33,10 @@ int main(int argc, char** argv) {
     int rc = 0;
 
     memory::initialize();
-    defer(memory::shutdown());
+    defer({
+        memory::shutdown();
+        context::shutdown();
+    });
 
     {
         memory::allocator_t* default_allocator{};
@@ -54,7 +57,6 @@ int main(int argc, char** argv) {
 
         errors::shutdown();
         signals::shutdown();
-        context::shutdown();
     }
 
     return (rc < 0xff ? rc : 0xff);

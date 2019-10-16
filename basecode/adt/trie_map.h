@@ -31,9 +31,19 @@ namespace basecode::adt {
     public:
         struct tree_node_t;
 
+        struct pair_t final {
+            V value;
+            adt::string_t key{};
+
+            bool operator<(const pair_t& other) const {
+                return key < other.key;
+            }
+        };
+
         struct node_t final {
             node_t(V data, tree_node_t* tree) : data(data), tree(tree) {}
             V data;
+            bool leaf{};
             tree_node_t* tree;
         };
 
@@ -55,6 +65,34 @@ namespace basecode::adt {
                                                                                   _allocator(allocator) {
             assert(_allocator);
             insert(elements);
+        }
+
+        void walk(
+                const node_t* node,
+                string_t& str,
+                adt::array_t<pair_t>& pairs) const {
+            if (node->leaf) {
+                pairs.add(pair_t{
+                    .key = str,
+                    .value = node->data
+                });
+            }
+            const auto& children = node->tree->children.pairs();
+            for (auto child : children) {
+                str.append((char)child->key);
+                walk(child->value, str, pairs);
+                str.erase(str.end() - 1);
+            }
+        }
+
+        adt::array_t<pair_t> pairs() const {
+            adt::array_t<pair_t> pairs{};
+            adt::string_t str{};
+
+            walk(&_root, str, pairs);
+            std::sort(pairs.begin(), pairs.end());
+
+            return pairs;
         }
 
         void insert(std::string_view key, V value) {
@@ -79,10 +117,11 @@ namespace basecode::adt {
                 ++i;
             }
 
+            current_node->leaf = true;
             current_node->data = value;
         }
 
-        decltype(auto) search(std::string_view key) {
+        decltype(auto) search(std::string_view key) const {
             node_t* current_node = nullptr;
 
             for (const char c : key) {
@@ -100,7 +139,7 @@ namespace basecode::adt {
             }
         }
 
-        node_t* find(node_t* node, const utf8::rune_t& rune) {
+        node_t* find(node_t* node, const utf8::rune_t& rune) const {
             auto current_node = node ? node : &_root;
             auto& children = current_node->tree->children;
             auto child_node = children.find(rune);

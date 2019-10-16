@@ -61,12 +61,13 @@ namespace basecode::adt {
                                             _size(other._size),
                                             _capacity(other._capacity),
                                             _allocator(other._allocator) {
-            other._moved = true;
+            other._data = nullptr;
+            other._size = other._capacity = 0;
         }
 
         ~array_t() {
-            if (_moved) return;
-            if (_data)  deallocate_data();
+            if (_data)
+                deallocate_data();
         }
 
         T* end() {
@@ -98,23 +99,22 @@ namespace basecode::adt {
         }
 
         void clear() {
-            for (size_t i = 0; i < _size; i++)
-                (&_data[i])->~T();
-            std::memset(_data, 0, _capacity * sizeof(T));
+            if constexpr (!std::is_trivially_constructible<T>::value) {
+                // XXX: this seems expensive but i don't see
+                //      another way to cleanly handle it
+                for (size_t i = 0; i < _size; i++) {
+                    (&_data[i])->~T();
+                    new (_data + i) T();
+                }
+            } else {
+                std::memset(_data, 0, _capacity * sizeof(T));
+            }
             resize(0);
         }
 
         void add(T&& value) {
             if (_size + 1 > _capacity) grow();
             _data[_size++] = value;
-        }
-
-        template <typename... Args>
-        T& emplace(Args&&... args) {
-            if (_size + 1 > _capacity) grow();
-            auto& value = *(new (_data + _size) T(std::forward<Args>(args)...));
-            _size++;
-            return value;
         }
 
         const T* end() const {
@@ -151,6 +151,14 @@ namespace basecode::adt {
         void add(const T& value) {
             if (_size + 1 > _capacity) grow();
             _data[_size++] = value;
+        }
+
+        template <typename... Args>
+        T& emplace(Args&&... args) {
+            if (_size + 1 > _capacity) grow();
+            auto& value = *(new (_data + _size) T(std::forward<Args>(args)...));
+            _size++;
+            return value;
         }
 
         T& operator[](size_t index) {
@@ -199,15 +207,17 @@ namespace basecode::adt {
         }
 
         array_t& operator=(const array_t& other) {
-            if (!_allocator)
-                _allocator = other._allocator;
-            auto n = other._size;
-            grow(n);
-            for (size_t i = 0; i < n; i++) {
-                if (i < _size) (&_data[i])->~T();
-                _data[i] = other._data[i];
+            if (this != &other) {
+                if (!_allocator)
+                    _allocator = other._allocator;
+                auto n = other._size;
+                grow(n);
+                for (size_t i = 0; i < n; i++) {
+                    if (i < _size) (&_data[i])->~T();
+                    _data[i] = other._data[i];
+                }
+                _size = n;
             }
-            _size = n;
             return *this;
         }
 
@@ -225,19 +235,15 @@ namespace basecode::adt {
         }
 
         array_t& operator=(array_t&& other) noexcept {
-            assert(_allocator == other._allocator);
-
-            // free any memory we're already using
-            deallocate_data();
-
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
-            _allocator = other._allocator;
-
-            // mark donor as being moved so it doesn't deallocate
-            other._moved = true;
-
+            if (this != &other) {
+                assert(_allocator == other._allocator);
+                deallocate_data();
+                _data = other._data;
+                _size = other._size;
+                _capacity = other._capacity;
+                other._data = nullptr;
+                other._size = other._capacity = 0;
+            }
             return *this;
         }
 
@@ -250,8 +256,10 @@ namespace basecode::adt {
 
     private:
         void deallocate_data() {
-            for (size_t i = 0; i < _size; i++)
-                (&_data[i])->~T();
+            if constexpr (!std::is_trivially_constructible<T>::value) {
+                for (size_t i = 0; i < _size; i++)
+                    (&_data[i])->~T();
+            }
             _allocator->deallocate(_data);
         }
 
@@ -266,9 +274,12 @@ namespace basecode::adt {
                 new_data = (T*)_allocator->allocate(
                     new_capacity * sizeof(T),
                     alignof(T));
-                std::memset(new_data, 0, new_capacity * sizeof(T));
                 if (_data)
                     std::memcpy(new_data, _data, _size * sizeof(T));
+                if constexpr (!std::is_trivially_constructible<T>::value) {
+                    for (size_t i = _size; i < new_capacity; i++)
+                        new (new_data + 1) T();
+                }
             }
             _allocator->deallocate(_data);
             _data = new_data;
@@ -293,7 +304,6 @@ namespace basecode::adt {
 
     private:
         T* _data{};
-        bool _moved{};
         uint32_t _size{};
         uint32_t _capacity{};
         memory::allocator_t* _allocator;

@@ -26,7 +26,7 @@ namespace basecode::memory {
     class trace_allocator_t : public allocator_t {
     public:
         explicit trace_allocator_t(
-            allocator_t* backing,
+            allocator_t* backing = context::current()->allocator,
             size_t debug_heap_size = 2 * 1024 * 1024);
 
         ~trace_allocator_t() override;

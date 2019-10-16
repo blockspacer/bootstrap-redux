@@ -61,8 +61,8 @@ namespace basecode::adt {
         }
 
         bool walk(
-            node_t* root,
-            const walk_callback_t& callback) {
+                node_t* root,
+                const walk_callback_t& callback) {
             if (root == nullptr) return false;
             walk(root->left, callback);
             if (!callback(root))
@@ -80,8 +80,11 @@ namespace basecode::adt {
             });
             to_free[i] = _root;
 
-            for (auto node : to_free)
+            for (auto node : to_free) {
+                if constexpr (!std::is_trivially_destructible<K>::value)
+                    node->~node_t();
                 _allocator->deallocate(node);
+            }
 
             _size = 0;
             _root = nullptr;

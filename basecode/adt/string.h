@@ -34,21 +34,16 @@ namespace basecode::adt {
 
         explicit string_t(
             const char* value,
+            std::optional<int32_t> size = {},
             memory::allocator_t* allocator = context::current()->allocator);
 
-        explicit string_t(
-            const std::string_view& value,
-            memory::allocator_t* allocator = context::current()->allocator);
-
-        string_t(const char* other);
+        explicit string_t(const char* other);
 
         string_t(const string_t& other);
 
-        string_t(const std::string& other);
+        string_t(string_t&& other) noexcept;
 
         string_t(const std::string_view& other);
-
-        string_t(string_t&& other) noexcept;
 
         ~string_t();
 
@@ -80,9 +75,9 @@ namespace basecode::adt {
 
         void append(char value);
 
-        const char* c_str() const;
-
         char* erase(const char* it);
+
+        operator std::string () const;
 
         char& operator[](size_t index);
 
@@ -90,19 +85,17 @@ namespace basecode::adt {
 
         void append(const char* value);
 
-        operator std::string () const {
-            return std::string(_data, _size);
-        }
-
         [[nodiscard]] bool empty() const;
+
+        void truncate(uint32_t new_size);
+
+        void append(const string_t& value);
+
+        operator std::string_view () const;
 
         [[nodiscard]] uint32_t size() const;
 
         void reserve(uint32_t new_capacity);
-
-        operator std::string_view () const {
-            return std::string_view(_data, _size);
-        }
 
         [[nodiscard]] const char* end() const;
 
@@ -111,6 +104,8 @@ namespace basecode::adt {
         [[nodiscard]] const char& back() const;
 
         string_t& operator=(const char* other);
+
+        [[nodiscard]] const char* c_str() const;
 
         [[nodiscard]] uint32_t capacity() const;
 
@@ -124,6 +119,10 @@ namespace basecode::adt {
 
         char* insert(const char* it, const char& v);
 
+        bool operator<(const string_t& other) const;
+
+        bool operator>(const string_t& other) const;
+
         bool operator==(const string_t& other) const;
 
         [[nodiscard]] std::string_view slice() const;
@@ -131,6 +130,8 @@ namespace basecode::adt {
         string_t& operator=(string_t&& other) noexcept;
 
         string_t& insert(size_t pos, size_t n, char c);
+
+        int32_t append(const char* value, int32_t size);
 
         [[nodiscard]] std::string as_std_string() const;
 
@@ -150,7 +151,6 @@ namespace basecode::adt {
         void set_capacity(uint32_t new_capacity);
 
     private:
-        bool _moved{};
         char* _data{};
         uint32_t _size{};
         uint32_t _capacity{};

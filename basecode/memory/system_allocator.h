@@ -37,11 +37,6 @@ namespace basecode::memory {
         std::optional<uint32_t> allocated_size(void* p) override;
 
     private:
-        static inline uint32_t size_with_padding(uint32_t size, uint32_t align) {
-            return size + align + sizeof(header_t);
-        }
-
-    private:
         uint32_t _total_allocated = 0;
     };
 

@@ -80,7 +80,8 @@ namespace basecode::utf8 {
             return false;
         }
 
-        return load(r, (adt::string_t)stream.str());
+        const auto& str = stream.str();
+        return load(r, string_t(str.c_str(), str.size()));
     }
 
     void source_buffer_t::push_mark() {
