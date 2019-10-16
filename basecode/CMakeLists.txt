@@ -15,6 +15,7 @@ configure_file (
 add_library(
         ${PROJECT_NAME}
 
+        ../ext/tracy-master/TracyClientDLL.cpp
         ../ext/mustach-master/mustach.c ../ext/mustach-master/mustach.h
 
         context/context.cpp context/context.h

@@ -58,6 +58,9 @@ add_custom_command(OUTPUT always-rebuild COMMAND ${CMAKE_COMMAND} -E echo)
 set (TESTS_DIR ${PROJECT_BINARY_DIR}/tests)
 set (LOGS_DIR  ${PROJECT_BINARY_DIR}/logs)
 
+# tracy
+include_directories(ext/tracy-master)
+
 # pstreams
 include_directories(ext/pstreams-1.0.1)
 
