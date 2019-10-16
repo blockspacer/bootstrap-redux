@@ -228,7 +228,7 @@ namespace basecode::language::core::parser {
 
         auto& registry = _session.registry();
         for (auto entity : _tokens) {
-            const lexer::token_t& token = registry.get<lexer::token_t>(entity);
+            const auto& token = registry.get<lexer::token_t>(entity);
             auto s = _rule_table.find(token.type);
             if (!s) {
                 const auto& loc = registry.get<source_location_t>(entity);
@@ -528,7 +528,7 @@ namespace basecode::language::core::parser {
             90,
             [](context_t& ctx, entity_t lhs) {
                 source_location_t loc;
-                if (!ctx.parser->is_node_an_identifier(lhs, loc)) {
+                if (!ctx.parser->is_node_valid_lvalue(lhs, loc)) {
                     ctx.parser->add_source_highlighted_error(
                         *ctx.r,
                         errors::parser::member_select_operator_requires_identifier_lvalue,
@@ -605,11 +605,6 @@ namespace basecode::language::core::parser {
                     ast_node,
                     ctx.scope,
                     ctx.block);
-                ctx.registry->assign<ast::variable_decl_t>(
-                    ast_node,
-                    null_entity,
-                    ast_node,
-                    null_entity);
 
                 scope.identifiers.insert(token.value, ast_node);
 
@@ -667,6 +662,17 @@ namespace basecode::language::core::parser {
             token_type,
             20,
             [](context_t& ctx, entity_t lhs) {
+                {
+                    source_location_t loc;
+                    if (!ctx.parser->is_node_valid_lvalue(lhs, loc)) {
+                        ctx.parser->add_source_highlighted_error(
+                            *ctx.r,
+                            errors::parser::assignment_requires_valid_lvalue,
+                            loc);
+                        return null_entity;
+                    }
+                }
+
                 auto rhs = ctx.parser->expression(
                     *ctx.r,
                     ctx.rule->lbp - 1);
@@ -792,6 +798,17 @@ namespace basecode::language::core::parser {
             token_type,
             20,
             [](context_t& ctx, entity_t lhs) {
+                {
+                    source_location_t loc;
+                    if (!ctx.parser->is_node_valid_lvalue(lhs, loc)) {
+                        ctx.parser->add_source_highlighted_error(
+                            *ctx.r,
+                            errors::parser::assignment_requires_valid_lvalue,
+                            loc);
+                        return null_entity;
+                    }
+                }
+
                 auto ast_node = ctx.registry->create();
                 ctx.registry->assign<ast::node_t>(
                     ast_node,
@@ -823,15 +840,35 @@ namespace basecode::language::core::parser {
             });
     }
 
-    bool parser_t::is_node_an_identifier(entity_t expr, source_location_t& loc) {
+    bool parser_t::is_node_valid_lvalue(entity_t expr, source_location_t& loc) {
         auto& registry = _session.registry();
-        if (!registry.has<ast::identifier_t>(expr)) {
-            auto node = registry.try_get<ast::node_t>(expr);
-            if (node)
-                loc = registry.get<source_location_t>(node->token);
-            return false;
+        const auto node = registry.try_get<ast::node_t>(expr);
+        if (!node) return false;
+
+        if (node->type == ast::node_type_t::identifier
+        ||  node->type == ast::node_type_t::identifier_reference) {
+            return true;
         }
-        return true;
+
+        if (node->type == ast::node_type_t::binary_operator) {
+            const auto& token = registry.get<lexer::token_t>(node->token);
+            if (token.type == lexer::token_type_t::comma
+            ||  token.type == lexer::token_type_t::left_bracket
+            ||  token.type == lexer::token_type_t::member_select_operator) {
+                return true;
+            }
+        }
+
+        if (node->type == ast::node_type_t::unary_operator) {
+            const auto& token = registry.get<lexer::token_t>(node->token);
+            if (token.type == lexer::token_type_t::caret) {
+                return true;
+            }
+        }
+
+        loc = registry.get<source_location_t>(node->token);
+
+        return false;
     }
 
 }

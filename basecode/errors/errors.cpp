@@ -221,6 +221,11 @@ namespace basecode::errors {
                 {.code = "P008"sv, .message = "invalid assignment expression"sv}
             },
 
+            {
+                {.code = parser::assignment_requires_valid_lvalue, .locale = "en_US"sv},
+                {.code = "P009"sv, .message = "assignment requires valid lvalue"sv}
+            },
+
             // ----------------------
             // graphviz
             // ----------------------

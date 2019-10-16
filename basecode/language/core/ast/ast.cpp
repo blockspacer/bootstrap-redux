@@ -73,7 +73,6 @@ namespace basecode::language::core::ast {
             case node_type_t::assignment_operator:      return "assignment_operator"sv;
             case node_type_t::continue_expression:      return "continue_expression"sv;
             case node_type_t::identifier_reference:     return "identifier_reference"sv;
-            case node_type_t::variable_declaration:     return "variable_declaration"sv;
             case node_type_t::uninitialized_literal:    return "uninitialized_literal"sv;
             case node_type_t::fallthrough_expression:   return "fallthrough_expression"sv;
             case node_type_t::initializer_expression:   return "initializer_expression"sv;
@@ -461,7 +460,6 @@ namespace basecode::language::core::ast {
             case node_type_t::bitcast_expression:
             case node_type_t::value_sink_literal:
             case node_type_t::continue_expression:
-            case node_type_t::variable_declaration:
             case node_type_t::uninitialized_literal:
             case node_type_t::fallthrough_expression:
             case node_type_t::initializer_expression:

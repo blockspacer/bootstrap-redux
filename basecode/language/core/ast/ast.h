@@ -75,7 +75,6 @@ namespace basecode::language::core::ast {
         assignment_operator,
         continue_expression,
         identifier_reference,
-        variable_declaration,
         uninitialized_literal,
         fallthrough_expression,
         initializer_expression,
@@ -260,21 +259,6 @@ namespace basecode::language::core::ast {
 
     struct identifier_ref_t final {
         entity_t identifier{};
-    };
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    struct variable_decl_t final {
-        variable_decl_t(
-            entity_t type,
-            entity_t identifier,
-            entity_t initializer) : type(type),
-                                    identifier(identifier),
-                                    initializer(initializer) {
-        }
-        entity_t type{};
-        entity_t identifier{};
-        entity_t initializer{};
     };
 
     ///////////////////////////////////////////////////////////////////////////

@@ -105,7 +105,7 @@ namespace basecode::language::core::parser {
 
         void comma_binding_power(int32_t bp = 25);
 
-        bool is_node_an_identifier(entity_t expr, source_location_t& loc);
+        bool is_node_valid_lvalue(entity_t expr, source_location_t& loc);
 
     private:
         production_rule_t* infix(

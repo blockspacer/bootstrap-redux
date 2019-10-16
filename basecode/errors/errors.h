@@ -85,6 +85,7 @@ namespace basecode::errors {
         static constexpr error_code_t expected_expression = 205;
         static constexpr error_code_t undefined_production_rule = 201;
         static constexpr error_code_t invalid_assignment_expression = 206;
+        static constexpr error_code_t assignment_requires_valid_lvalue = 208;
         static constexpr error_code_t missing_operator_production_rule = 202;
         static constexpr error_code_t member_select_operator_requires_identifier_lvalue = 207;
         static constexpr error_code_t member_select_operator_requires_identifier_rvalue = 204;

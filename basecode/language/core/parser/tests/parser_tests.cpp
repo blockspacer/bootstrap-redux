@@ -28,6 +28,39 @@ namespace basecode {
     using namespace basecode;
     using namespace basecode::language::core;
 
+    TEST_CASE("parser_t::parse identifier & identifier_references") {
+        workspace::session_options_t options{};
+        workspace::session_t session(options);
+        utf8::source_buffer_t buffer(options.allocator);
+        result_t r(options.allocator);
+
+        defer(fmt::print("{}", r));
+
+        const adt::string_t source =
+            "c := a * b;"sv
+        ;
+
+        REQUIRE(buffer.load(r, source));
+
+        entity_list_t tokens{};
+        lexer::lexer_t lexer(session, buffer);
+        REQUIRE(lexer.tokenize(r, tokens));
+        REQUIRE(!r.is_failed());
+        REQUIRE(r.messages().empty());
+
+        parser::parser_t parser(session, buffer, tokens);
+        REQUIRE(parser.initialize(r));
+
+        entity_t module_node = parser.parse(r);
+        REQUIRE(module_node != (entity_t)entt::null);
+
+        ast::write_dot_graph(
+            r,
+            session,
+            "test-identifier.dot",
+            module_node);
+    }
+
     TEST_CASE("parser_t::parse produces valid ast") {
         workspace::session_options_t options{};
         workspace::session_t session(options);
@@ -86,7 +119,11 @@ namespace basecode {
         entity_t module_node = parser.parse(r);
         REQUIRE(module_node != (entity_t)entt::null);
 
-        ast::write_dot_graph(r, session, "test.dot", module_node);
+        ast::write_dot_graph(
+            r,
+            session,
+            "test.dot",
+            module_node);
     }
 
 }
