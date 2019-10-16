@@ -26,6 +26,22 @@
 #include <basecode/adt/hash_table.h>
 #include <boost/filesystem/path.hpp>
 
+#if defined(__GNUC__)
+#  define factor_force_inline __attribute__((always_inline)) inline
+#elif defined(_MSC_VER)
+#  define factor_force_inline __forceinline
+#else
+#  define factor_force_inline inline
+#endif
+
+#if defined(__GNUC__)
+#  define factor_no_inline __attribute__((noinline))
+#elif defined(_MSC_VER)
+#  define factor_no_inline __declspec(noinline)
+#else
+#  define factor_no_inline
+#endif
+
 namespace basecode {
 
     using namespace std::literals;

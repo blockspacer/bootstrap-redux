@@ -108,6 +108,11 @@ namespace basecode::errors {
         static constexpr error_code_t illegal_byte_order_mark = 305;
     }
 
+    namespace profiler {
+        static constexpr error_code_t no_cpu_rtdscp_support = 1600;
+        static constexpr error_code_t no_cpu_invariant_tsc_support = 1601;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
 
     bool shutdown();

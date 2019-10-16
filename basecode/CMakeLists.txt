@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(basecode)
 
-message(STATUS "${PROJECT_NAME} build configuration:")
+message(STATUS "--------------- ${PROJECT_NAME} build configuration ---------------")
 
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 1)
@@ -75,6 +75,8 @@ add_library(
         numbers/bytes.h
         numbers/parse.cpp numbers/parse.h
 
+        profiler/timer.cpp profiler/timer.h
+
         hashing/murmur.cpp hashing/murmur.h
 
         utf8/rune.cpp utf8/rune.h
@@ -118,5 +120,6 @@ target_link_libraries(
 add_subdirectory(adt/tests)
 add_subdirectory(memory/tests)
 add_subdirectory(graphviz/tests)
+add_subdirectory(profiler/tests)
 add_subdirectory(language/core/lexer/tests)
 add_subdirectory(language/core/parser/tests)

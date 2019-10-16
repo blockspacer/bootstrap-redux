@@ -69,7 +69,7 @@ namespace basecode::errors {
             },
 
             // ----------------------
-            // lexer_t
+            // lexer
             // ----------------------
 
             {
@@ -178,7 +178,7 @@ namespace basecode::errors {
             },
 
             // ----------------------
-            // parser_t
+            // parser
             // ----------------------
 
             {
@@ -276,7 +276,21 @@ namespace basecode::errors {
             {
                 {.code = utf8_module::illegal_byte_order_mark, .locale = "en_US"sv},
                 {.code = "S006"sv, .message = "illegal byte-order mark"sv}
-            }
+            },
+
+            // ----------------------
+            // profiler
+            // ----------------------
+
+            {
+                {.code = profiler::no_cpu_rtdscp_support, .locale = "en_US"sv},
+                {.code = "T001"sv, .message = "CPU doesn't support RDTSCP instruction"sv}
+            },
+
+            {
+                {.code = profiler::no_cpu_invariant_tsc_support, .locale = "en_US"sv},
+                {.code = "T002"sv, .message = "CPU doesn't support invariant TSC"sv}
+            },
         };
 
         g_error_system = memory::construct_with_allocator<error_system_t>(allocator, allocator, elements);
