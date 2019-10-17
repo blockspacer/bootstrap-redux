@@ -50,6 +50,7 @@ namespace basecode {
 
     // filesystem type aliases
     using path_t = boost::filesystem::path;
+    using path_list_t = adt::array_t<path_t>;
 
     // string type aliases
     using string_t = adt::string_t;

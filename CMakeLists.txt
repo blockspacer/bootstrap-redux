@@ -95,27 +95,6 @@ if (WIN32)
 endif()
 add_library(boost-filesystem ${BOOST_FILESYSTEM_SOURCES})
 
-# boost program_options library
-set(
-        BOOST_PROGRAM_OPTIONS_SOURCES
-        ext/boost-1.70.0/libs/program_options/src/cmdline.cpp
-        ext/boost-1.70.0/libs/program_options/src/config_file.cpp
-        ext/boost-1.70.0/libs/program_options/src/convert.cpp
-        ext/boost-1.70.0/libs/program_options/src/options_description.cpp
-        ext/boost-1.70.0/libs/program_options/src/parsers.cpp
-        ext/boost-1.70.0/libs/program_options/src/positional_options.cpp
-        ext/boost-1.70.0/libs/program_options/src/split.cpp
-        ext/boost-1.70.0/libs/program_options/src/utf8_codecvt_facet.cpp
-        ext/boost-1.70.0/libs/program_options/src/value_semantic.cpp
-        ext/boost-1.70.0/libs/program_options/src/variables_map.cpp)
-if (WIN32)
-    set(
-            BOOST_PROGRAM_OPTIONS_SOURCES
-            ${BOOST_PROGRAM_OPTIONS_SOURCES}
-            ext/boost-1.70.0/libs/program_options/src/winmain.cpp)
-endif()
-add_library(boost-program_options ${BOOST_PROGRAM_OPTIONS_SOURCES})
-
 # catch2
 include_directories(ext/catch2-2.9.1/single_include)
 
@@ -154,13 +133,17 @@ include_directories(ext/entt-3.1.1/single_include)
 include_directories(${PROJECT_SOURCE_DIR})
 
 # sub-projects
-add_subdirectory(bc)
+add_subdirectory(bcc)
 add_subdirectory(basecode)
 
 # post build
-add_custom_target(basecode-configured DEPENDS dummy-target basecode bc)
+add_custom_target(basecode-configured DEPENDS dummy-target basecode bcc)
 add_custom_command(
         TARGET basecode-configured
 
+        COMMAND ${CMAKE_COMMAND} -E echo  "make_directory: ${LOGS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${LOGS_DIR}
+
         COMMAND ${CMAKE_COMMAND} -E echo  "copy_directory: ${PROJECT_SOURCE_DIR}/tests"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/tests ${TESTS_DIR})
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/tests ${TESTS_DIR}
+)
