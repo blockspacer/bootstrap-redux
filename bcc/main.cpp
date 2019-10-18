@@ -27,11 +27,14 @@
 #include <basecode/errors/errors.h>
 #include <basecode/format/format.h>
 #include <basecode/context/context.h>
+#include <basecode/workspace/session.h>
 #include <basecode/strings/transforms.h>
 #include <basecode/logging/spd_logger.h>
 #include <basecode/memory/trace_allocator.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
+#include <basecode/language/core/lexer/lexer.h>
+#include <basecode/language/core/parser/parser.h>
 
 #define TRACE_ALLOCATOR 0
 using namespace basecode;
@@ -162,6 +165,41 @@ int run(int argc, char* argv[]) {
         const auto arg = argv[ya_optind++];
         meta_options.emplace(arg, strlen(arg));
     }
+
+    workspace::session_options_t options{};
+    workspace::session_t session(options);
+    utf8::source_buffer_t buffer(options.allocator);
+    result_t r(options.allocator);
+
+    defer(print_results(r));
+
+    const auto& file = source_files[0];
+    if (!buffer.load(r, file))
+        return 1;
+
+    entity_list_t tokens{};
+    language::core::lexer::lexer_t lexer(
+        session,
+        buffer);
+    if (!lexer.tokenize(r, tokens))
+        return 1;
+
+    language::core::parser::parser_t parser(
+        session,
+        buffer,
+        tokens);
+    if (!parser.initialize(r))
+        return 1;
+
+    entity_t module_node = parser.parse(r);
+    if (module_node == null_entity)
+        return 1;
+
+    language::core::ast::write_dot_graph(
+        r,
+        session,
+        "test.dot",
+        module_node);
 
     return 0;
 }
